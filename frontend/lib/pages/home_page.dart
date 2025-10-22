@@ -51,15 +51,107 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.menu),
-            color: Colors.black,
-          onPressed: () {},
+        leading: Builder (
+          builder: (context) => IconButton(
+            icon: Padding(
+              padding: const EdgeInsets.only(left: 10.0),
+              child: Icon(
+                Icons.menu,
+                color: Colors.black,
+              ),
           ),
+          onPressed: () {
+            Scaffold.of(context).openDrawer();
+          },
+        ),
       ),
-      // have to pass it to the body for the index to show the correct page
-      body: _pages[_selectedIndex],
+    ),
+    // the semin page thagt opens when the menu button is clicked 
+    drawer: Drawer(
+      backgroundColor: Colors.blue[50],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // wrapping the items in another columns so that logout is on its own 
+        children: [
+          Column(
+            children: [Column(
+            children: [
+              // logo 
+              DrawerHeader(
+                child: Image.asset(
+                  'lib/images/logo.png',
+
+                ),
+              ),
+              // dividing line 
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: Divider(
+                  color: Colors.white
+                ),
+              ),
+              // menu options
+              //profile
+              Padding(
+                padding: const EdgeInsets.only(left: 25.0),
+                child: ListTile(
+                  leading: Icon(
+                    Icons.person, 
+                    color: Colors.blue[900]
+                  ),
+                  title: Text(
+                    'Profile', 
+                    style: TextStyle(color: Colors.blue[900])),
+                ),
+              ),
+              // about 
+              Padding(
+                padding: const EdgeInsets.only(left: 25.0),
+                child: ListTile(
+                  leading: Icon(
+                    Icons.info, 
+                    color: Colors.blue[900]
+                  ),
+                  title: Text(
+                    'About', 
+                    style: TextStyle(color: Colors.blue[900])),
+                ),
+              ),
+              // settings 
+              Padding(
+                padding: const EdgeInsets.only(left: 25.0),
+                child: ListTile(
+                  leading: Icon(
+                    Icons.settings, 
+                    color: Colors.blue[900]
+                  ),
+                  title: Text(
+                    'Settings', 
+                    style: TextStyle(color: Colors.blue[900])),
+                ),
+              ),],
+              )
+            ]
+          ),
+
+          // logout at the bottom of the drawer 
+          Padding(
+            padding: const EdgeInsets.only(left: 25.0, bottom: 25.0),
+            child: ListTile(
+              leading: Icon(
+                Icons.logout, 
+                color: Colors.blue[900]
+              ),
+              title: Text(
+                'Logout', 
+                style: TextStyle(color: Colors.blue[900])),
+            ),
+          ),
+        ],
+      ),
+    ),
+    // have to pass it to the body for the index to show the correct page
+    body: _pages[_selectedIndex],
     );
   }
 }
