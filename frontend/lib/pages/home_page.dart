@@ -44,10 +44,19 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[50],
       // this adds the bottom navigation bar component
       bottomNavigationBar: BottomNavBar(
         onTabChange: (index) => navigateBottomBar(index),
+      ),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.menu),
+            color: Colors.black,
+          onPressed: () {},
+          ),
       ),
       // have to pass it to the body for the index to show the correct page
       body: _pages[_selectedIndex],
