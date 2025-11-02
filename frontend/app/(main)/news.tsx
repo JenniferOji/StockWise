@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NEWS } from '@/constants/news';
+import { NAV_HEIGHT } from '@/constants/layout';
 
 export default function News() {
   return (
@@ -9,7 +10,11 @@ export default function News() {
       <FlatList
         data={NEWS}
         keyExtractor={(item) => item.companyName + item.date}
-        contentContainerStyle={styles.list}
+        // pushing the content below the top nav bar 
+        contentContainerStyle={[
+          styles.list,
+          { paddingTop: + NAV_HEIGHT + 5 },
+        ]}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Image source={{ uri: item.imageUrl }} style={styles.image} />

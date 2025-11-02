@@ -6,7 +6,9 @@ import React from 'react';
 import { View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import BottomNavBar from '@/components/ui/bottom-nav-bar';
+import TopNavBar from '@/components/ui/top-nav-bar';
 
+// shared varibales for all classes to use 
 export const unstable_settings = {};
 
 export default function RootLayout() {
@@ -14,7 +16,8 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'light' ? DarkTheme : DefaultTheme}>
-      <View style={{ flex: 1, paddingBottom: 56 }}>
+      <TopNavBar/>
+        <View style={{ flex: 1, paddingBottom: 56 }}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />

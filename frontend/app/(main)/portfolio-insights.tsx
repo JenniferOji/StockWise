@@ -3,13 +3,15 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { View, Text, StyleSheet, Dimensions } from 'react-native'
 import { PieChart } from 'react-native-chart-kit'
 import { INSIGHTS } from '../../constants/insights'
+import {NAV_HEIGHT} from '../../constants/layout'
 
+// https://www.npmjs.com/package/react-native-pie-chart
 export default function PortfolioInsights() {
 	const total = INSIGHTS.reduce((s, c) => s + c.allocation, 0)
 		const items = INSIGHTS.slice().sort((a, b) => b.allocation - a.allocation)
 		const screenWidth = Dimensions.get('window').width - 32
 		const chartData = items.map((it) => ({ name: it.sector, population: it.allocation, color: it.color || '#3b82f6', legendFontColor: '#444', legendFontSize: 12 }))
-		const chartConfig = { backgroundGradientFrom: '#ffffff', backgroundGradientTo: '#ffffff', color: (opacity = 1) => `rgba(0,0,0,${opacity})`, labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})` }
+		const chartConfig = { backgroundGradientFrom: '#ffffff', backgroundGradientTo: '#ffffff', color: (opacity = 1) => `rgba(59,130,246,${opacity})`, labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})` }
 
 		return (
 			<SafeAreaView style={styles.container}>
@@ -27,7 +29,7 @@ export default function PortfolioInsights() {
 }
 
 const styles = StyleSheet.create({
-	container: { flex: 1, backgroundColor: '#f5f7fa' },
+	container: { flex: 1, backgroundColor: '#f5f7fa', paddingTop: NAV_HEIGHT },
 	header: { padding: 16 },
 	title: { fontSize: 20, fontWeight: '700' },
 	subtitle: { fontSize: 13, color: '#666', marginTop: 4 },

@@ -2,6 +2,7 @@ import React from 'react';
 import { Image, Text, StyleSheet, View, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { STOCKS } from '../../constants/stocks';
+import { NAV_HEIGHT } from '@/constants/layout';
 
 export default function StockHoldings() {
   return (
@@ -27,7 +28,7 @@ export default function StockHoldings() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffffff' },
+  container: { flex: 1, backgroundColor: '#ffffff', paddingTop: NAV_HEIGHT },
   listWrapper: { flex: 1 },
   list: { paddingVertical: 8, paddingHorizontal: 12, paddingBottom: 12 },
   row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#eee' },

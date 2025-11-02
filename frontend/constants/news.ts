@@ -42,11 +42,4 @@ export const NEWS: NewsItem[] = [
     sentiment: 0.69,
     date: "2025-10-29",
   },
-  {
-    companyName: "The Coca-Cola Company",
-    headline: "Coca-Cola reports steady international volume growth driven by new product launches",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/4/48/Coca-Cola_logo.svg",
-    sentiment: 0.33,
-    date: "2025-10-26",
-  },
 ];
