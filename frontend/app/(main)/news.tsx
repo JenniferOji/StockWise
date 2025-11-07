@@ -36,7 +36,7 @@ export default function News() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f7fa' },
+  container: { flex: 1, backgroundColor: '#f5f7fa'},
   list: { padding: 12, paddingBottom: 96 },
   card: {
     backgroundColor: '#ffffff',

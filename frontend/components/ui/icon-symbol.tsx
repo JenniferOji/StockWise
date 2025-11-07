@@ -21,6 +21,7 @@ const MAPPING = {
   'newspaper.fill': 'article',
   'menubar.dock.rectangle': 'menu',
   'chart.bar.fill': 'insert-chart',
+  'arrow.right.square': 'logout',
 } as IconMapping;
 
 /**
