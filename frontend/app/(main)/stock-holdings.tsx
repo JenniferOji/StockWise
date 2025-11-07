@@ -1,17 +1,45 @@
-import React from 'react';
-import { Image, Text, StyleSheet, View, FlatList, TextInput } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { Image, Text, StyleSheet, View, FlatList, TextInput, Pressable, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { STOCKS } from '../../constants/stocks';
 import { NAV_HEIGHT } from '@/constants/layout';
 
 export default function StockHoldings() {
+  // query holds the current search text from the user 
+  const [query, setQuery] = useState('');
+  // state holding whether the dropdown is visible
+  const [open, setOpen] = useState(false);
+
+  // displayed is the list of stocks the user has added to the page 
+  const [displayed, setDisplayed] = useState<typeof STOCKS[number][]>([]);
+
+  // compute matches from the stock list excluding already added items
+  const matches = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return STOCKS.filter(s => !displayed.some(d => d.symbol === s.symbol) && (s.symbol.toLowerCase().includes(q) || s.companyName.toLowerCase().includes(q)));
+  }, [query, displayed]);
+
   return (
     <SafeAreaView style={styles.container}>
+      {/* search input: typing shows matches below */}
       <View style={styles.searchContainer}>
-        <TextInput placeholder="Search" style={styles.searchInput} />
+        <TextInput placeholder="Search" value={query} onChangeText={(t) => { setQuery(t); setOpen(true); }} onFocus={() => setOpen(true)} style={styles.searchInput} />
+        {open && matches.length > 0 && (
+          <View style={styles.searchDropdown}>
+            <FlatList data={matches} keyExtractor={(i) => i.symbol} renderItem={({ item }) => (
+              // tapping a search result will add that stock as a card to the page 
+              <Pressable style={styles.dropdownItem} onPress={() => { setDisplayed(prev => [item, ...prev]); setQuery(''); setOpen(false); Keyboard.dismiss(); }}>
+                <Text style={styles.ddSymbol}>{item.symbol}</Text>
+                <Text style={styles.ddName}>{item.companyName}</Text>
+              </Pressable>
+            )} />
+          </View>
+        )}
       </View>
+      {/* loops through the list of stocks in the displayed list and adds them as cards to the page */}
       <FlatList
-        data={STOCKS}
+        data={displayed}
         keyExtractor={(item) => item.symbol}
         contentContainerStyle={styles.list}
         style={styles.listWrapper}
@@ -46,6 +74,10 @@ const styles = StyleSheet.create({
   name: { fontSize: 13, color: '#6b7280', marginTop: 2 },
   cardRight: { marginLeft: 8, alignItems: 'flex-end' },
   shares: { fontSize: 14, fontWeight: '600', color: '#111' },
-  searchContainer: { paddingHorizontal: 16, paddingTop: 12 },
-  searchInput: { backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, elevation: 1 },
+  searchContainer: { paddingHorizontal: 16, paddingTop: 12 , color: '#111' },
+  searchInput: { backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, elevation: 1, color: '#111' },
+  searchDropdown: { backgroundColor: '#fff', marginTop: 8, borderRadius: 8, maxHeight: 220, elevation: 4, paddingVertical: 4 },
+  dropdownItem: { paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
+  ddSymbol: { fontSize: 14, fontWeight: '700' },
+  ddName: { fontSize: 12, color: '#6b7280' },
 });
