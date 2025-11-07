@@ -1,10 +1,10 @@
-import React from 'react';
-import { View, Pressable, Text, StyleSheet } from 'react-native';
-import { useNavigation, DrawerActions } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
-import { IconSymbol } from './icon-symbol';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { DrawerActions, useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { IconSymbol } from './icon-symbol';
 
 
 export default function TopNavBar() {
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   tab: {
     flex: 1,
     // alignItems: 'center',
-    left: 20,
+    left: 40,
     justifyContent: 'center',
   }
   ,

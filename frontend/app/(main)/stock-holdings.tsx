@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Text, StyleSheet, View, FlatList } from 'react-native';
+import { Image, Text, StyleSheet, View, FlatList, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { STOCKS } from '../../constants/stocks';
 import { NAV_HEIGHT } from '@/constants/layout';
@@ -7,6 +7,9 @@ import { NAV_HEIGHT } from '@/constants/layout';
 export default function StockHoldings() {
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.searchContainer}>
+        <TextInput placeholder="Search" style={styles.searchInput} />
+      </View>
       <FlatList
         data={STOCKS}
         keyExtractor={(item) => item.symbol}
@@ -43,4 +46,6 @@ const styles = StyleSheet.create({
   name: { fontSize: 13, color: '#6b7280', marginTop: 2 },
   cardRight: { marginLeft: 8, alignItems: 'flex-end' },
   shares: { fontSize: 14, fontWeight: '600', color: '#111' },
+  searchContainer: { paddingHorizontal: 16, paddingTop: 12 },
+  searchInput: { backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, elevation: 1 },
 });

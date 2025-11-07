@@ -32,6 +32,8 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 48,
     paddingHorizontal: 12,
+    justifyContent: 'flex-end',
+    paddingBottom: 90,
   },
   item: {
     flexDirection: 'row',
