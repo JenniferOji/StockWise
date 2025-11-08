@@ -14,6 +14,8 @@ export default function StockHoldings() {
 
   // modal controls for the edit popup
   const [modalVisible, setModalVisible] = useState(false);
+  // which stock is currently being edited in the modal
+  const [selected, setSelected] = useState<typeof STOCKS[number] | null>(null);
 
   // compute matches from the stock list excluding already added items
   const matches = useMemo(() => {
@@ -57,7 +59,7 @@ export default function StockHoldings() {
             </View>
             <View style={styles.cardRight}>
               <Text style={styles.shares}>{item.shares} shares</Text>
-              <TouchableOpacity style={styles.editButton} onPress={() => setModalVisible(true)}>
+              <TouchableOpacity style={styles.editButton} onPress={() => { setSelected(item); setModalVisible(true); }}>
                 <Text style={styles.editText}>edit</Text>
               </TouchableOpacity>
             </View>
@@ -66,11 +68,25 @@ export default function StockHoldings() {
       />
 
       {/* the pop up that displays when the edit button is clicked */}
-      <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => setModalVisible(false)}>
+      <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => { setModalVisible(false); setSelected(null); }}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalText}>hello</Text>
-            <Pressable style={styles.modalClose} onPress={() => setModalVisible(false)}>
+            <Text style={styles.modalText}>{selected ? `${selected.symbol} - ${selected.companyName}` : 'Edit'}</Text>
+            {/* delete button removes the selected stock from the displayed list */}
+            <Pressable
+              style={styles.modalDelete}
+              onPress={() => {
+                if (selected) {
+                  setDisplayed(prev => prev.filter(d => d.symbol !== selected.symbol));
+                }
+                setModalVisible(false);
+                setSelected(null);
+              }}
+            >
+              <Text style={styles.modalDeleteText}>Delete stock</Text>
+            </Pressable>
+
+            <Pressable style={styles.modalClose} onPress={() => { setModalVisible(false); setSelected(null); }}>
               <Text style={styles.modalCloseText}>close</Text>
             </Pressable>
           </View>
@@ -105,4 +121,6 @@ const styles = StyleSheet.create({
   modalText: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
   modalClose: { marginTop: 8, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#0b3d91' },
   modalCloseText: { color: '#fff', fontWeight: '700' },
+  modalDelete: { marginTop: 8, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#ef4444' },
+  modalDeleteText: { color: '#fff', fontWeight: '700' },
 });
