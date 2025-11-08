@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Image, Text, StyleSheet, View, FlatList, TextInput, Pressable, Keyboard } from 'react-native';
+import { Image, Text, StyleSheet, View, FlatList, TextInput, Pressable, Keyboard, Modal, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { STOCKS } from '../../constants/stocks';
 import { NAV_HEIGHT } from '@/constants/layout';
@@ -9,9 +9,11 @@ export default function StockHoldings() {
   const [query, setQuery] = useState('');
   // state holding whether the dropdown is visible
   const [open, setOpen] = useState(false);
-
   // displayed is the list of stocks the user has added to the page 
   const [displayed, setDisplayed] = useState<typeof STOCKS[number][]>([]);
+
+  // modal controls for the edit popup
+  const [modalVisible, setModalVisible] = useState(false);
 
   // compute matches from the stock list excluding already added items
   const matches = useMemo(() => {
@@ -31,6 +33,7 @@ export default function StockHoldings() {
               // tapping a search result will add that stock as a card to the page 
               <Pressable style={styles.dropdownItem} onPress={() => { setDisplayed(prev => [item, ...prev]); setQuery(''); setOpen(false); Keyboard.dismiss(); }}>
                 <Text style={styles.ddSymbol}>{item.symbol}</Text>
+
                 <Text style={styles.ddName}>{item.companyName}</Text>
               </Pressable>
             )} />
@@ -54,10 +57,25 @@ export default function StockHoldings() {
             </View>
             <View style={styles.cardRight}>
               <Text style={styles.shares}>{item.shares} shares</Text>
+              <TouchableOpacity style={styles.editButton} onPress={() => setModalVisible(true)}>
+                <Text style={styles.editText}>edit</Text>
+              </TouchableOpacity>
             </View>
           </View>
         )}
       />
+
+      {/* the pop up that displays when the edit button is clicked */}
+      <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalText}>hello</Text>
+            <Pressable style={styles.modalClose} onPress={() => setModalVisible(false)}>
+              <Text style={styles.modalCloseText}>close</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -80,4 +98,11 @@ const styles = StyleSheet.create({
   dropdownItem: { paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
   ddSymbol: { fontSize: 14, fontWeight: '700' },
   ddName: { fontSize: 12, color: '#6b7280' },
+  editButton: { marginTop: 8, backgroundColor: '#eef2ff', paddingHorizontal: 8, paddingVertical: 6, borderRadius: 8 },
+  editText: { color: '#0b3d91', fontWeight: '700', fontSize: 12 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
+  modalCard: { width: '80%', backgroundColor: '#fff', padding: 20, borderRadius: 12, alignItems: 'center' },
+  modalText: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
+  modalClose: { marginTop: 8, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#0b3d91' },
+  modalCloseText: { color: '#fff', fontWeight: '700' },
 });

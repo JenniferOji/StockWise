@@ -8,7 +8,6 @@ import { IconSymbol } from './icon-symbol';
 
 
 export default function TopNavBar() {
-  const router = useRouter();
   const scheme = useColorScheme();
   const tint = Colors[scheme ?? 'light'].tint;
   const navigation = useNavigation();
