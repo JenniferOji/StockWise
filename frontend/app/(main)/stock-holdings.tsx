@@ -71,6 +71,7 @@ export default function StockHoldings() {
       <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => { setModalVisible(false); setSelected(null); }}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
+            {/* when exiting out of the pop up it goes from displaying the company name to edit */}
             <Text style={styles.modalText}>{selected ? `${selected.symbol} - ${selected.companyName}` : 'Edit'}</Text>
             {/* delete button removes the selected stock from the displayed list */}
             <Pressable

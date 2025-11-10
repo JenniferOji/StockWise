@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, View, StyleSheet, Dimensions } from 'react-native';
+import { Text, TouchableOpacity, View, StyleSheet, Dimensions, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 const { width } = Dimensions.get('window');
 
@@ -11,6 +11,9 @@ export default function IntroPage() {
    return (
       <View style={styles.container}>
         <View style={styles.content}>
+          <View>
+            <Image source={require('../assets/images/app-logo.png')} style={styles.logo} resizeMode="contain" />
+          </View>
           <Text style={styles.title}>Stock Wise</Text>
   
           <Text style={styles.subtitle}>Your portfolio. Simplified</Text>
@@ -40,6 +43,25 @@ export default function IntroPage() {
       fontWeight: '700',
       color: '#0B3D91', 
       marginBottom: 16,
+    },
+    logoWrap: {
+      width: 140,
+      height: 140,
+      borderRadius: 28,
+      backgroundColor: '#fff',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 18,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      elevation: 6,
+    },
+    logo: {
+      width: 200,
+      height: 200,
+      borderRadius: 16,
     },
     subtitle: {
       fontSize: 18,
