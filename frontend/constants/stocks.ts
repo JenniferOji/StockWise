@@ -14,12 +14,6 @@ export const STOCKS: Stock[] = [
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/500px-Apple_logo_black.svg.png'
   },
   {
-    symbol: 'META',
-    companyName: 'Meta Platforms, Inc.',
-    shares: 20,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Meta_Platforms_Logo_2023.svg/500px-Meta_Platforms_Logo_2023.svg.png'
-  },
-  {
     symbol: 'NVDA',
     companyName: 'NVIDIA Corporation',
     shares: 10,

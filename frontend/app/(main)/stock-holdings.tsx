@@ -1,8 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Image, Text, StyleSheet, View, FlatList, TextInput, Pressable, Keyboard, Modal, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { STOCKS } from '../../constants/stocks';
 import { NAV_HEIGHT } from '@/constants/layout';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Colors } from '@/constants/theme';
 
 export default function StockHoldings() {
   // query holds the current search text from the user 
@@ -17,6 +19,9 @@ export default function StockHoldings() {
   // which stock is currently being edited in the modal
   const [selected, setSelected] = useState<typeof STOCKS[number] | null>(null);
 
+  // Use a neutral icon color for the search icon so it stays visible on a white input
+  const iconColor = Colors.light.icon;
+  
   // compute matches from the stock list excluding already added items
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -26,9 +31,22 @@ export default function StockHoldings() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* search input: typing shows matches below */}
+      {/* search input - typing shows matches below */}
       <View style={styles.searchContainer}>
-        <TextInput placeholder="Search" value={query} onChangeText={(t) => { setQuery(t); setOpen(true); }} onFocus={() => setOpen(true)} style={styles.searchInput} />
+        <View style={styles.searchRow}>
+          <TextInput
+            placeholder="Search"
+            placeholderTextColor="#6B7280"
+            selectionColor="#0b3d91"
+            value={query}
+            onChangeText={(t) => { setQuery(t); setOpen(true); }}
+            onFocus={() => setOpen(true)}
+            style={[styles.searchInput, styles.searchInputWithIcon]}
+          />          
+          <View style={styles.searchIcon} pointerEvents="box-none">
+            <IconSymbol name="magnifyingglass" size={18} color={iconColor} />
+          </View>
+        </View>
         {open && matches.length > 0 && (
           <View style={styles.searchDropdown}>
             <FlatList data={matches} keyExtractor={(i) => i.symbol} renderItem={({ item }) => (
@@ -110,7 +128,11 @@ const styles = StyleSheet.create({
   cardRight: { marginLeft: 8, alignItems: 'flex-end' },
   shares: { fontSize: 14, fontWeight: '600', color: '#111' },
   searchContainer: { paddingHorizontal: 16, paddingTop: 12 , color: '#111' },
-  searchInput: { backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, elevation: 1, color: '#111' },
+  searchInput: { flex: 1, backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, elevation: 1, color: '#111' },
+  searchRow: { position: 'relative', flexDirection: 'row', alignItems: 'center' },
+  searchInputWithIcon: { paddingRight: 44 },
+  searchIcon: { position: 'absolute', right: 12, top: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', padding: 8 },
+  searchIconText: { fontSize: 18, color: '#6B7280' },
   searchDropdown: { backgroundColor: '#fff', marginTop: 8, borderRadius: 8, maxHeight: 220, elevation: 4, paddingVertical: 4 },
   dropdownItem: { paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
   ddSymbol: { fontSize: 14, fontWeight: '700' },

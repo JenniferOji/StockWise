@@ -22,6 +22,8 @@ const MAPPING = {
   'menubar.dock.rectangle': 'menu',
   'chart.bar.fill': 'insert-chart',
   'arrow.right.square': 'logout',
+  'magnifyingglass': 'search',
+  'magnifyingglass.circle.fill': 'search',
 } as IconMapping;
 
 /**

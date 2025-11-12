@@ -5,7 +5,15 @@ import { NEWS } from '@/constants/news';
 import { NAV_HEIGHT } from '@/constants/layout';
 
 export default function News() {
+  // function to convert a sentiment value into a label and colour
+  const getSentiment = (score: number) => {
+    if (score > 0.55) return { label: 'Positive', color: '#2ecc71' };
+    if (score < 0) return { label: 'Negative', color: '#e74c3c' };
+    else return { label: 'Neutral', color: '#f39c12' };
+  };
+
   return (
+    // SafeAreaView keeps content out of status bar areas on devices 
     <SafeAreaView style={styles.container}>
       <FlatList
         data={NEWS}
@@ -15,17 +23,23 @@ export default function News() {
           styles.list,
           { paddingTop: + NAV_HEIGHT + 5 },
         ]}
+        // render each news item as a card
         renderItem={({ item }) => (
           <View style={styles.card}>
+            {/* the company logo image */}
             <Image source={{ uri: item.imageUrl }} style={styles.image} />
+            {/* the main card body contains the company name + headline + date + sentiment */}
             <View style={styles.cardBody}>
               <Text style={styles.company}>{item.companyName}</Text>
               <Text style={styles.headline}>{item.headline}</Text>
               <View style={styles.metaRow}>
                 <Text style={styles.date}>{item.date}</Text>
-                <Text style={[styles.sentiment, item.sentiment > 0.2 ? { color: '#2ecc71' } : item.sentiment < 0 ? { color: '#e74c3c' } : { color: '#f39c12' }]}>
-                  {(item.sentiment > 0 ? '+' : '') + item.sentiment.toFixed(2)}
-                </Text>
+                {/* sentiment label and corresponding colour based on score */}
+                {(() => {
+                  // get the sentiment label and colour
+                  const { label, color } = getSentiment(item.sentiment);
+                  return <Text style={[styles.sentiment, { color }]}>{label}</Text>;
+                })()}
               </View>
             </View>
           </View>
