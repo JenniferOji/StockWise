@@ -19,7 +19,7 @@ export default function StockHoldings() {
   // which stock is currently being edited in the modal
   const [selected, setSelected] = useState<typeof STOCKS[number] | null>(null);
 
-  // Use a neutral icon color for the search icon so it stays visible on a white input
+  // colour for the search bar icon 
   const iconColor = Colors.light.icon;
   
   // compute matches from the stock list excluding already added items
