@@ -15,7 +15,7 @@ export default function TopNavBar() {
   return (
     <View style={[styles.container, { backgroundColor: Colors[scheme ?? 'medium'].background, borderBottomColor: '#e6e6e6'}]}>
       <Pressable style={styles.tab} onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
-        <IconSymbol name="menubar.dock.rectangle" size={30} color={tint} />
+        <IconSymbol name="menubar.rectangle" size={30} color={tint} />
       </Pressable>
     </View>
   );

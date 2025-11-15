@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: 65,
+    height: 70,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingBottom: 5,
   },
   label: {
     fontSize: 12,

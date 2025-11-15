@@ -24,6 +24,7 @@ const MAPPING = {
   'arrow.right.square': 'logout',
   'magnifyingglass': 'search',
   'magnifyingglass.circle.fill': 'search',
+  'menubar.rectangle': 'menu',
 } as IconMapping;
 
 /**
