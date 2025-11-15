@@ -15,7 +15,7 @@ export default function TopNavBar() {
   return (
     <View style={[styles.container, { backgroundColor: Colors[scheme ?? 'medium'].background, borderBottomColor: '#e6e6e6'}]}>
       <Pressable style={styles.tab} onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
-        <IconSymbol name="menubar.dock.rectangle" size={22} color={tint} />
+        <IconSymbol name="menubar.dock.rectangle" size={30} color={tint} />
       </Pressable>
     </View>
   );
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     right: 0,
-    height: 70,
+    height: 80,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
@@ -36,9 +36,9 @@ const styles = StyleSheet.create({
   },
   tab: {
     alignItems: 'flex-start',
-    paddingLeft: 20,
-    paddingTop: 20,
-    paddingRight: 280,
+    paddingLeft: 40,
+    paddingTop: 25,
+    paddingRight: 300,
   },
   overlay: {
     position: 'absolute',

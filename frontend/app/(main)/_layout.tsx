@@ -23,6 +23,7 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <StatusBar style="dark" />
       <ThemeProvider value={colorScheme === 'light' ? DarkTheme : DefaultTheme}>
         <View style={{ flex: 1}}>
           <Drawer.Navigator drawerContent={(props) => <DrawerContent {...props} />} screenOptions={{ header: ({ navigation }: { navigation?: any }) => React.createElement(TopNavBar as any, { navigation }), headerShown: true }}>
