@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     right: 0,
-    height: 65,
+    height: 70,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
@@ -35,12 +35,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   tab: {
-    flex: 1,
-    // alignItems: 'center',
-    left: 40,
-    justifyContent: 'center',
-  }
-  ,
+    alignItems: 'flex-start',
+    paddingLeft: 20,
+    paddingTop: 20,
+    paddingRight: 280,
+  },
   overlay: {
     position: 'absolute',
     left: 0,
@@ -49,10 +48,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     zIndex: 60,
     flex: 1,
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.35)'
   },
   drawer: {
     position: 'absolute',

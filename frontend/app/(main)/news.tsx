@@ -20,8 +20,7 @@ export default function News() {
         keyExtractor={(item) => item.companyName + item.date}
         // pushing the content below the top nav bar 
         contentContainerStyle={[
-          styles.list,
-          { paddingTop: + NAV_HEIGHT + 5 },
+          styles.list
         ]}
         // render each news item as a card
         renderItem={({ item }) => (
@@ -50,7 +49,7 @@ export default function News() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f7fa'},
+  container: { flex: 1, backgroundColor: '#f5f7fa', paddingTop: + NAV_HEIGHT + 5 },
   list: { padding: 12, paddingBottom: 96 },
   card: {
     backgroundColor: '#ffffff',

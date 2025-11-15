@@ -12,6 +12,7 @@ import DrawerContent from '@/components/ui/drawer';
 import StockHoldings from './stock-holdings';
 import News from './news';
 import PortfolioInsights from './portfolio-insights';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // shared varibales for all classes to use 
 export const unstable_settings = {};
@@ -21,15 +22,17 @@ export default function RootLayout() {
   const Drawer = createDrawerNavigator();
 
   return (
-    <ThemeProvider value={colorScheme === 'light' ? DarkTheme : DefaultTheme}>
-      <View style={{ flex: 1}}>
-        <Drawer.Navigator drawerContent={(props) => <DrawerContent {...props} />} screenOptions={{ header: () => <TopNavBar />, headerShown: true }}>
-          <Drawer.Screen name="stock-holdings" component={StockHoldings} />
-          <Drawer.Screen name="news" component={News} />
-          <Drawer.Screen name="portfolio-insights" component={PortfolioInsights} />
-        </Drawer.Navigator>
-        <BottomNavBar />
-      </View>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider value={colorScheme === 'light' ? DarkTheme : DefaultTheme}>
+        <View style={{ flex: 1}}>
+          <Drawer.Navigator drawerContent={(props) => <DrawerContent {...props} />} screenOptions={{ header: ({ navigation }: { navigation?: any }) => React.createElement(TopNavBar as any, { navigation }), headerShown: true }}>
+            <Drawer.Screen name="stock-holdings" component={StockHoldings} />
+            <Drawer.Screen name="news" component={News} />
+            <Drawer.Screen name="portfolio-insights" component={PortfolioInsights} />
+          </Drawer.Navigator>
+          <BottomNavBar />
+        </View>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

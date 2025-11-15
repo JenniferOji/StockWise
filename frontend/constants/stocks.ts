@@ -26,12 +26,6 @@ export const STOCKS: Stock[] = [
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/500px-Netflix_2015_logo.svg.png'
   },
   {
-    symbol: 'JPM',
-    companyName: 'JPMorgan Chase & Co.',
-    shares: 25,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/JPMorgan_Chase_Logo_2016.svg/500px-JPMorgan_Chase_Logo_2016.svg.png'
-  },
-  {
     symbol: 'BAC',
     companyName: 'Bank of America Corporation',
     shares: 30,
