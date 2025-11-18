@@ -7,25 +7,30 @@ import {NAV_HEIGHT} from '../../constants/layout'
 
 // https://www.npmjs.com/package/react-native-pie-chart
 export default function PortfolioInsights() {
-	const total = INSIGHTS.reduce((s, c) => s + c.allocation, 0)
-		const items = INSIGHTS.slice().sort((a, b) => b.allocation - a.allocation)
-		const screenWidth = Dimensions.get('window').width - 32
-		const chartData = items.map((it) => ({ name: it.sector, population: it.allocation, color: it.color || '#3b82f6', legendFontColor: '#444', legendFontSize: 12 }))
-		const chartConfig = { backgroundGradientFrom: '#ffffff', backgroundGradientTo: '#ffffff', color: (opacity = 1) => `rgba(59,130,246,${opacity})`, labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})` }
+	// total is the sum of allocation percentages and is shown in the header
+	const total = INSIGHTS.reduce((s, c) => s + c.allocation, 0) 
+	// items is a copy sorted so the largest slices render first in the order
+	const items = INSIGHTS.slice().sort((a, b) => b.allocation - a.allocation) 
+	// measure available width and subtract padding so the chart fits the card
+	const screenWidth = Dimensions.get('window').width - 32 
+	// maps the model (sorted list of items) to the piechart 
+	const chartData = items.map((item) => ({ name: item.sector, population: item.allocation, color: item.color || '#3b82f6', legendFontColor: '#444', legendFontSize: 12 })) // transform to PieChart data shape
+	// chartConfig controls gradients and label coloring
+	const chartConfig = { backgroundGradientFrom: '#ffffff', backgroundGradientTo: '#ffffff', color: (opacity = 1) => `rgba(59,130,246,${opacity})`, labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})` } 
 
-		return (
-			<SafeAreaView style={styles.container}>
-				<View style={styles.header}>
-					<Text style={styles.title}>Sector allocations</Text>
-					<Text style={styles.subtitle}>{`Total allocation: ${total}%`}</Text>
+	return (
+		<SafeAreaView style={styles.container}>
+			<View style={styles.header}>
+				<Text style={styles.title}>Sector allocations</Text>
+				<Text style={styles.subtitle}>{`Total allocation: ${total}%`}</Text>
+			</View>
+			<View style={styles.chartWrap}>
+				<View style={[styles.chartCard, { width: screenWidth }] }>
+					<PieChart data={chartData} width={screenWidth - 24} height={220} chartConfig={chartConfig} accessor={'population'} backgroundColor={'transparent'} paddingLeft={'15'} absolute />
 				</View>
-				<View style={styles.chartWrap}>
-					<View style={[styles.chartCard, { width: screenWidth }] }>
-						<PieChart data={chartData} width={screenWidth - 24} height={220} chartConfig={chartConfig} accessor={'population'} backgroundColor={'transparent'} paddingLeft={'15'} absolute />
-					</View>
-				</View>
-			</SafeAreaView>
-		)
+			</View>
+		</SafeAreaView>
+	)
 }
 
 const styles = StyleSheet.create({

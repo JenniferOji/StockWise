@@ -13,6 +13,7 @@ export default function StockHoldings() {
   const [open, setOpen] = useState(false);
   // displayed is the list of stocks the user has added to the page 
   const [displayed, setDisplayed] = useState<typeof STOCKS[number][]>([]);
+  // this lives in component state only; consider persisting to AsyncStorage or backend later
 
   // modal controls for the edit popup
   const [modalVisible, setModalVisible] = useState(false);
@@ -26,8 +27,10 @@ export default function StockHoldings() {
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [];
+    // filter stocks by query and exclude ones already in the displayed list - if it type 'r' it will display stock containing r
     return STOCKS.filter(s => !displayed.some(d => d.symbol === s.symbol) && (s.symbol.toLowerCase().includes(q) || s.companyName.toLowerCase().includes(q)));
   }, [query, displayed]);
+  // useMemo avoids recomputing the filtered list on every render unless query/displayed change
 
   return (
     <SafeAreaView style={styles.container}>
@@ -39,22 +42,26 @@ export default function StockHoldings() {
             placeholderTextColor="#6B7280"
             selectionColor="#0b3d91"
             value={query}
-            onChangeText={(t) => { setQuery(t); setOpen(true); }}
+            onChangeText={(t) => { setQuery(t); setOpen(true); }} 
             onFocus={() => setOpen(true)}
             style={[styles.searchInput, styles.searchInputWithIcon]}
           />          
-          <View style={styles.searchIcon} pointerEvents="box-none">
+          {/* search icon is positioned absolutely inside the input field */}
+          <View 
+          style={styles.searchIcon} pointerEvents="box-none">
             <IconSymbol name="magnifyingglass" size={18} color={iconColor} />
           </View>
         </View>
+        {/* when the user starts typing it opens the dropdown menu to display stocks */}
         {open && matches.length > 0 && (
           <View style={styles.searchDropdown}>
             <FlatList data={matches} keyExtractor={(i) => i.symbol} renderItem={({ item }) => (
-              // tapping a search result will add that stock as a card to the page 
-              <Pressable style={styles.dropdownItem} onPress={() => { setDisplayed(prev => [item, ...prev]); setQuery(''); setOpen(false); Keyboard.dismiss(); }}>
-                <Text style={styles.ddSymbol}>{item.symbol}</Text>
+              // tapping a search result will add that stock as a card to the page - stores it in the displayed list
+              <Pressable style={styles.dropdownItem} onPress={() => { setDisplayed(prev => [item, ...prev]); setQuery(''); setOpen(false);}}>
+           <Text style={styles.ddSymbol}>{item.symbol}</Text>
 
-                <Text style={styles.ddName}>{item.companyName}</Text>
+              {/* show the company name under the symbol in the dropdown */}
+           <Text style={styles.ddName}>{item.companyName}</Text>
               </Pressable>
             )} />
           </View>
@@ -68,14 +75,16 @@ export default function StockHoldings() {
         style={styles.listWrapper}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <View style={styles.cardLeft}>
+              <View style={styles.cardLeft}>
               <Image source={{ uri: item.imageUrl }} style={styles.logo} resizeMode="contain" />
             </View>
             <View style={styles.cardBody}>
+              {/* symbol and company name shown in the card body */}
               <Text style={styles.symbol}>{item.symbol}</Text>
               <Text style={styles.name}>{item.companyName}</Text>
             </View>
             <View style={styles.cardRight}>
+              {/* shares and edit button on the right side of the card */}
               <Text style={styles.shares}>{item.shares} shares</Text>
               <TouchableOpacity style={styles.editButton} onPress={() => { setSelected(item); setModalVisible(true); }}>
                 <Text style={styles.editText}>edit</Text>
@@ -90,6 +99,7 @@ export default function StockHoldings() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             {/* when exiting out of the pop up it goes from displaying the company name to edit */}
+            {/* modal header shows which stock is being edited */}
             <Text style={styles.modalText}>{selected ? `${selected.symbol} - ${selected.companyName}` : 'Edit'}</Text>
             {/* delete button removes the selected stock from the displayed list */}
             <Pressable
