@@ -30,7 +30,8 @@ func main() {
 		user.Post("/register", routes.Register)
 		user.Post("/login", routes.Login)
 	}
-	app.Listen(":8080")
+	
+	app.Listen(":4000")
 
 }
 
