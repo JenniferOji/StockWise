@@ -59,6 +59,49 @@ func Register(ctx iris.Context) {
 	// if we get to this point the user does not exist
 }
 
+func Login(ctx iris.Context) {
+	var userInput RegisterUserInput
+	err := ctx.ReadJSON(&userInput)
+	if err != nil {
+		utils.HandleValidationErrors(err, ctx)
+		return
+	}
+
+	var existingUser models.Users
+	errMsg := "Invalid email or password."
+	userExists, userExistsErr := getAndHandleUserExists(&existingUser, userInput.Email)
+	// if theres a user exists error we need to create an internal server error
+	if userExistsErr != nil {
+		utils.CreateInternalServerError(ctx)
+		return
+	}
+
+	// if false user hasnt regeistered or gave faulty details 
+	if userExists == false {
+		utils.CreateError(iris.StatusUnauthorized,"Credentials Error", errMsg, ctx)
+		return
+	}
+
+	// if the user logged in with a social account they cant login with password
+	if existingUser.SocialLogin == true {
+		utils.CreateError(iris.StatusUnauthorized,"Credentials Error", "Social Login account.", ctx)
+		return
+	}
+
+	passwordErr := bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(userInput.Password))	
+	if passwordErr != nil {
+		utils.CreateError(iris.StatusUnauthorized,"Credentials Error", errMsg, ctx)
+		return
+	}
+
+	// at this point th euser gave th eright error 
+	ctx.JSON(iris.Map{
+		"ID":       existingUser.ID,
+		"Username": existingUser.Username,
+		"Email":    existingUser.Email,
+	})
+}
+
 // takes in user model pointer and email string to check if user exists
 func getAndHandleUserExists(user *models.Users, email string) (exists bool, err error) {
 	// query the dsatabase for a user with the given email
@@ -93,3 +136,9 @@ type RegisterUserInput struct {
 	Password string `json:"password" validate:"required,min=6,max=256"`
 	Email    string `json:"email" validate:"required,email"`
 }
+
+type LoginUserInput struct {
+	Password string `json:"password" validate:"required"`
+	Email    string `json:"email" validate:"required,email"`
+}
+

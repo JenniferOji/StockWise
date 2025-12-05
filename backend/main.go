@@ -28,6 +28,7 @@ func main() {
 	user := app.Party("/api/user")
 	{
 		user.Post("/register", routes.Register)
+		user.Post("/login", routes.Login)
 	}
 	app.Listen(":8080")
 
