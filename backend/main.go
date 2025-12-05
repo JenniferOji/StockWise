@@ -4,6 +4,7 @@ import (
 	"github.com/YourGitHubUser/StockWise/backend/database"
 	"github.com/YourGitHubUser/StockWise/backend/routes"
 	"github.com/YourGitHubUser/StockWise/backend/storage"
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
 	_ "github.com/lib/pq"
@@ -18,6 +19,7 @@ func main() {
 	database.Connect()
 
 	app := iris.Default()
+	app.Validator = validator.New()
 	// location := app.Party("/api/location")
 	// {
 	// 	location.Get("autocomplete", routes.Autocomplete)

@@ -6,6 +6,7 @@ import (
 
 	"github.com/YourGitHubUser/StockWise/backend/models"
 	"github.com/YourGitHubUser/StockWise/backend/storage"
+	"github.com/YourGitHubUser/StockWise/backend/utils"
 	"github.com/kataras/iris/v12"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -14,14 +15,19 @@ func Register(ctx iris.Context) {
 	var userInput RegisterUserInput
 	err := ctx.ReadJSON(&userInput)
 	if err != nil {
-		fmt.Println(err.Error())
+		utils.HandleValidationErrors(err, ctx)
 		return
 	}
 
 	var newUser models.Users
 	userExists, userExistsErr := getAndHandleUserExists(&newUser, userInput.Email)
 	if userExistsErr != nil {
-		fmt.Println(userExistsErr.Error())
+		utils.CreateError(
+			iris.StatusConflict,
+			"Conflict",
+			"Email already registered", // decription shown to user
+			ctx,
+		)
 		return
 	}
 
@@ -32,7 +38,7 @@ func Register(ctx iris.Context) {
 
 	hashedPassword, hashErr := hashAndSaltPassword(userInput.Password)
 	if hashErr != nil {
-		fmt.Println(hashErr.Error())
+		utils.CreateInternalServerError(ctx)
 		return
 	}
 
