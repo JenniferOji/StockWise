@@ -12,7 +12,7 @@ func CreateError(statusCode int, title string, detail string, ctx iris.Context) 
 	ctx.StopWithProblem(statusCode, iris.NewProblem().Title(title).Detail(detail))
 }
 
-// create a seperat efunction for 500 bad request errors as they are common
+// create a seperate function for 500 bad request errors as they are common
 func CreateInternalServerError(ctx iris.Context) {
 	CreateError(iris.StatusInternalServerError,
 		"Internal Server Error",

@@ -1,4 +1,6 @@
-const serverUrl = "http://192.168.30.24:4000/api"; // use device-accessible IP for mobile
+import { Platform } from 'react-native';
+
+const serverUrl = Platform.OS === 'web' ? 'http://localhost:4000/api' : 'http://192.168.1.34:4000/api'; // a device accessible IP for mobile
 const user = "/user";
 
 const userEndpoint = serverUrl + user;

@@ -12,30 +12,41 @@ export const registerUser = async(
     password: string  
     )=> {
         try {
-            const {data}: DataRes = await axios.post(endpoints.register, {
+            console.log('Attempting registration to:', endpoints.register);
+            const response = await axios.post(endpoints.register, {
                 username,
                 email,
                 password
             });
+            console.log('Registration response:', response);
             // if there is data present return it
-            if (data) return data;
+            if (response.data) return response.data;
+            return null;
         }catch (error) {
+            console.error('Registration error details:', error);
+            if (axios.isAxiosError(error)) {
+                console.error('Network error:', error.message);
+                console.error('Response status:', error.response?.status);
+                console.error('Response data:', error.response?.data);
+            }
             handleError(error);
+            return null;
     }
 }
 
 export const loginUser = async (email: string, password: string) => {
     try {
         // send post request to server login endpoint with email and password 
-        const {data}: DataRes = await axios.post(endpoints.login, { 
+        const response = await axios.post(endpoints.login, { 
             email,
             password
         }); 
-        if (data) return data;
+        if (response.data) return response.data;
 
         return null;
     } catch (error) {
         handleError(error);
+        return null;
     }
 }
 

@@ -36,6 +36,7 @@ func Register(ctx iris.Context) {
 		return
 	}
 
+	// if we get to this point the user does not exist
 	hashedPassword, hashErr := hashAndSaltPassword(userInput.Password)
 	if hashErr != nil {
 		utils.CreateInternalServerError(ctx)
@@ -56,7 +57,6 @@ func Register(ctx iris.Context) {
 		"Username": newUser.Username,
 		"Email":    newUser.Email,
 	})
-	// if we get to this point the user does not exist
 }
 
 func Login(ctx iris.Context) {

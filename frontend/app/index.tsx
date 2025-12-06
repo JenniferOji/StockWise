@@ -1,29 +1,61 @@
 import { Text, TouchableOpacity, View, StyleSheet, Dimensions, Image } from 'react-native';
 import { useRouter } from 'expo-router';
+import { AuthContext } from "../context";
+import { useState, useEffect } from "react";
+import { User } from "../types/user";
+import * as SecureStore from 'expo-secure-store';
 const { width } = Dimensions.get('window');
 
 export default function IntroPage() {
+  const isLoadingComplete = useCachedResources();
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null); // it will either be user or null but we initialise it to null
+
+  // everytime user opens the we open the securestore and check if there is a user saved
+  useEffect(() => {
+    async function getUser() {
+      try {
+        const getItem = (SecureStore as any).getItemAsync;
+        if (typeof getItem === 'function') {
+          const user = await getItem('user');
+          if (user) setUser(JSON.parse(user) as User);
+        } else if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
+          const u = (globalThis as any).localStorage.getItem('user');
+          if (u) setUser(JSON.parse(u) as User);
+        }
+      } catch (e) {
+      }
+    }
+    getUser();
+
+  }, []);
 
   const handleStart = () => {
-    router.replace('/(main)/stock-holdings' as any);
+    router.push('/signup' as any);
   };
-   return (
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <View>
-            <Image source={require('../assets/images/app-logo.png')} style={styles.logo} resizeMode="contain" />
+
+  if (!isLoadingComplete) {
+    return null;
+  } else {
+    return (
+        <AuthContext.Provider value={{ user, setUser }}>
+          <View style={styles.container}>
+            <View style={styles.content}>
+              <View>
+                <Image source={require('../assets/images/app-logo.png')} style={styles.logo} resizeMode="contain" />
+              </View>
+              <Text style={styles.title}>Stock Wise</Text>
+      
+              <Text style={styles.subtitle}>Your portfolio. Simplified</Text>
+      
+              <TouchableOpacity activeOpacity={0.85} style={styles.button} onPress={handleStart}>
+                <Text style={styles.buttonText}>Optimise now</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <Text style={styles.title}>Stock Wise</Text>
-  
-          <Text style={styles.subtitle}>Your portfolio. Simplified</Text>
-  
-          <TouchableOpacity activeOpacity={0.85} style={styles.button} onPress={handleStart}>
-            <Text style={styles.buttonText}>Optimise now</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
+        </AuthContext.Provider>
+      );
+    }
   }
   
   const styles = StyleSheet.create({
@@ -86,3 +118,7 @@ export default function IntroPage() {
   });
   
   
+function useCachedResources(): boolean {
+  return true;
+}
+
