@@ -1,0 +1,236 @@
+# https://medium.com/@lei.xiaofan/quick-start-building-sentiment-analysis-models-8c1e78c30b2c
+import pandas as pd
+import os
+from pathlib import Path
+from sklearn.model_selection import train_test_split
+import re
+from autocorrect import Speller
+spell = Speller(lang='en')
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
+from sklearn.pipeline import make_pipeline
+from catboost import CatBoostClassifier
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
+
+import numpy as np
+
+import nltk
+
+# Download tokenizers and lemmatization dataset
+nltk.download('punkt')
+nltk.download('wordnet')
+
+inputpath = 'input'
+outputpath = 'outputs'
+if os.path.exists(inputpath) is False:
+    os.mkdir(inputpath)
+if os.path.exists(outputpath) is False:
+    os.mkdir(outputpath)
+
+news_sentiment_path = Path("training_data/news_data.csv")
+df = pd.read_csv(news_sentiment_path, encoding="cp1252", low_memory=False)
+
+colnames = ['Sentiment', 'Headline']
+
+# replacing textual categories by integers
+X = df.Headline.values
+y = df.Sentiment.replace(4, 1)
+
+# split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
+
+print("training size:", len(X_train))
+print("testing size:", len(X_test))
+
+lemm = WordNetLemmatizer()
+
+# Fixing Word Lengthening
+def reduce_lengthening(text):
+    pattern = re.compile(r"(.)\1{2,}")
+    return pattern.sub(r"\1\1", text)
+
+def text_preprocess(doc):
+    # Lowercasing all the letters
+    temp = doc.lower()
+    # Removing hashtags and mentions
+    temp = re.sub("@[A-Za-z0-9_]+", "", temp)
+    temp = re.sub("#[A-Za-z0-9_]+", "", temp)
+    # Removing links
+    temp = re.sub(r"http\S+", "", temp)
+    temp = re.sub(r"www.\S+", "", temp)
+    # Removing numbers
+    temp = re.sub("[0-9]", "", temp)
+    # Removing '
+    temp = re.sub("'", " ", temp)
+
+    # Tokenization
+    temp = word_tokenize(temp)
+    # Fixing Word Lengthening
+    temp = [reduce_lengthening(w) for w in temp]
+    # Spell corrector
+    # temp = [spell(w) for w in temp]
+    # Stem
+    temp = [lemm.lemmatize(w) for w in temp]
+    # Removing short words
+    temp = [w for w in temp if len(w) > 1]
+    temp = " ".join(w for w in temp)
+
+    return temp
+
+text_preprocess("Sooo happppyyy to seee youuu!!! Visit my blog at http://example.com #excited @friend")
+'soo happy see you visit blog'
+
+
+tfidf = TfidfVectorizer(ngram_range=(1, 2), min_df=3, max_df=0.95)
+
+# preprocess the raw text
+X_train_clean = [text_preprocess(x) for x in X_train]
+X_test_clean = [text_preprocess(x) for x in X_test]
+
+Xtrain = tfidf.fit_transform(X_train_clean)
+Xtest = tfidf.transform(X_test_clean)
+
+# training
+cat_classifier = CatBoostClassifier(
+    iterations=1000,
+    learning_rate=0.03,
+    depth=6,
+    od_type='Iter',
+    od_wait=50,
+    silent=True,
+    verbose=100
+)
+
+pred = cat_classifier.predict(Xtest)
+print(classification_report(y_test, pred))
+print(confusion_matrix(y_test, pred, labels=cat_classifier.classes_))
+
+
+# one hot (binary) bag of words vectoriser
+# binary=True gives 0/1 per word
+vectorizer = CountVectorizer(binary=True)
+X_train_vec = vectorizer.fit_transform(X_train_clean)
+X_test_vec = vectorizer.transform(X_test_clean)
+
+# quick checks
+print("vocab size:", len(vectorizer.get_feature_names_out()))
+print("X_train_vec shape:", X_train_vec.shape)
+print("X_test_vec shape:", X_test_vec.shape)
+
+# show the first headline vector as dense (only do for small check)
+print("first headline:", X_train_clean[0])
+print("first vector (nonzero indices):", X_train_vec[0].nonzero()[1])
+print("first vector (as array) sample:", X_train_vec[0].toarray()[0][:50])  # first 50 features
+
+
+pipe = make_pipeline(CountVectorizer(), TfidfTransformer())
+pipe.fit(X_train_clean)
+
+Xtrain = pipe.transform(X_train_clean)
+Xtest = pipe.transform(X_test_clean)
+
+# # training
+# cat_classifier = CatBoostClassifier(
+#     iterations=1000,
+#     learning_rate=0.03,
+#     depth=6,
+#     od_type='Iter',
+#     od_wait=50,
+#     silent=True,
+#     verbose=100
+# )
+cat_classifier.fit(Xtrain, y_train, eval_set=(Xtest, y_test), plot=True)
+
+# prediction
+predictions = cat_classifier.predict(Xtest)
+print('Test score: %.2f\n' % (accuracy_score(y_test, predictions)))
+
+
+res = cat_classifier.get_evals_result()
+
+# Show structure so you can see available dataset names and metric names
+print("Top-level keys (datasets):", list(res.keys()))
+for ds_name, metrics in res.items():
+    print(f"- {ds_name}: metrics = {list(metrics.keys())}")
+
+# Choose dataset keys
+ds_keys = list(res.keys())
+train_key = ds_keys[0]
+val_key = ds_keys[1] if len(ds_keys) > 1 else None
+
+# Pick the first metric reported for the train set
+metric = list(res[train_key].keys())[0]
+print("\nPlotting metric:", metric, "for", train_key, "and", val_key)
+
+# Prepare series
+train_series = res[train_key][metric]
+val_series = res[val_key][metric] if val_key is not None and metric in res[val_key] else None
+
+plt.figure(figsize=(8, 4))
+plt.plot(train_series, label=f'{train_key} ({metric})')
+if val_series is not None:
+    plt.plot(val_series, label=f'{val_key} ({metric})')
+plt.xlabel('Iteration')
+plt.ylabel(metric)
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+LABEL_MAP = {-1: "negative", 1: "positive", 0: "neutral"}
+NAME_TO_ID = {v: k for k, v in LABEL_MAP.items()}
+
+def predict_text_single(text):
+    cleaned = text_preprocess(text)
+    X = pipe.transform([cleaned])
+    pred_raw = cat_classifier.predict(X)[0]
+    val = np.asarray(pred_raw).ravel()[0]
+    if isinstance(val, bytes):
+        val = val.decode()
+    if isinstance(val, str):
+        label_id = NAME_TO_ID[val]
+    else:
+        label_id = int(val)
+    proba = cat_classifier.predict_proba(X)[0].tolist()
+    return {"text": text, "cleaned": cleaned, "label_id": label_id, "label": LABEL_MAP[label_id], "proba": proba}
+
+def predict_texts_batch(texts):
+    cleaned = [text_preprocess(t) for t in texts]
+    X = pipe.transform(cleaned)
+    preds = cat_classifier.predict(X)
+    probas = cat_classifier.predict_proba(X)
+    results = []
+    for i, t in enumerate(texts):
+        pred_raw = preds[i]
+        val = np.asarray(pred_raw).ravel()[0]
+        if isinstance(val, bytes):
+            val = val.decode()
+        if isinstance(val, str):
+            label_id = NAME_TO_ID[val]
+        else:
+            label_id = int(val)
+        results.append({
+            "text": t,
+            "cleaned": cleaned[i],
+            "label_id": label_id,
+            "label": LABEL_MAP[label_id],
+            "proba": probas[i].tolist()
+        })
+    return results
+
+result = predict_text_single("Stocks are looking good today!")
+print(result)
+
+result2 = predict_text_single("i hate mondays they always make me feel horrible!")
+print(result2)
+
+print("CatBoost classes order:", list(cat_classifier.classes_))
+
+print("train label counts:")
+print(pd.Series(y_train).value_counts())
