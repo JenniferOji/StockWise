@@ -3,7 +3,7 @@ package storage
 import (
 	"os"
 
-	"github.com/YourGitHubUser/StockWise/backend/models"
+	"github.com/YourGitHubUser/StockWise/backend/schemas"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/middleware/cors"
 	_ "github.com/lib/pq"
 )
 
@@ -18,16 +19,9 @@ func main() {
 
 	app := iris.New()
 
-	app.Use(func(ctx iris.Context) {
-		ctx.Header("Access-Control-Allow-Origin", "http://localhost:8081")
-		ctx.Header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
-		ctx.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		if ctx.Method() == "OPTIONS" {
-			ctx.StatusCode(204)
-			return
-		}
-		ctx.Next()
-	})
+	app.UseRouter(cors.New().
+		AllowOrigin("*").
+		Handler())
 
 	app.Validator = validator.New()
 	// location := app.Party("/api/location")

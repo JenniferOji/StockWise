@@ -33,8 +33,10 @@ if os.path.exists(inputpath) is False:
 if os.path.exists(outputpath) is False:
     os.mkdir(outputpath)
 
-news_sentiment_path = Path("training_data/news_data.csv")
-df = pd.read_csv(news_sentiment_path, encoding="cp1252", low_memory=False)
+# load dataset
+# resource 1: https://www.kaggle.com/datasets/myrios/news-sentiment-analysis?resource=download
+news_sentiment_path = Path("C:/Users/35387/OneDrive - Atlantic TU\year 4/Applied Project/StockWise/ml/training_data/news_sentiment_data.csv")
+df = pd.read_csv(news_sentiment_path, encoding="ISO-8859-1", low_memory=False)
 
 colnames = ['Sentiment', 'Headline']
 
@@ -48,6 +50,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 print("training size:", len(X_train))
 print("testing size:", len(X_test))
 
+# initialise lemmatizer which will be used in text_preprocess
 lemm = WordNetLemmatizer()
 
 # Fixing Word Lengthening
@@ -93,8 +96,12 @@ tfidf = TfidfVectorizer(ngram_range=(1, 2), min_df=3, max_df=0.95)
 X_train_clean = [text_preprocess(x) for x in X_train]
 X_test_clean = [text_preprocess(x) for x in X_test]
 
-Xtrain = tfidf.fit_transform(X_train_clean)
-Xtest = tfidf.transform(X_test_clean)
+# vectorising using the pipeline
+pipe = make_pipeline(CountVectorizer(), TfidfTransformer())
+pipe.fit(X_train_clean)
+
+Xtrain = pipe.transform(X_train_clean)
+Xtest = pipe.transform(X_test_clean)
 
 # training
 cat_classifier = CatBoostClassifier(
@@ -103,14 +110,18 @@ cat_classifier = CatBoostClassifier(
     depth=6,
     od_type='Iter',
     od_wait=50,
-    silent=True,
-    verbose=100
+    verbose=100, 
+    objective='MultiClass'  # Ensure correct objective for a multiclass task
 )
 
-pred = cat_classifier.predict(Xtest)
-print(classification_report(y_test, pred))
-print(confusion_matrix(y_test, pred, labels=cat_classifier.classes_))
+cat_classifier.fit(Xtrain, y_train, eval_set=(Xtest, y_test))
 
+# prediction
+predictions = cat_classifier.predict(Xtest)
+print('Test score: %.2f\n' % (accuracy_score(y_test, predictions)))
+
+print(classification_report(y_test, predictions))
+print(confusion_matrix(y_test, predictions, labels=cat_classifier.classes_))
 
 # one hot (binary) bag of words vectoriser
 # binary=True gives 0/1 per word
@@ -127,30 +138,6 @@ print("X_test_vec shape:", X_test_vec.shape)
 print("first headline:", X_train_clean[0])
 print("first vector (nonzero indices):", X_train_vec[0].nonzero()[1])
 print("first vector (as array) sample:", X_train_vec[0].toarray()[0][:50])  # first 50 features
-
-
-pipe = make_pipeline(CountVectorizer(), TfidfTransformer())
-pipe.fit(X_train_clean)
-
-Xtrain = pipe.transform(X_train_clean)
-Xtest = pipe.transform(X_test_clean)
-
-# # training
-# cat_classifier = CatBoostClassifier(
-#     iterations=1000,
-#     learning_rate=0.03,
-#     depth=6,
-#     od_type='Iter',
-#     od_wait=50,
-#     silent=True,
-#     verbose=100
-# )
-cat_classifier.fit(Xtrain, y_train, eval_set=(Xtest, y_test), plot=True)
-
-# prediction
-predictions = cat_classifier.predict(Xtest)
-print('Test score: %.2f\n' % (accuracy_score(y_test, predictions)))
-
 
 res = cat_classifier.get_evals_result()
 

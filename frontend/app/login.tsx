@@ -3,27 +3,26 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { User } from '../types/user';
-import { registerUser } from '../services/user';
+import { loginUser } from '../services/user';
 
-export default function SignUpPage() {
+export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSignUp = async () => {
+  const handleLogin = async () => {
     setLoading(true);
     try {
-      const created = await registerUser(username, email, password);
-      console.log('Registration result:', created);
-      if (created) {
+      const user = await loginUser(email, password);
+      console.log('Login result:', user);
+      if (user) {
         try {
           const setItem = (SecureStore as any).setItemAsync;
           if (typeof setItem === 'function') {
-            await setItem('user', JSON.stringify(created));
+            await setItem('user', JSON.stringify(user));
           } else if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
-            (globalThis as any).localStorage.setItem('user', JSON.stringify(created));
+            (globalThis as any).localStorage.setItem('user', JSON.stringify(user));
           }
         } catch (e) {
         }
@@ -32,11 +31,11 @@ export default function SignUpPage() {
         router.replace('/(main)/stock-holdings' as any);
         return;
       }
-      console.log('Registration failed - no user data returned');
-      Alert.alert('Sign up failed', 'Unable to register.');
+      console.log('Login failed - no user data returned');
+      Alert.alert('Login failed', 'Invalid email or password.');
     } catch (err) {
-      console.error('Registration error:', err);
-      Alert.alert('Sign up failed', 'Unable to register.');
+      console.error('Login error:', err);
+      Alert.alert('Login failed', 'Unable to log in.');
     } finally {
       setLoading(false);
     }
@@ -44,12 +43,11 @@ export default function SignUpPage() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Create an account</Text>
-      <TextInput placeholder="Name" value={username} onChangeText={setUsername} style={styles.input} />
+      <Text style={styles.title}>Log in to account</Text>
       <TextInput placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" style={styles.input} autoCapitalize="none" />
       <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
-      <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Signing up...' : 'Sign up'}</Text>
+      <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
+        <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Log in'}</Text>
       </TouchableOpacity>
     </View>
   );

@@ -30,8 +30,12 @@ export default function IntroPage() {
 
   }, []);
 
-  const handleStart = () => {
+  const handleSignUp = () => {
     router.push('/signup' as any);
+  };
+
+  const handleLogin = () => {
+    router.push('/login' as any);
   };
 
   if (!isLoadingComplete) {
@@ -48,8 +52,11 @@ export default function IntroPage() {
       
               <Text style={styles.subtitle}>Your portfolio. Simplified</Text>
       
-              <TouchableOpacity activeOpacity={0.85} style={styles.button} onPress={handleStart}>
-                <Text style={styles.buttonText}>Optimise now</Text>
+              <TouchableOpacity activeOpacity={0.85} style={styles.button1} onPress={handleSignUp}>
+                <Text style={styles.buttonText}>Sign Up</Text>
+              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.85} style={styles.button2} onPress={handleLogin}>
+                <Text style={styles.buttonText}>Log In</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -102,13 +109,24 @@ export default function IntroPage() {
       marginBottom: 28,
       paddingHorizontal: 8,
     },
-    button: {
+    button1: {
+      backgroundColor: '#669af5ff',
+      borderRadius: 12,
+      paddingVertical: 14,
+      paddingHorizontal: 28,
+      minWidth: Math.min(320, width * 0.7),
+      alignItems: 'center',
+      marginTop: 50,
+    },
+    button2: {
       backgroundColor: '#0B3D91',
       borderRadius: 12,
       paddingVertical: 14,
       paddingHorizontal: 28,
       minWidth: Math.min(320, width * 0.7),
       alignItems: 'center',
+      marginTop: 15,
+
     },
     buttonText: {
       color: '#ffffff',

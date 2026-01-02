@@ -15,7 +15,7 @@ from pathlib import Path
 
 from pathlib import Path
 
-current_directory = Path(__file__).parent  # Get the current script's directory
+current_directory = Path(__file__).parent  # current scripts directory
 headlines_path = current_directory / "training_data" / "djia_news.csv"
 djia_path = current_directory / "training_data" / "djia_price_table.csv"
 

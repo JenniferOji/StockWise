@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/YourGitHubUser/StockWise/backend/models"
+	models "github.com/YourGitHubUser/StockWise/backend/schemas"
 	"github.com/YourGitHubUser/StockWise/backend/storage"
 	"github.com/YourGitHubUser/StockWise/backend/utils"
 	"github.com/kataras/iris/v12"
@@ -60,7 +60,7 @@ func Register(ctx iris.Context) {
 }
 
 func Login(ctx iris.Context) {
-	var userInput RegisterUserInput
+	var userInput LoginUserInput
 	err := ctx.ReadJSON(&userInput)
 	if err != nil {
 		utils.HandleValidationErrors(err, ctx)
@@ -76,25 +76,25 @@ func Login(ctx iris.Context) {
 		return
 	}
 
-	// if false user hasnt regeistered or gave faulty details 
+	// if false user hasnt regeistered or gave faulty details
 	if userExists == false {
-		utils.CreateError(iris.StatusUnauthorized,"Credentials Error", errMsg, ctx)
+		utils.CreateError(iris.StatusUnauthorized, "Credentials Error", errMsg, ctx)
 		return
 	}
 
 	// if the user logged in with a social account they cant login with password
 	if existingUser.SocialLogin == true {
-		utils.CreateError(iris.StatusUnauthorized,"Credentials Error", "Social Login account.", ctx)
+		utils.CreateError(iris.StatusUnauthorized, "Credentials Error", "Social Login account.", ctx)
 		return
 	}
 
-	passwordErr := bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(userInput.Password))	
+	passwordErr := bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(userInput.Password))
 	if passwordErr != nil {
-		utils.CreateError(iris.StatusUnauthorized,"Credentials Error", errMsg, ctx)
+		utils.CreateError(iris.StatusUnauthorized, "Credentials Error", errMsg, ctx)
 		return
 	}
 
-	// at this point th euser gave th eright error 
+	// at this point th euser gave th eright error
 	ctx.JSON(iris.Map{
 		"ID":       existingUser.ID,
 		"Username": existingUser.Username,
@@ -141,4 +141,3 @@ type LoginUserInput struct {
 	Password string `json:"password" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
 }
-
