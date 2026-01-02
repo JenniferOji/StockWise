@@ -82,3 +82,27 @@ export const getUserStocks = async (userId: number) => {
         return null;
     }
 }
+export const updateStock = async (stockId: number, quantity: number) => {
+    try {
+        const response = await axios.put(endpoints.updateStock, {
+            stock_id: stockId,
+            quantity
+        });
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+}
+
+export const deleteStock = async (stockId: number) => {
+    try {
+        const response = await axios.delete(endpoints.deleteStock, {
+            params: { stock_id: stockId }
+        });
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+}

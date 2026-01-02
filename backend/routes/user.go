@@ -28,6 +28,48 @@ func GetUserStocks(ctx iris.Context) {
 	ctx.JSON(stocks)
 }
 
+func DeleteStock(ctx iris.Context) {
+	stockID := ctx.URLParam("stock_id")
+	if stockID == "" {
+		utils.CreateError(iris.StatusBadRequest, "Bad Request", "Stock ID is required", ctx)
+		return
+	}
+
+	result := storage.DB.Delete(&models.Stock{}, stockID)
+	if result.Error != nil {
+		utils.CreateInternalServerError(ctx)
+		return
+	}
+
+	ctx.JSON(iris.Map{"message": "Stock deleted successfully"})
+}
+
+func UpdateStock(ctx iris.Context) {
+	var updateInput UpdateStockInput
+	err := ctx.ReadJSON(&updateInput)
+	if err != nil {
+		utils.HandleValidationErrors(err, ctx)
+		return
+	}
+
+	var stock models.Stock
+	result := storage.DB.First(&stock, updateInput.StockID)
+	if result.Error != nil {
+		utils.CreateError(iris.StatusNotFound, "Not Found", "Stock not found", ctx)
+		return
+	}
+
+	stock.Quantity = updateInput.Quantity
+	storage.DB.Save(&stock)
+
+	ctx.JSON(iris.Map{
+		"ID":          stock.ID,
+		"Symbol":      stock.Symbol,
+		"CompanyName": stock.CompanyName,
+		"Quantity":    stock.Quantity,
+	})
+}
+
 func Register(ctx iris.Context) {
 	var userInput RegisterUserInput
 	err := ctx.ReadJSON(&userInput)
@@ -189,5 +231,10 @@ type AddStockInput struct {
 	UserID      uint    `json:"user_id" validate:"required"`
 	Symbol      string  `json:"symbol" validate:"required"`
 	CompanyName string  `json:"company_name" validate:"required"`
-	Quantity    float64 `json:"quantity" validate:"required,min=0"`
+	Quantity    float64 `json:"quantity" validate:"gte=0"`
+}
+
+type UpdateStockInput struct {
+	StockID  uint    `json:"stock_id" validate:"required"`
+	Quantity float64 `json:"quantity" validate:"gte=0"`
 }

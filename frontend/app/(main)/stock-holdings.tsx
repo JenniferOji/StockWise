@@ -6,7 +6,7 @@ import { NAV_HEIGHT } from '@/constants/layout';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import * as SecureStore from 'expo-secure-store';
-import { addStock, getUserStocks } from '../../services/user';
+import { addStock, getUserStocks, updateStock, deleteStock } from '../../services/user';
 
 export default function StockHoldings() {
   // query holds the current search text from the user 
@@ -21,44 +21,43 @@ export default function StockHoldings() {
   const [modalVisible, setModalVisible] = useState(false);
   // which stock is currently being edited in the modal
   const [selected, setSelected] = useState<typeof STOCKS[number] | null>(null);
+  // editing shares value
+  const [editShares, setEditShares] = useState('');
 
   // colour for the search bar icon 
   const iconColor = Colors.light.icon;
 
+  // function to load the users stocks from the backend  
+  const loadUserStocks = async () => {
+    // get user from secure store 
+    try {
+      let userJson = null;
+      try {
+        userJson = await SecureStore.getItemAsync('user');
+      } catch (secureStoreError) {
+        if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
+          userJson = (globalThis as any).localStorage.getItem('user');
+        }
+      }
+      // if we have user data, parse and use it to get the stocks
+      if (userJson) {
+        const user = JSON.parse(userJson);
+        const stocks = await getUserStocks(user.ID);
+        if (stocks && Array.isArray(stocks)) {
+          const displayedStocks = stocks.map((stock: any) => {
+            const foundStock = STOCKS.find(s => s.symbol === stock.symbol);
+            return foundStock ? { ...foundStock, shares: stock.quantity, dbId: stock.ID } : null;
+          }).filter(Boolean);
+          setDisplayed(displayedStocks as typeof STOCKS[number][]);
+        }
+      }
+    } catch (err) {
+      console.error('Error loading stocks:', err);
+    }
+  };
+
   // when the pasge loads it will get the users stocks from the backend and display it 
   useEffect(() => {
-    const loadUserStocks = async () => {
-      try {
-        let userJson = null;
-        try {
-          userJson = await SecureStore.getItemAsync('user');
-        } catch (secureStoreError) {
-          if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
-            userJson = (globalThis as any).localStorage.getItem('user');
-          }
-        }
-        console.log('User JSON:', userJson);
-        if (userJson) {
-          const user = JSON.parse(userJson);
-          const stocks = await getUserStocks(user.ID);
-          if (stocks && Array.isArray(stocks)) {
-            const displayedStocks = stocks.map((stock: any) => {
-              const foundStock = STOCKS.find(s => s.symbol === stock.symbol);
-              console.log(`Mapping ${stock.symbol}:`, foundStock ? 'Found' : 'Not found');
-              return foundStock ? { ...foundStock, shares: stock.quantity, dbId: stock.ID } : null;
-            }).filter(Boolean);
-            console.log('Displayed stocks:', displayedStocks);
-            setDisplayed(displayedStocks as typeof STOCKS[number][]);
-          } else {
-            console.log('No stocks or not an array');
-          }
-        } else {
-          console.log('No user found in storage');
-        }
-      } catch (err) {
-        console.error('Error loading stocks:', err);
-      }
-    };
     loadUserStocks();
   }, []);
   
@@ -88,7 +87,7 @@ export default function StockHoldings() {
           const user = JSON.parse(userJson);
           const result = await addStock(user.ID, item.symbol, item.companyName, item.shares);
           if (result) {
-            console.log('Stock saved:', result);
+            await loadUserStocks();
           }
         }
       } catch (err) {
@@ -121,8 +120,8 @@ export default function StockHoldings() {
           <View style={styles.searchDropdown}>
             <FlatList data={matches} keyExtractor={(i) => i.symbol} renderItem={({ item }) => (
               // tapping a search result will add that stock as a card to the page - stores it in the displayed list
-              <Pressable style={styles.dropdownItem} onPress={() => { 
-                setDisplayed(prev => [item, ...prev]); setQuery(''); setOpen(false); saveStock(item); Keyboard.dismiss();
+              <Pressable style={styles.dropdownItem} onPress={async () => { 
+                setQuery(''); setOpen(false); await saveStock(item); Keyboard.dismiss();
               }}>
            <Text style={styles.ddSymbol}>{item.symbol}</Text>
 
@@ -152,7 +151,7 @@ export default function StockHoldings() {
             <View style={styles.cardRight}>
               {/* shares and edit button on the right side of the card */}
               <Text style={styles.shares}>{item.shares} shares</Text>
-              <TouchableOpacity style={styles.editButton} onPress={() => { setSelected(item); setModalVisible(true); }}>
+              <TouchableOpacity style={styles.editButton} onPress={() => { setSelected(item); setEditShares(item.shares.toString()); setModalVisible(true); }}>
                 <Text style={styles.editText}>edit</Text>
               </TouchableOpacity>
             </View>
@@ -167,12 +166,40 @@ export default function StockHoldings() {
             {/* when exiting out of the pop up it goes from displaying the company name to edit */}
             {/* modal header shows which stock is being edited */}
             <Text style={styles.modalText}>{selected ? `${selected.symbol} - ${selected.companyName}` : 'Edit'}</Text>
+            
+            <View style={styles.modalInputContainer}>
+              <Text style={styles.modalLabel}>Number of Shares:</Text>
+              <TextInput
+                style={styles.modalInput}
+                value={editShares}
+                onChangeText={setEditShares}
+                keyboardType="numeric"
+                placeholder="Enter shares"
+              />
+            </View>
+
+            <Pressable
+              style={styles.modalSave}
+              onPress={async () => {
+                if (selected && (selected as any).dbId) {
+                  const shares = parseFloat(editShares) || 0;
+                  await updateStock((selected as any).dbId, shares);
+                  await loadUserStocks();
+                }
+                setModalVisible(false);
+                setSelected(null);
+              }}
+            >
+              <Text style={styles.modalSaveText}>Save Changes</Text>
+            </Pressable>
+
             {/* delete button removes the selected stock from the displayed list */}
             <Pressable
               style={styles.modalDelete}
-              onPress={() => {
-                if (selected) {
-                  setDisplayed(prev => prev.filter(d => d.symbol !== selected.symbol));
+              onPress={async () => {
+                if (selected && (selected as any).dbId) {
+                  await deleteStock((selected as any).dbId);
+                  await loadUserStocks();
                 }
                 setModalVisible(false);
                 setSelected(null);
@@ -218,8 +245,13 @@ const styles = StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
   modalCard: { width: '80%', backgroundColor: '#fff', padding: 20, borderRadius: 12, alignItems: 'center' },
   modalText: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
-  modalClose: { marginTop: 8, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#0b3d91' },
+  modalInputContainer: { width: '100%', marginBottom: 12 },
+  modalLabel: { fontSize: 14, fontWeight: '600', marginBottom: 6, color: '#333' },
+  modalInput: { width: '100%', borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10, fontSize: 16, color: '#333' },
+  modalSave: { width: '100%', marginTop: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#10b981', alignItems: 'center' },
+  modalSaveText: { color: '#fff', fontWeight: '700' },
+  modalClose: { width: '100%', marginTop: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#0b3d91', alignItems: 'center' },
   modalCloseText: { color: '#fff', fontWeight: '700' },
-  modalDelete: { marginTop: 8, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#ef4444' },
+  modalDelete: { width: '100%', marginTop: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#ef4444', alignItems: 'center' },
   modalDeleteText: { color: '#fff', fontWeight: '700' },
 });

@@ -11,4 +11,6 @@ export const endpoints = {
   login: userEndpoint + "/login",
   addStock: userEndpoint + "/stock",
   getStocks: userEndpoint + "/stocks",
+  updateStock: userEndpoint + "/stock",
+  deleteStock: userEndpoint + "/stock",
 };

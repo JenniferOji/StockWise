@@ -35,6 +35,8 @@ func main() {
 		user.Post("/login", routes.Login)
 		user.Post("/stock", routes.AddStock)
 		user.Get("/stocks", routes.GetUserStocks)
+		user.Put("/stock", routes.UpdateStock)
+		user.Delete("/stock", routes.DeleteStock)
 	}
 
 	app.Listen(":4000")
