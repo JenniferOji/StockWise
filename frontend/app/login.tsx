@@ -27,7 +27,7 @@ export default function LoginPage() {
         } catch (e) {
         }
         setLoading(false);
-        console.log('About to navigate to stock holdings...');
+        console.log('navigate to stock holdings');
         router.replace('/(main)/stock-holdings' as any);
         return;
       }

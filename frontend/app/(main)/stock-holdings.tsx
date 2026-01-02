@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Image, Text, StyleSheet, View, FlatList, TextInput, Pressable, Keyboard, Modal, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { STOCKS } from '../../constants/stocks';
@@ -6,7 +6,7 @@ import { NAV_HEIGHT } from '@/constants/layout';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import * as SecureStore from 'expo-secure-store';
-import { addStock } from '../../services/user';
+import { addStock, getUserStocks } from '../../services/user';
 
 export default function StockHoldings() {
   // query holds the current search text from the user 
@@ -24,6 +24,43 @@ export default function StockHoldings() {
 
   // colour for the search bar icon 
   const iconColor = Colors.light.icon;
+
+  // when the pasge loads it will get the users stocks from the backend and display it 
+  useEffect(() => {
+    const loadUserStocks = async () => {
+      try {
+        let userJson = null;
+        try {
+          userJson = await SecureStore.getItemAsync('user');
+        } catch (secureStoreError) {
+          if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
+            userJson = (globalThis as any).localStorage.getItem('user');
+          }
+        }
+        console.log('User JSON:', userJson);
+        if (userJson) {
+          const user = JSON.parse(userJson);
+          const stocks = await getUserStocks(user.ID);
+          if (stocks && Array.isArray(stocks)) {
+            const displayedStocks = stocks.map((stock: any) => {
+              const foundStock = STOCKS.find(s => s.symbol === stock.symbol);
+              console.log(`Mapping ${stock.symbol}:`, foundStock ? 'Found' : 'Not found');
+              return foundStock ? { ...foundStock, shares: stock.quantity, dbId: stock.ID } : null;
+            }).filter(Boolean);
+            console.log('Displayed stocks:', displayedStocks);
+            setDisplayed(displayedStocks as typeof STOCKS[number][]);
+          } else {
+            console.log('No stocks or not an array');
+          }
+        } else {
+          console.log('No user found in storage');
+        }
+      } catch (err) {
+        console.error('Error loading stocks:', err);
+      }
+    };
+    loadUserStocks();
+  }, []);
   
   // compute matches from the stock list excluding already added items
   const matches = useMemo(() => {
@@ -34,15 +71,19 @@ export default function StockHoldings() {
   }, [query, displayed]);
   // useMemo avoids recomputing the filtered list on every render unless query/displayed change
 
+  // saving a users stock to the backend
   const saveStock = async (item: typeof STOCKS[number]) => {
       try {
-        const getItem = (SecureStore as any).getItemAsync;
         let userJson = null;
-        if (typeof getItem === 'function') {
-          userJson = await getItem('user');
-        } else if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
-          userJson = (globalThis as any).localStorage.getItem('user');
+        // first try SecureStore
+        try {
+          userJson = await SecureStore.getItemAsync('user');
+        } catch (secureStoreError) {
+          if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
+            userJson = (globalThis as any).localStorage.getItem('user');
+          }
         }
+        // if we have user data, parse and use it to save the stock
         if (userJson) {
           const user = JSON.parse(userJson);
           const result = await addStock(user.ID, item.symbol, item.companyName, item.shares);
@@ -95,7 +136,7 @@ export default function StockHoldings() {
       {/* loops through the list of stocks in the displayed list and adds them as cards to the page */}
       <FlatList
         data={displayed}
-        keyExtractor={(item) => item.symbol}
+        keyExtractor={(item) => (item as any).dbId?.toString() || item.symbol}
         contentContainerStyle={styles.list}
         style={styles.listWrapper}
         renderItem={({ item }) => (

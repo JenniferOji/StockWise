@@ -7,7 +7,7 @@ type Users struct {
 	gorm.Model             // adds ID, CreatedAt, UpdatedAt, DeletedAt fields
 	Username       string  `json:"username"`
 	Password       string  `json:"password"`
-	Email          string  `json:"email"`
+	Email          string  `json:"email" gorm:"uniqueIndex"`
 	SocialLogin    bool    `json:"social_login"`
 	SocialProvider string  `json:"social_provider"`
 	Stocks         []Stock `gorm:"foreignKey:UserID" json:"stocks"`

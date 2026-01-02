@@ -68,12 +68,16 @@ export const addStock = async (userId: number, symbol: string, companyName: stri
 
 export const getUserStocks = async (userId: number) => {
     try {
+        console.log('Getting stocks for user ID:', userId);
+        console.log('Endpoint:', endpoints.getStocks);
         const response = await axios.get(endpoints.getStocks, {
             params: { user_id: userId }
         });
-        if (response.data) return response.data;
-        return null;
+        console.log('Response status:', response.status);
+        console.log('Response data:', response.data);
+        return response.data;
     } catch (error) {
+        console.error('getUserStocks error:', error);
         handleError(error);
         return null;
     }
