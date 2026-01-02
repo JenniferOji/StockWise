@@ -5,6 +5,8 @@ import { STOCKS } from '../../constants/stocks';
 import { NAV_HEIGHT } from '@/constants/layout';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
+import * as SecureStore from 'expo-secure-store';
+import { addStock } from '../../services/user';
 
 export default function StockHoldings() {
   // query holds the current search text from the user 
@@ -32,6 +34,27 @@ export default function StockHoldings() {
   }, [query, displayed]);
   // useMemo avoids recomputing the filtered list on every render unless query/displayed change
 
+  const saveStock = async (item: typeof STOCKS[number]) => {
+      try {
+        const getItem = (SecureStore as any).getItemAsync;
+        let userJson = null;
+        if (typeof getItem === 'function') {
+          userJson = await getItem('user');
+        } else if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
+          userJson = (globalThis as any).localStorage.getItem('user');
+        }
+        if (userJson) {
+          const user = JSON.parse(userJson);
+          const result = await addStock(user.ID, item.symbol, item.companyName, item.shares);
+          if (result) {
+            console.log('Stock saved:', result);
+          }
+        }
+      } catch (err) {
+        console.error('Error saving stock:', err);
+      }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* search input - typing shows matches below */}
@@ -57,7 +80,9 @@ export default function StockHoldings() {
           <View style={styles.searchDropdown}>
             <FlatList data={matches} keyExtractor={(i) => i.symbol} renderItem={({ item }) => (
               // tapping a search result will add that stock as a card to the page - stores it in the displayed list
-              <Pressable style={styles.dropdownItem} onPress={() => { setDisplayed(prev => [item, ...prev]); setQuery(''); setOpen(false);}}>
+              <Pressable style={styles.dropdownItem} onPress={() => { 
+                setDisplayed(prev => [item, ...prev]); setQuery(''); setOpen(false); saveStock(item); Keyboard.dismiss();
+              }}>
            <Text style={styles.ddSymbol}>{item.symbol}</Text>
 
               {/* show the company name under the symbol in the dropdown */}

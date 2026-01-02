@@ -11,6 +11,23 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func GetUserStocks(ctx iris.Context) {
+	userID := ctx.URLParam("user_id")
+	if userID == "" {
+		utils.CreateError(iris.StatusBadRequest, "Bad Request", "User ID is required", ctx)
+		return
+	}
+
+	var stocks []models.Stock
+	result := storage.DB.Where("user_id = ?", userID).Find(&stocks)
+	if result.Error != nil {
+		utils.CreateInternalServerError(ctx)
+		return
+	}
+
+	ctx.JSON(stocks)
+}
+
 func Register(ctx iris.Context) {
 	var userInput RegisterUserInput
 	err := ctx.ReadJSON(&userInput)
@@ -131,6 +148,32 @@ func hashAndSaltPassword(password string) (hashedPassword string, err error) {
 	return string(bytes), nil
 }
 
+// handles when the users adds a stock to their portfolio
+func AddStock(ctx iris.Context) {
+	var stockInput AddStockInput
+	err := ctx.ReadJSON(&stockInput)
+	if err != nil {
+		utils.HandleValidationErrors(err, ctx)
+		return
+	}
+
+	newStock := models.Stock{
+		UserID:      stockInput.UserID,
+		Symbol:      stockInput.Symbol,
+		CompanyName: stockInput.CompanyName,
+		Quantity:    stockInput.Quantity,
+	}
+
+	storage.DB.Create(&newStock)
+
+	ctx.JSON(iris.Map{
+		"ID":          newStock.ID,
+		"Symbol":      newStock.Symbol,
+		"CompanyName": newStock.CompanyName,
+		"Quantity":    newStock.Quantity,
+	})
+}
+
 type RegisterUserInput struct {
 	Username string `json:"username" validate:"required,min=3,max=256"`
 	Password string `json:"password" validate:"required,min=6,max=256"`
@@ -140,4 +183,11 @@ type RegisterUserInput struct {
 type LoginUserInput struct {
 	Password string `json:"password" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
+}
+
+type AddStockInput struct {
+	UserID      uint    `json:"user_id" validate:"required"`
+	Symbol      string  `json:"symbol" validate:"required"`
+	CompanyName string  `json:"company_name" validate:"required"`
+	Quantity    float64 `json:"quantity" validate:"required,min=0"`
 }

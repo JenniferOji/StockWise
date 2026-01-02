@@ -6,6 +6,9 @@ const user = "/user";
 const userEndpoint = serverUrl + user;
 
 export const endpoints = {
+  index: "/index",
   register: userEndpoint + "/register",
   login: userEndpoint + "/login",
+  addStock: userEndpoint + "/stock",
+  getStocks: userEndpoint + "/stocks",
 };

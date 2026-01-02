@@ -33,6 +33,8 @@ func main() {
 	{
 		user.Post("/register", routes.Register)
 		user.Post("/login", routes.Login)
+		user.Post("/stock", routes.AddStock)
+		user.Get("/stocks", routes.GetUserStocks)
 	}
 
 	app.Listen(":4000")

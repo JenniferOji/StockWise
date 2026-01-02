@@ -50,3 +50,31 @@ export const loginUser = async (email: string, password: string) => {
     }
 }
 
+export const addStock = async (userId: number, symbol: string, companyName: string, quantity: number) => {
+    try {
+        const response = await axios.post(endpoints.addStock, {
+            user_id: userId,
+            symbol,
+            company_name: companyName,
+            quantity
+        });
+        if (response.data) return response.data;
+        return null;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+}
+
+export const getUserStocks = async (userId: number) => {
+    try {
+        const response = await axios.get(endpoints.getStocks, {
+            params: { user_id: userId }
+        });
+        if (response.data) return response.data;
+        return null;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+}

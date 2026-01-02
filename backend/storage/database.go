@@ -3,7 +3,7 @@ package storage
 import (
 	"os"
 
-	"github.com/YourGitHubUser/StockWise/backend/schemas"
+	models "github.com/YourGitHubUser/StockWise/backend/schemas"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -35,6 +35,7 @@ func performMigrations(db *gorm.DB) {
 	// auto migrate the User model to create/update the users table
 	db.AutoMigrate(
 		&models.Users{},
+		&models.Stock{},
 	)
 }
 

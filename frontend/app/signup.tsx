@@ -42,14 +42,23 @@ export default function SignUpPage() {
     }
   };
 
+  
+  const handleBackToHome = () => {
+    router.push('/');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create an account</Text>
-      <TextInput placeholder="Name" value={username} onChangeText={setUsername} style={styles.input} />
-      <TextInput placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" style={styles.input} autoCapitalize="none" />
-      <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
+      <TextInput placeholder="Name" value={username} onChangeText={setUsername} style={styles.input} placeholderTextColor="#6B7280" />
+      <TextInput placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" style={styles.input} autoCapitalize="none" placeholderTextColor="#6B7280" />
+      <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} placeholderTextColor="#6B7280" />
       <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
         <Text style={styles.buttonText}>{loading ? 'Signing up...' : 'Sign up'}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity activeOpacity={0.85} style={styles.buttonHome} onPress={handleBackToHome}>
+        <Text style={styles.buttonText}>Back to Home</Text>
       </TouchableOpacity>
     </View>
   );
@@ -78,6 +87,13 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#0B3D91',
+    padding: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 8,
+  }, 
+  buttonHome: {
+    backgroundColor: '#669af5ff',
     padding: 14,
     borderRadius: 10,
     alignItems: 'center',
