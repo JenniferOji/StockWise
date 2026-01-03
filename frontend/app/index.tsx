@@ -125,7 +125,7 @@ export default function IntroPage() {
       paddingHorizontal: 28,
       minWidth: Math.min(320, width * 0.7),
       alignItems: 'center',
-      marginTop: 15,
+      marginTop: 10,
 
     },
     buttonText: {
