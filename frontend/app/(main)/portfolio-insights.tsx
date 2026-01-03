@@ -1,32 +1,113 @@
-import React from 'react'
+import React, { useEffect, useState, useMemo} from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { View, Text, StyleSheet, Dimensions } from 'react-native'
 import { PieChart } from 'react-native-chart-kit'
 import { INSIGHTS } from '../../constants/insights'
 import {NAV_HEIGHT} from '../../constants/layout'
+import { getUserStocks } from '../../services/user';
+import * as SecureStore from 'expo-secure-store';
+import { STOCKS } from '../../constants/stocks';
+
+type BackendStock = {
+	ID: number;
+	user_id: number;
+	symbol: string;
+	company_name: string;
+	quantity: number;
+	sector: string;
+};
 
 // https://www.npmjs.com/package/react-native-pie-chart
 export default function PortfolioInsights() {
+	const [stocks, setStocks] = useState<BackendStock[]>([]);
+	
+	// function to load the users stocks from the backend  
+	const loadUserStocks = async () => {
+		// get user from secure store 
+		try {
+		let userJson = null;
+		try {
+			userJson = await SecureStore.getItemAsync('user');
+		} catch (secureStoreError) {
+			if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
+			userJson = (globalThis as any).localStorage.getItem('user');
+			}
+		}
+		// if we have user data, parse and use it to get the stocks
+		if (userJson) {
+			const user = JSON.parse(userJson);
+			const loadedStocks = await getUserStocks(user.ID);
+			// validate loadedStocks is an array before setting state
+			if (loadedStocks && Array.isArray(loadedStocks)) {
+				setStocks(loadedStocks);
+			} else {
+				console.error('Invalid stocks data:', loadedStocks);
+				setStocks([]);
+			}
+		}
+		} catch (err) {
+			console.error('Error loading stocks:', err);
+		}
+	};
+
+	// when the page loads it will get the users stocks from the backend and display it 
+	useEffect(() => {
+		loadUserStocks();
+	}, []);
+
 	// total is the sum of allocation percentages and is shown in the header
-	const total = INSIGHTS.reduce((s, c) => s + c.allocation, 0) 
-	// items is a copy sorted so the largest slices render first in the order
-	const items = INSIGHTS.slice().sort((a, b) => b.allocation - a.allocation) 
+	const totalShares = useMemo(() => {
+		const total = stocks.reduce((sum, stock) => sum + (stock.quantity || 0), 0);
+		return total;
+	}, [stocks])
+	// sectorData groups shares by sector - acc is accumulator, stock is current item
+	const sectorData = useMemo(() => {
+		const data = stocks.reduce((acc, stock) => {
+			if (!acc[stock.sector]) {
+				acc[stock.sector] = 0
+			}
+			acc[stock.sector] += (stock.quantity || 0)
+			return acc
+		}, {} as Record<string, number>);
+		console.log('Sector data:', data);
+		return data;
+	}, [stocks])
+	// sectorAllocations maps sectorData to an array of objects with sector and allocation %
+	const sectorAllocations = useMemo(() => {
+		const allocations = Object.entries(sectorData).map(([sector, shares]) => ({
+			sector,
+			allocation: totalShares > 0 ? (shares / totalShares) * 100 : 0
+		}));
+		console.log('Sector allocations:', allocations);
+		return allocations;
+	}, [sectorData, totalShares])
+	const total = useMemo(() => sectorAllocations.reduce((s, c) => s + c.allocation, 0), [sectorAllocations])
 	// measure available width and subtract padding so the chart fits the card
 	const screenWidth = Dimensions.get('window').width - 32 
 	// maps the model (sorted list of items) to the piechart 
-	const chartData = items.map((item) => ({ name: item.sector, population: item.allocation, color: item.color || '#3b82f6', legendFontColor: '#444', legendFontSize: 12 })) // transform to PieChart data shape
+	const chartData = useMemo(() => {
+		const data = sectorAllocations.map((item) => {
+			const sectorColor = INSIGHTS.find(insight => insight.sector === item.sector)?.color || '#3b82f6'
+			return { name: item.sector, population: item.allocation, color: sectorColor, legendFontColor: '#444', legendFontSize: 12 }
+		});
+		return data;
+	}, [sectorAllocations])
 	// chartConfig controls gradients and label coloring
-	const chartConfig = { backgroundGradientFrom: '#ffffff', backgroundGradientTo: '#ffffff', color: (opacity = 1) => `rgba(59,130,246,${opacity})`, labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})` } 
+	const chartConfig = { backgroundGradientFrom: '#ffffff', backgroundGradientTo: '#ffffff', color: (opacity = 1) => `rgba(59,130,246,${opacity})`, labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})` }
 
 	return (
 		<SafeAreaView style={styles.container}>
 			<View style={styles.header}>
 				<Text style={styles.title}>Sector allocations</Text>
-				<Text style={styles.subtitle}>{`Total allocation: ${total}%`}</Text>
+				<Text style={styles.subtitle}>{`Total allocation: ${total.toFixed(1)}%`}</Text>
 			</View>
 			<View style={styles.chartWrap}>
 				<View style={[styles.chartCard, { width: screenWidth }] }>
-					<PieChart data={chartData} width={screenWidth - 24} height={220} chartConfig={chartConfig} accessor={'population'} backgroundColor={'transparent'} paddingLeft={'15'} absolute />
+					{stocks.length > 0 && chartData.length > 0 ? (
+						<PieChart data={chartData} width={screenWidth - 24} height={220} chartConfig={chartConfig} accessor={'population'} backgroundColor={'transparent'} paddingLeft={'15'} />
+					) : (
+						<Text style={{ padding: 20, color: '#666' }}>No stock data available</Text>
+					)}
 				</View>
 			</View>
 		</SafeAreaView>

@@ -67,6 +67,7 @@ func UpdateStock(ctx iris.Context) {
 		"Symbol":      stock.Symbol,
 		"CompanyName": stock.CompanyName,
 		"Quantity":    stock.Quantity,
+		"Sector":	   stock.Sector,
 	})
 }
 
@@ -204,6 +205,7 @@ func AddStock(ctx iris.Context) {
 		Symbol:      stockInput.Symbol,
 		CompanyName: stockInput.CompanyName,
 		Quantity:    stockInput.Quantity,
+		Sector: 	 stockInput.Sector,
 	}
 
 	storage.DB.Create(&newStock)
@@ -213,6 +215,7 @@ func AddStock(ctx iris.Context) {
 		"Symbol":      newStock.Symbol,
 		"CompanyName": newStock.CompanyName,
 		"Quantity":    newStock.Quantity,
+		"Sector": 	   newStock.Sector,
 	})
 }
 
@@ -232,6 +235,7 @@ type AddStockInput struct {
 	Symbol      string  `json:"symbol" validate:"required"`
 	CompanyName string  `json:"company_name" validate:"required"`
 	Quantity    float64 `json:"quantity" validate:"gte=0"`
+	Sector      string  `json:"sector" validate:"required"`
 }
 
 type UpdateStockInput struct {

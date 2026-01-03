@@ -19,4 +19,5 @@ type Stock struct {
 	Symbol      string  `json:"symbol"`
 	CompanyName string  `json:"company_name"`
 	Quantity    float64 `json:"quantity"`
+	Sector      string  `json:"sector"`
 }

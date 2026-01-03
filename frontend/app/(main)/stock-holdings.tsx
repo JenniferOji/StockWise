@@ -85,7 +85,7 @@ export default function StockHoldings() {
         // if we have user data, parse and use it to save the stock
         if (userJson) {
           const user = JSON.parse(userJson);
-          const result = await addStock(user.ID, item.symbol, item.companyName, item.shares);
+          const result = await addStock(user.ID, item.symbol, item.companyName, item.shares, item.sector);
           if (result) {
             await loadUserStocks();
           }
@@ -121,7 +121,8 @@ export default function StockHoldings() {
             <FlatList data={matches} keyExtractor={(i) => i.symbol} renderItem={({ item }) => (
               // tapping a search result will add that stock as a card to the page - stores it in the displayed list
               <Pressable style={styles.dropdownItem} onPress={async () => { 
-                setQuery(''); setOpen(false); await saveStock(item); Keyboard.dismiss();
+                setQuery(''); setOpen(false); 
+                await saveStock(item); Keyboard.dismiss();
               }}>
            <Text style={styles.ddSymbol}>{item.symbol}</Text>
 

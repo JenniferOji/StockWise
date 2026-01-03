@@ -50,13 +50,14 @@ export const loginUser = async (email: string, password: string) => {
     }
 }
 
-export const addStock = async (userId: number, symbol: string, companyName: string, quantity: number) => {
+export const addStock = async (userId: number, symbol: string, companyName: string, quantity: number, sector: string) => {
     try {
         const response = await axios.post(endpoints.addStock, {
             user_id: userId,
             symbol,
             company_name: companyName,
-            quantity
+            quantity,
+            sector
         });
         if (response.data) return response.data;
         return null;
