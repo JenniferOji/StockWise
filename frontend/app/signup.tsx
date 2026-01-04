@@ -58,7 +58,7 @@ export default function SignUpPage() {
       <TextInput placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" style={styles.input} autoCapitalize="none" placeholderTextColor="#6B7280" />
       <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} placeholderTextColor="#6B7280" />
       
-      {/* Displays the box to select risk tolerance */}
+      {/* sisplays the box to select risk tolerance */}
       <TouchableOpacity 
         // when clicked it opens the modal which shows the options
         style={styles.dropdown} 
@@ -70,7 +70,7 @@ export default function SignUpPage() {
         <Text style={styles.dropdownArrow}>▼</Text>
       </TouchableOpacity>
 
-      {/* The modal which shows the risk options */}
+      {/* the modal which shows the risk options */}
       <Modal
         visible={showRiskDropdown}
         transparent={true}
@@ -82,7 +82,7 @@ export default function SignUpPage() {
           activeOpacity={1}
           onPress={() => setShowRiskDropdown(false)}
         >
-          {/* Displaying the dropdown thats shown when clicked */}
+          {/* displaying the dropdown thats shown when clicked */}
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Risk Tolerance</Text>
             {riskOptions.map((option) => (
@@ -94,7 +94,15 @@ export default function SignUpPage() {
                   setShowRiskDropdown(false);
                 }}
               >
-                <Text style={styles.optionText}>{option}</Text>
+                <View>
+                  <Text style={styles.optionText}>{option}</Text>
+                  {/* showing a description for each risk level */}
+                  <Text style={styles.optionDescription}>
+                    {option === 'Low' && 'Conservative - Minimal risk, stable returns'}
+                    {option === 'Medium' && 'Balanced - Moderate risk and returns'}
+                    {option === 'High' && 'Aggressive - Higher risk, higher potential returns'}
+                  </Text>
+                </View>                
                 {risk === option && <Text style={styles.checkmark}>✓</Text>}
               </TouchableOpacity>
             ))}
@@ -104,7 +112,7 @@ export default function SignUpPage() {
 
       <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
         <Text style={styles.buttonText}>{loading ? 'Signing up...' : 'Sign up'}</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> 
 
       <TouchableOpacity activeOpacity={0.85} style={styles.buttonHome} onPress={handleBackToHome}>
         <Text style={styles.buttonText}>Back to Home</Text>
@@ -206,6 +214,10 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 16,
     color: '#333',
+  },
+    optionDescription: {
+    fontSize: 13,
+    color: '#6B7280',
   },
   checkmark: {
     fontSize: 18,

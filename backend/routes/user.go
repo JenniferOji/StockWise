@@ -168,6 +168,7 @@ func Login(ctx iris.Context) {
 		"ID":       existingUser.ID,
 		"Username": existingUser.Username,
 		"Email":    existingUser.Email,
+		"Risk":     existingUser.Risk,
 	})
 }
 

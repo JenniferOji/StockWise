@@ -42,6 +42,8 @@ export default function SettingsPage() {
       // if we found user data, parse it and set the risk and id
       if (userStr) {
         const user: User = JSON.parse(userStr);
+        console.log('Loaded user data from storage:', user);
+        console.log('User Risk field:', user.Risk);
         setCurrentRisk(user.Risk || 'Medium');
         setUserId(user.ID);
       }
@@ -55,10 +57,12 @@ export default function SettingsPage() {
     setLoading(true);
     try {
       // send the new risk value to the backend to update the database
+      console.log('Sending update request with:', { user_id: userId, risk: newRisk });
       const response = await axios.put(`${endpoints.updateRisk}`, {
-        user_id: userId,
+        user_id: parseInt(userId),
         risk: newRisk
       });
+      console.log('Update response:', response.data);
 
       if (response.data) {
         // update the risk in local storage so it persists
@@ -91,6 +95,11 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error('Error updating risk:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Response status:', error.response?.status);
+        console.error('Response data:', error.response?.data);
+        console.error('Request config:', error.config?.url);
+      }
       Alert.alert('Error', 'Failed to update risk tolerance. Please try again.');
     } finally {
       setLoading(false);
@@ -149,7 +158,7 @@ export default function SettingsPage() {
               >
                 <View>
                   <Text style={styles.optionText}>{option}</Text>
-                  {/* show a description for each risk level */}
+                  {/* showing a description for each risk level */}
                   <Text style={styles.optionDescription}>
                     {option === 'Low' && 'Conservative - Minimal risk, stable returns'}
                     {option === 'Medium' && 'Balanced - Moderate risk and returns'}
