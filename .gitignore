@@ -1,5 +1,8 @@
 node_modules
 ml/.env
-ml/training_data/djia_news.csv
-ml/training_data/djia_price_table.csv
 backend/.env
+ml/training_data
+catboost_info
+ml/progress
+.expo
+frontend/.expo
