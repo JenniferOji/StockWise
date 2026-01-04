@@ -1,12 +1,19 @@
 package routes
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
 	"strings"
+	"time"
 
 	models "github.com/YourGitHubUser/StockWise/backend/schemas"
 	"github.com/YourGitHubUser/StockWise/backend/storage"
 	"github.com/YourGitHubUser/StockWise/backend/utils"
+	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -67,7 +74,7 @@ func UpdateStock(ctx iris.Context) {
 		"Symbol":      stock.Symbol,
 		"CompanyName": stock.CompanyName,
 		"Quantity":    stock.Quantity,
-		"Sector":	   stock.Sector,
+		"Sector":      stock.Sector,
 	})
 }
 
@@ -107,6 +114,7 @@ func Register(ctx iris.Context) {
 		Username:    userInput.Username,
 		Password:    hashedPassword,
 		Email:       userInput.Email,
+		Risk:        userInput.Risk,
 		SocialLogin: false,
 	}
 
@@ -116,6 +124,7 @@ func Register(ctx iris.Context) {
 		"ID":       newUser.ID,
 		"Username": newUser.Username,
 		"Email":    newUser.Email,
+		"Risk":     newUser.Risk,
 	})
 }
 
@@ -205,7 +214,7 @@ func AddStock(ctx iris.Context) {
 		Symbol:      stockInput.Symbol,
 		CompanyName: stockInput.CompanyName,
 		Quantity:    stockInput.Quantity,
-		Sector: 	 stockInput.Sector,
+		Sector:      stockInput.Sector,
 	}
 
 	storage.DB.Create(&newStock)
@@ -215,14 +224,135 @@ func AddStock(ctx iris.Context) {
 		"Symbol":      newStock.Symbol,
 		"CompanyName": newStock.CompanyName,
 		"Quantity":    newStock.Quantity,
-		"Sector": 	   newStock.Sector,
+		"Sector":      newStock.Sector,
 	})
+}
+
+// handles when the user updates their risk profile
+func UpdateRisk(ctx iris.Context) {
+	var riskInput UpdateRiskInput
+	err := ctx.ReadJSON(&riskInput)
+	if err != nil {
+		utils.HandleValidationErrors(err, ctx)
+		return
+	}
+
+	var user models.Users
+	result := storage.DB.First(&user, riskInput.UserID)
+	if result.Error != nil {
+		utils.CreateError(iris.StatusNotFound, "Not Found", "User not found", ctx)
+		return
+	}
+
+	user.Risk = riskInput.Risk
+	storage.DB.Save(&user)
+
+	ctx.JSON(iris.Map{
+		"ID":       user.ID,
+		"Username": user.Username,
+		"Email":    user.Email,
+		"Risk":     user.Risk,
+	})
+}
+
+// resource: https://www.youtube.com/watch?v=U6Q1iwaNrKI
+func GetNews(ctx iris.Context) {
+	// load the .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file:", err)
+	}
+	// get the API key from environment variable
+	api_key := os.Getenv("NEWS_API_KEY")
+
+	// get user id from url param
+	userID := ctx.URLParam("user_id")
+	if userID == "" {
+		utils.CreateError(iris.StatusBadRequest, "Bad Request", "User ID is required", ctx)
+		return
+	}
+
+	// fetch user stocks from database
+	var stocks []models.Stock
+	result := storage.DB.Where("user_id = ?", userID).Find(&stocks)
+	if result.Error != nil {
+		utils.CreateInternalServerError(ctx)
+		return
+	}
+
+	// build a list of keywords from the users stocks (company names and symbols)
+	keywords := []string{}
+	for _, stock := range stocks {
+		if stock.CompanyName != "" {
+			keywords = append(keywords, stock.CompanyName)
+		}
+		if stock.Symbol != "" {
+			keywords = append(keywords, stock.Symbol)
+		}
+	}
+
+	if len(keywords) == 0 {
+		ctx.StatusCode(http.StatusBadRequest)
+		ctx.JSON(iris.Map{"error": "No keywords found from user stocks"})
+		return
+	}
+
+	// concatenate keywords and setting the timeframe
+	query := strings.Join(keywords, " OR ")
+	fromDate := time.Now().AddDate(0, 0, -7).Format("2006-01-02") // past 7 days
+	toDate := time.Now().Format("2006-01-02")                     // today
+
+	// make the http get request to get the news
+	requestURL := fmt.Sprintf("https://newsapi.org/v2/everything?q=%s&from=%s&to=%s&apiKey=%s", query, fromDate, toDate, api_key)
+	resp, err := http.Get(requestURL)
+	if err != nil {
+		ctx.StatusCode(http.StatusInternalServerError)
+		ctx.JSON(iris.Map{"error": "Error making HTTP request to NewsAPI"})
+		return
+	}
+
+	// this happenss after making the request
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal("Error reading response body:", err)
+	}
+
+	fmt.Println(string(body))
+
+	// slice of articles and each article has a title and description...
+	var NewsData struct {
+		Articles []struct {
+			Title       string
+			Description string
+			Url         string
+			PublishedAt string
+		}
+	}
+
+	// unmarshelling means converting json data to go struct
+	err = json.Unmarshal(body, &NewsData)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// for i, article := range NewsData.Articles {
+	// 	if i > 5 {
+	// 		break
+	// 	}
+	// 	fmt.Println(article.Title)
+	// 	fmt.Println(article.Description)
+	// 	fmt.Println(article.Url)
+	// 	fmt.Println(article.PublishedAt)
+	// 	fmt.Println("--------------------------------")
 }
 
 type RegisterUserInput struct {
 	Username string `json:"username" validate:"required,min=3,max=256"`
 	Password string `json:"password" validate:"required,min=6,max=256"`
 	Email    string `json:"email" validate:"required,email"`
+	Risk     string `json:"risk" validate:"required"`
 }
 
 type LoginUserInput struct {
@@ -241,4 +371,16 @@ type AddStockInput struct {
 type UpdateStockInput struct {
 	StockID  uint    `json:"stock_id" validate:"required"`
 	Quantity float64 `json:"quantity" validate:"gte=0"`
+}
+
+type UpdateRiskInput struct {
+	UserID uint   `json:"user_id" validate:"required"`
+	Risk   string `json:"risk" validate:"required"`
+}
+
+type NewsItem struct {
+	CompanyName string `json:"companyName"`
+	Headline    string `json:"headline"`
+	ImageUrl    string `json:"imageUrl"`
+	Date        string `json:"date"`
 }

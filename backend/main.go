@@ -37,6 +37,8 @@ func main() {
 		user.Get("/stocks", routes.GetUserStocks)
 		user.Put("/stock", routes.UpdateStock)
 		user.Delete("/stock", routes.DeleteStock)
+		user.Put("/risk", routes.UpdateRisk)
+		user.Get("/news", routes.GetNews)
 	}
 
 	app.Listen(":4000")
@@ -47,5 +49,4 @@ func CheckError(err error) {
 	if err != nil {
 		panic(err)
 	}
-
 }

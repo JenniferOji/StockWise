@@ -25,6 +25,8 @@ const MAPPING = {
   'magnifyingglass': 'search',
   'magnifyingglass.circle.fill': 'search',
   'menubar.rectangle': 'menu',
+  'gearshape.fill': 'settings',
+  'chart.bar': 'insert-chart',
 } as IconMapping;
 
 /**

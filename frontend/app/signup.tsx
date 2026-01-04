@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Modal, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { User } from '../types/user';
@@ -10,12 +10,16 @@ export default function SignUpPage() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [risk, setRisk] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showRiskDropdown, setShowRiskDropdown] = useState(false);
+
+  const riskOptions = ['Low', 'Medium', 'High'];
 
   const handleSignUp = async () => {
     setLoading(true);
     try {
-      const created = await registerUser(username, email, password);
+      const created = await registerUser(username, email, password, risk);
       console.log('Registration result:', created);
       if (created) {
         try {
@@ -53,6 +57,51 @@ export default function SignUpPage() {
       <TextInput placeholder="Name" value={username} onChangeText={setUsername} style={styles.input} placeholderTextColor="#6B7280" />
       <TextInput placeholder="Email" value={email} onChangeText={setEmail} keyboardType="email-address" style={styles.input} autoCapitalize="none" placeholderTextColor="#6B7280" />
       <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} placeholderTextColor="#6B7280" />
+      
+      {/* Displays the box to select risk tolerance */}
+      <TouchableOpacity 
+        // when clicked it opens the modal which shows the options
+        style={styles.dropdown} 
+        onPress={() => setShowRiskDropdown(true)}
+      >
+        <Text style={risk ? styles.dropdownText : styles.dropdownPlaceholder}>
+          {risk || 'Select Risk Tolerance'}
+        </Text>
+        <Text style={styles.dropdownArrow}>▼</Text>
+      </TouchableOpacity>
+
+      {/* The modal which shows the risk options */}
+      <Modal
+        visible={showRiskDropdown}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowRiskDropdown(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowRiskDropdown(false)}
+        >
+          {/* Displaying the dropdown thats shown when clicked */}
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Risk Tolerance</Text>
+            {riskOptions.map((option) => (
+              <TouchableOpacity
+                key={option}
+                style={styles.optionButton}
+                onPress={() => {
+                  setRisk(option);
+                  setShowRiskDropdown(false);
+                }}
+              >
+                <Text style={styles.optionText}>{option}</Text>
+                {risk === option && <Text style={styles.checkmark}>✓</Text>}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       <TouchableOpacity style={styles.button} onPress={handleSignUp} disabled={loading}>
         <Text style={styles.buttonText}>{loading ? 'Signing up...' : 'Sign up'}</Text>
       </TouchableOpacity>
@@ -101,6 +150,66 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
+    fontWeight: '700',
+  },
+  dropdown: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  dropdownText: {
+    color: '#333',
+    fontSize: 16,
+  },
+  dropdownPlaceholder: {
+    color: '#6B7280',
+    fontSize: 16,
+  },
+  dropdownArrow: {
+    color: '#6B7280',
+    fontSize: 12,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    width: '80%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 16,
+    textAlign: 'center',
+    color: '#333',
+  },
+  optionButton: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  optionText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  checkmark: {
+    fontSize: 18,
+    color: '#0B3D91',
     fontWeight: '700',
   },
 });

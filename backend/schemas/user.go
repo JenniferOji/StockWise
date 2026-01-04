@@ -8,6 +8,7 @@ type Users struct {
 	Username       string  `json:"username"`
 	Password       string  `json:"password"`
 	Email          string  `json:"email" gorm:"uniqueIndex"`
+	Risk           string  `json:"risk"`
 	SocialLogin    bool    `json:"social_login"`
 	SocialProvider string  `json:"social_provider"`
 	Stocks         []Stock `gorm:"foreignKey:UserID" json:"stocks"`

@@ -17,8 +17,19 @@ export default function DrawerContent(props: DrawerContentComponentProps) {
     router.replace('/');
   };
 
+  const handleSettings = () => {
+    navigation.closeDrawer();
+    router.push('/(main)/settings' as any);
+  };
+
+
   return (
     <View style={[styles.container, { backgroundColor: Colors[scheme ?? 'light'].background }]}>
+      <Pressable style={styles.item} onPress={handleSettings} accessibilityRole="button" accessibilityLabel="Settings">
+        <IconSymbol name="gearshape.fill" size={20} color={tint} />
+        <Text style={[styles.label, { color: tint }]}>Settings</Text>
+      </Pressable>
+      
       <Pressable style={styles.item} onPress={handleLogout} accessibilityRole="button" accessibilityLabel="Log out">
         <IconSymbol name="arrow.right.square" size={20} color={tint} />
         <Text style={[styles.label, { color: tint }]}>Logout</Text>

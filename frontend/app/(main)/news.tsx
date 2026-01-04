@@ -1,8 +1,10 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NEWS } from '@/constants/news';
 import { NAV_HEIGHT } from '@/constants/layout';
+import * as SecureStore from 'expo-secure-store';
+import { getNews } from '../../services/user';
 
 export default function News() {
   // function to convert a sentiment value into a label and colour
@@ -12,6 +14,38 @@ export default function News() {
     else return { label: 'Neutral', color: '#f39c12' };
   };
 
+    // const [news, setNews] = useState<typeof NEW[number][]>([]);
+  
+  // function to load the users stocks from the backend  
+  const loadUserStocks = async () => {
+    // get user from secure store 
+    try {
+      let userJson = null;
+      try {
+        userJson = await SecureStore.getItemAsync('user');
+      } catch (secureStoreError) {
+        if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
+          userJson = (globalThis as any).localStorage.getItem('user');
+        }
+      }
+      // if we have user data, parse and use it to get the stocks
+      if (userJson) {
+        const user = JSON.parse(userJson);
+        const news = await getNews(user.ID);
+        // if (stocks && Array.isArray(stocks)) {
+        //   setNews(news as typeof NEWS[number][]);
+        // }
+      }
+    } catch (err) {
+      console.error('Error loading stocks:', err);
+    }
+  };
+
+  // when the pasge loads it will get the users stocks from the backend and display it 
+  useEffect(() => {
+    loadUserStocks();
+  }, []);
+  
   return (
     // SafeAreaView keeps content out of status bar areas on devices 
     <SafeAreaView style={styles.container}>
@@ -34,11 +68,11 @@ export default function News() {
               <View style={styles.metaRow}>
                 <Text style={styles.date}>{item.date}</Text>
                 {/* sentiment label and corresponding colour based on score */}
-                {(() => {
+                {/* {(() => {
                   // get the sentiment label and colour
                   const { label, color } = getSentiment(item.sentiment);
                   return <Text style={[styles.sentiment, { color }]}>{label}</Text>;
-                })()}
+                })()} */}
               </View>
             </View>
           </View>

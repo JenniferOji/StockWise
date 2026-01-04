@@ -1,9 +1,5 @@
-# https://medium.com/@lei.xiaofan/quick-start-building-sentiment-analysis-models-8c1e78c30b2c
-import pandas as pd
-import os
 from pathlib import Path
 from sklearn.model_selection import train_test_split
-import re
 from autocorrect import Speller
 spell = Speller(lang='en')
 import nltk
@@ -17,11 +13,14 @@ from sklearn.pipeline import make_pipeline
 from catboost import CatBoostClassifier
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
-
+import re
+import pandas as pd
+import os
 import numpy as np
-
+import requests
 import nltk
 
+# https://medium.com/@lei.xiaofan/quick-start-building-sentiment-analysis-models-8c1e78c30b2c
 # Download tokenizers and lemmatization dataset
 nltk.download('punkt')
 nltk.download('wordnet')
@@ -214,8 +213,11 @@ def predict_texts_batch(texts):
 result = predict_text_single("Stocks are looking good today!")
 print(result)
 
-result2 = predict_text_single("i hate mondays they always make me feel horrible!")
+result2 = predict_text_single("I hate mondays they always make me feel horrible")
 print(result2)
+
+result3 = predict_text_single("The sky is blue")
+print(result3)
 
 print("CatBoost classes order:", list(cat_classifier.classes_))
 
