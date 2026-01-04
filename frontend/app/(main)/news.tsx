@@ -68,11 +68,11 @@ export default function News() {
               <View style={styles.metaRow}>
                 <Text style={styles.date}>{item.date}</Text>
                 {/* sentiment label and corresponding colour based on score */}
-                {/* {(() => {
+                {(() => {
                   // get the sentiment label and colour
                   const { label, color } = getSentiment(item.sentiment);
                   return <Text style={[styles.sentiment, { color }]}>{label}</Text>;
-                })()} */}
+                })()}
               </View>
             </View>
           </View>
