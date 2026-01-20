@@ -6,3 +6,4 @@ catboost_info
 ml/progress
 .expo
 frontend/.expo
+frontend/.vscode

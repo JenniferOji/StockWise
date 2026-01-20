@@ -55,7 +55,7 @@ export default function PortfolioInsights() {
 	// when the page comes into focus it will reload the stocks
 	// resource: https://reactnavigation.org/docs/use-focus-effect/
 	useFocusEffect(
-		// useCallback to avoid re-creating the function on every render
+		// useCallback avoids recreating the function on every render
 		useCallback(() => {
 			loadUserStocks();
 		}, [])

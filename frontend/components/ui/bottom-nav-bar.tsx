@@ -24,6 +24,10 @@ export default function BottomNavBar() {
         <IconSymbol name="chart.bar.fill" size={22} color={tint} />
         <Text style={[styles.label, { color: tint }]}>Insights</Text>
       </Pressable>
+            <Pressable style={styles.tab} onPress={() => router.push('../../(main)/insights' as any)}>
+        <IconSymbol name="chart.bar.fill" size={22} color={tint} />
+        <Text style={[styles.label, { color: tint }]}>Other</Text>
+      </Pressable>
     </View>
   );
 }

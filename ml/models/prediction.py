@@ -123,7 +123,7 @@ model = LinearDiscriminantAnalysis().fit(x_train, y_train)
 # show the model predictions and a simple aggregated confidence metric
 predictions = model.predict(x_test)
 
-# Try to get class probabilities if the model supports it, otherwise fall back to proportion of predicted labels
+# tries to get class probabilities if the model supports it, otherwise fall back to proportion of predicted labels
 import numpy as _np
 try:
     probs = model.predict_proba(x_test)
@@ -132,7 +132,6 @@ try:
     pred_label = int(_np.argmax(avg_prob))
     confidence = float(avg_prob[pred_label])
 except Exception:
-    # fallback: use fraction of predictions equal to the modal predicted label
     pred_label = int(_np.round(predictions.mean()))  # 1 if majority are 1 else 0
     confidence = float((predictions == pred_label).mean())
 
@@ -143,12 +142,11 @@ ts = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M GMT')
 model_version = 'v1'
 print(f'"Prediction: {label_str} ({pct}% probability) — Model {model_version}, generated {ts}"')
 
-# also show raw predictions and a quick distribution for inspection
+# shows raw predictions and a quick distribution for inspection
 print('\nPrediction distribution (counts):')
 unique, counts = _np.unique(predictions, return_counts=True)
 print(dict(zip(unique.astype(int).tolist(), counts.tolist())))
 
-# add per row predictions to the dataset df using the trained model
 # this cell appends Prediction (0/1) and Prediction probability
 features = df[features_columns]
 full_X = features.to_numpy()
@@ -163,7 +161,7 @@ except Exception:
     full_conf = None
 
 # attach predictions to df
-# keep numeric 0/1 for later use
+# keep numeric 0/1 
 df['Prediction'] = full_pred
 if full_conf is not None:
     df['Prediction_Prob'] = full_conf

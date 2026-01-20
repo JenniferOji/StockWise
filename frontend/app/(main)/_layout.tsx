@@ -12,6 +12,7 @@ import DrawerContent from '@/components/ui/drawer';
 import StockHoldings from './stock-holdings';
 import News from './news';
 import PortfolioInsights from './portfolio-insights';
+import Insights from './insights';
 import Settings from './settings';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -31,6 +32,7 @@ export default function RootLayout() {
             <Drawer.Screen name="stock-holdings" component={StockHoldings} />
             <Drawer.Screen name="news" component={News} />
             <Drawer.Screen name="portfolio-insights" component={PortfolioInsights} />
+            <Drawer.Screen name="insights" component={Insights} />
             <Drawer.Screen name="settings" component={Settings} />
           </Drawer.Navigator>
           <BottomNavBar />
