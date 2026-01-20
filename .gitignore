@@ -7,3 +7,4 @@ ml/progress
 .expo
 frontend/.expo
 frontend/.vscode
+micro-services/__pycache__
