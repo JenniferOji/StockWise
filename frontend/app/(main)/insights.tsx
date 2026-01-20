@@ -1,51 +1,39 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, FlatList, StyleSheet, LayoutAnimation, ScrollView} from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet, LayoutAnimation, ScrollView} from "react-native";
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NAV_HEIGHT } from '@/constants/layout';
+import PortfolioInsightsWidget from '@/components/PortfolioInsightsWidget';
 
-// https://sanjanahumanintech.medium.com/accordion-in-react-native-95586a738aee
-
-// dummy data
+// accordion tutorial i used: https://sanjanahumanintech.medium.com/accordion-in-react-native-95586a738aee
+// list of all the sections that will show up on the insights page
 const menu = [
   { 
-    title: "Sizzler",
-    data: [
-      {key: "Paneer Sizzler", value: false}, 
-      {key: "Italian Sizzler", value: false}
-    ]
+    title: "Risk Metrics",
+    isWidget: false  
   },
   { 
-    title: "Pizza",
-    data: [
-      {key: "FarmHarvest Pizza", value: false}, 
-      {key: "Veg Extravegneza", value: false}
-    ]
+    title: "Performance Analysis",
+    isWidget: false  
   }, 
   { 
-    title: "Garlic Bread",
-    data: [
-      {key: "Herbs Garlic Bread", value: false}, 
-      {key: "Extra cheese Garlic Bread", value: false}
-    ]
+    title: "Stock Allocation",
+    isWidget: true  
   },
 ];
 
+// props for each accordion section
 interface AccordianProps {
     title: string;
-    data: Array<{key: string; value: boolean}>;
+    isWidget?: boolean;
 }
 
-function Accordian({ title, data: initialData }: AccordianProps) {
-    const [data, setData] = useState(initialData);
+// accordion component - the collapsible sections you click on
+function Accordian({ title, isWidget = false }: AccordianProps) {
+    // tracks if this section is expanded or collapsed
     const [expanded, setExpanded] = useState(false);
 
-    const onClick = (index: number) => {
-        const temp = data.slice();
-        temp[index].value = !temp[index].value;
-        setData(temp);
-    };
-
+    // toggles the accordion to open or closed with a smooth animation
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setExpanded(!expanded);
@@ -53,38 +41,16 @@ function Accordian({ title, data: initialData }: AccordianProps) {
 
     return (
         <View style={styles.accordionContainer}>
+            {/* the header bar you click to expand/collapse */}
             <TouchableOpacity style={styles.row} onPress={toggleExpand}>
                 <Text style={styles.title}>{title}</Text>
+                {/* arrow icon that flips when expanded */}
                 <Icon name={expanded ? 'keyboard-arrow-up' : 'keyboard-arrow-down'} size={24} color={'#666'} />
             </TouchableOpacity>
             <View style={styles.parentHr}/>
+            {/* only show the widget if its expanded and isWidget is true */}
             {
-                expanded &&
-                <View>
-                    <FlatList
-                        data={data}
-                        numColumns={1}
-                        scrollEnabled={false}
-                        renderItem={({item, index}) => 
-                            <View key={index}>
-                                <TouchableOpacity 
-                                    style={styles.childRow} 
-                                    onPress={() => onClick(index)}
-                                >
-                                    <Text style={item.value ? styles.itemTextActive : styles.itemText}>
-                                        {item.key}
-                                    </Text>
-                                    <Icon 
-                                        name={item.value ? 'check-circle' : 'radio-button-unchecked'} 
-                                        size={22} 
-                                        color={item.value ? '#3b82f6' : '#d1d5db'} 
-                                    />
-                                </TouchableOpacity>
-                                {index < data.length - 1 && <View style={styles.childHr}/>}
-                            </View>
-                        }
-                    />
-                </View>
+                expanded && isWidget && <PortfolioInsightsWidget />
             }
         </View>
     );
@@ -156,16 +122,17 @@ const styles = StyleSheet.create({
     },
 });
 
-// Main component that uses the Accordian
+// main insights screen component
 export default function InsightsScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
+                {/* map through menu array to create accordion sections */}
                 {menu.map((section, index) => (
                     <Accordian 
                         key={index}
                         title={section.title} 
-                        data={section.data} 
+                        isWidget={section.isWidget}
                     />
                 ))}
             </ScrollView>

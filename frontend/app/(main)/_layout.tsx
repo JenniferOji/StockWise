@@ -31,7 +31,7 @@ export default function RootLayout() {
           <Drawer.Navigator drawerContent={(props) => <DrawerContent {...props} />} screenOptions={{ header: ({ navigation }: { navigation?: any }) => React.createElement(TopNavBar as any, { navigation }), headerShown: true }}>
             <Drawer.Screen name="stock-holdings" component={StockHoldings} />
             <Drawer.Screen name="news" component={News} />
-            <Drawer.Screen name="portfolio-insights" component={PortfolioInsights} />
+            {/* <Drawer.Screen name="portfolio-insights" component={PortfolioInsights} /> */}
             <Drawer.Screen name="insights" component={Insights} />
             <Drawer.Screen name="settings" component={Settings} />
           </Drawer.Navigator>

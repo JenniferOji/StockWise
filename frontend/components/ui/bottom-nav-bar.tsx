@@ -20,13 +20,13 @@ export default function BottomNavBar() {
         <IconSymbol name="house.fill" size={24} color={tint} />
         <Text style={[styles.label, { color: tint }]}>Home</Text>
       </Pressable>
-      <Pressable style={styles.tab} onPress={() => router.push('../../(main)/portfolio-insights' as any)}>
+      {/* <Pressable style={styles.tab} onPress={() => router.push('../../(main)/portfolio-insights' as any)}>
         <IconSymbol name="chart.bar.fill" size={22} color={tint} />
         <Text style={[styles.label, { color: tint }]}>Insights</Text>
-      </Pressable>
-            <Pressable style={styles.tab} onPress={() => router.push('../../(main)/insights' as any)}>
+      </Pressable> */}
+      <Pressable style={styles.tab} onPress={() => router.push('../../(main)/insights' as any)}>
         <IconSymbol name="chart.bar.fill" size={22} color={tint} />
-        <Text style={[styles.label, { color: tint }]}>Other</Text>
+        <Text style={[styles.label, { color: tint }]}>Insights</Text>
       </Pressable>
     </View>
   );
