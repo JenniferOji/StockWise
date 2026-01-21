@@ -6,6 +6,7 @@ import { NAV_HEIGHT } from '@/constants/layout';
 import PortfolioInsightsWidget from '@/components/PortfolioInsightsWidget';
 
 // accordion tutorial i used: https://sanjanahumanintech.medium.com/accordion-in-react-native-95586a738aee
+
 // list of all the sections that will show up on the insights page
 const menu = [
   { 
