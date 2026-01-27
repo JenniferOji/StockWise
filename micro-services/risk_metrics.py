@@ -69,4 +69,9 @@ def calculate_sharpe_ratio(returns, risk_free_rate=0.04):
     excess_returns = returns.mean() * 252 - risk_free_rate
     return excess_returns / (returns.std() * np.sqrt(252))
 
-
+# max drawdown calculates the maximum observed loss from a peak to a trough of a portfolio, before a new peak is attained
+def calculate_max_drawdown(returns):
+    cumulative = (1 + returns).cumprod()
+    running_max = cumulative.expanding().max()
+    drawdown = (cumulative - running_max) / running_max
+    return drawdown.min() * 100
