@@ -81,4 +81,12 @@ def calculate_var(returns, confidence=0.05):
     # returns = returns.dropna()
     return np.percentile(returns, confidence * 100) * 100
 
-
+# function to calculate all risk metrics together
+def calculate_risk_metrics(daily_returns):
+    """Calculate all risk metrics together"""
+    return {
+        'Volatility': f"{calculate_volatility(daily_returns):.2f}%",
+        'Sharpe Ratio': f"{calculate_sharpe_ratio(daily_returns):.2f}",
+        'Max Drawdown': f"{calculate_max_drawdown(daily_returns):.2f}%",
+        'VaR (95%)': f"{calculate_var(daily_returns):.2f}%"
+    }
