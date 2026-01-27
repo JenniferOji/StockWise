@@ -71,7 +71,14 @@ def calculate_sharpe_ratio(returns, risk_free_rate=0.04):
 
 # max drawdown calculates the maximum observed loss from a peak to a trough of a portfolio, before a new peak is attained
 def calculate_max_drawdown(returns):
-    cumulative = (1 + returns).cumprod()
+    cumulative = (1 + returns).cumprod() 
     running_max = cumulative.expanding().max()
     drawdown = (cumulative - running_max) / running_max
     return drawdown.min() * 100
+
+# value at risk calculation at 95% confidence interval means that there is a 5% chance that the portfolio will lose more than the VaR amount over a specified period
+def calculate_var(returns, confidence=0.05):
+    # returns = returns.dropna()
+    return np.percentile(returns, confidence * 100) * 100
+
+
