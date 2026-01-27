@@ -39,4 +39,40 @@ class PortfolioRequest(BaseModel):
 def root():
     return {"message": "Risk metrics API"}
 
+@app.post("/api/risk-metrics")
+def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
+    portfolio = {}
+    for stock in portfolio_request.stocks:
+        portfolio[stock.ticker] = {
+            'shares': stock.shares,
+            'purchase_price': stock.purchase_price
+        }
+
+    # calculate date range for historical data analysis
+    start_date = (datetime.now() - timedelta(days=portfolio_request.days)).strftime('%Y-%m-%d')
+    end_date = datetime.now().strftime('%Y-%m-%d')
+    
+    # fetch historical price data from yahoo finance via yfinance library
+    price_data = get_portfolio_data(portfolio, start_date, end_date)
+    
+    # validate that the data was recieved for the tickers
+    if price_data.empty:
+        raise HTTPException(status_code=404, detail="No data found for the tickers")
+    
+    # calculate total portfolio value over time 
+    portfolio_value = calculate_portfolio_value(price_data, portfolio)
+    
+    # calculate daily returns and cumulative returns
+    daily_returns, cumulative_returns = calculate_returns(portfolio_value)
+    
+    # calculate all risk metrics: volatility, sharpe ratio, max drawdown, and var
+    risk_metrics = calculate_risk_metrics(daily_returns)
+    
+    current_portfolio_value = portfolio_value['Total'].values[-1]
+    
+    return {
+        "success": True,
+        "metrics": risk_metrics,
+        "portfolio_value": current_portfolio_value
+    }
 
