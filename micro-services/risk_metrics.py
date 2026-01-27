@@ -17,17 +17,6 @@ portfolio = {
 start_date = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')
 end_date = datetime.now().strftime('%Y-%m-%d')
 
-# takes in a dictionary portfolio with the stock as the key and the shares as values 
-# example: {'AAPL': 10, 'MSFT': 5, 'GOOGL': 2}
-# def get_portfolio_data(portfolio, start_date, end_date):
-#     """Download the historical price data of the portfolio stocks"""
-#     tickers = list(portfolio.keys())
-#     data = yf.download(tickers, start=start_date, end=end_date)['Adj Close']
-#     return data
-
-
-
-
 def get_portfolio_data(portfolio, start_date, end_date):
     """Download the historical price data of the portfolio stocks"""
     tickers = list(portfolio.keys())
@@ -75,34 +64,3 @@ def calculate_volatility(returns):
     # Annualised volatility - standard deviation of returns multiplied by sqrt(252 trading days) - because 252 trading days in a year
     return returns.std() * np.sqrt(252) * 100
 
-# sharpe ratio calculation with default risk free rate of 4% - because government bonds yield around 4% - sharpe ratio = (portfolio return - risk free rate) / portfolio volatility
-def calculate_sharpe_ratio(returns, risk_free_rate=0.04):
-    """Sharpe ratio with default 4% risk-free rate"""
-    # returns = returns.dropna()
-    excess_returns = returns.mean() * 252 - risk_free_rate
-    return excess_returns / (returns.std() * np.sqrt(252))
-
-# max drawdown calculates the maximum observed loss from a peak to a trough of a portfolio, before a new peak is attained
-def calculate_max_drawdown(returns):
-    """Maximum drawdown from peak to trough"""
-    # returns = returns.dropna()
-    cumulative = (1 + returns).cumprod()
-    running_max = cumulative.expanding().max()
-    drawdown = (cumulative - running_max) / running_max
-    return drawdown.min() * 100
-
-# value at risk calculation at 95% confidence interval means that there is a 5% chance that the portfolio will lose more than the VaR amount over a specified period
-def calculate_var(returns, confidence=0.05):
-    """Value at Risk at specified confidence level"""
-    # returns = returns.dropna()
-    return np.percentile(returns, confidence * 100) * 100
-
-# function to calculate all risk metrics together
-def calculate_risk_metrics(daily_returns):
-    """Calculate all risk metrics together"""
-    return {
-        'Volatility': f"{calculate_volatility(daily_returns):.2f}%",
-        'Sharpe Ratio': f"{calculate_sharpe_ratio(daily_returns):.2f}",
-        'Max Drawdown': f"{calculate_max_drawdown(daily_returns):.2f}%",
-        'VaR (95%)': f"{calculate_var(daily_returns):.2f}%"
-    }
