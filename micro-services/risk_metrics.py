@@ -5,13 +5,13 @@ import pandas as pd
 
 # resource used : https://www.trymito.io/blog/how-to-automate-portfolio-analysis-in-python-a-complete-guide
 # sample data 
-portfolio = {
-    'AAPL': {'shares': 50, 'purchase_price': 150},
-    'MSFT': {'shares': 30, 'purchase_price': 280},
-    'GOOGL': {'shares': 20, 'purchase_price': 2800},
-    'VTI': {'shares': 100, 'purchase_price': 200},
-    'BND': {'shares': 200, 'purchase_price': 80}
-}
+# portfolio = {
+#     'AAPL': {'shares': 50, 'purchase_price': 150},
+#     'MSFT': {'shares': 30, 'purchase_price': 280},
+#     'GOOGL': {'shares': 20, 'purchase_price': 2800},
+#     'VTI': {'shares': 100, 'purchase_price': 200},
+#     'BND': {'shares': 200, 'purchase_price': 80}
+# }
 
 # Set analysis timeframe to be a year
 start_date = (datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d')
@@ -26,13 +26,7 @@ def get_portfolio_data(portfolio, start_date, end_date):
     # ffill - forward fill to handle missing data
     # bfill - backward fill to handle any remaining missing data
     # data = data.fillna(method='ffill').fillna(method='bfill')
-
     return data
-
-# fetching historical price data for the portfolio
-price_data = get_portfolio_data(portfolio, start_date, end_date)
-print("Data fetched successfully!")
-
 
 def calculate_portfolio_value(price_data, portfolio):
     """Calculate the total value of the portfolio over time"""
@@ -46,16 +40,12 @@ def calculate_portfolio_value(price_data, portfolio):
     portfolio_value['Total'] = portfolio_value.sum(axis=1)
     return portfolio_value
 
-# calculating the portfolios value over time
 def calculate_returns(portfolio_value):
     """Calculate daily and cumulative returns"""
     daily_returns = portfolio_value['Total'].pct_change()
     cumulative_returns = (1 + daily_returns).cumprod() - 1
     
     return daily_returns, cumulative_returns
-
-portfolio_value = calculate_portfolio_value(price_data, portfolio)
-daily_returns, cumulative_returns = calculate_returns(portfolio_value)
 
 # THE MAIN RISK METRICS CALCULATION FUNCTIONS
 def calculate_volatility(returns):
@@ -78,7 +68,7 @@ def calculate_max_drawdown(returns):
 
 # value at risk calculation at 95% confidence interval means that there is a 5% chance that the portfolio will lose more than the VaR amount over a specified period
 def calculate_var(returns, confidence=0.05):
-    # returns = returns.dropna()
+    returns = returns.dropna()
     return np.percentile(returns, confidence * 100) * 100
 
 # function to calculate all risk metrics together

@@ -23,6 +23,7 @@ export default function StockHoldings() {
   const [selected, setSelected] = useState<typeof STOCKS[number] | null>(null);
   // editing shares value
   const [editShares, setEditShares] = useState('');
+  const [editPurchasePrice, setEditPurchasePrice] = useState('');
 
   // colour for the search bar icon 
   const iconColor = Colors.light.icon;
@@ -46,7 +47,11 @@ export default function StockHoldings() {
         if (stocks && Array.isArray(stocks)) {
           const displayedStocks = stocks.map((stock: any) => {
             const foundStock = STOCKS.find(s => s.symbol === stock.symbol);
-            return foundStock ? { ...foundStock, shares: stock.quantity, dbId: stock.ID } : null;
+            return foundStock ? { 
+              ...foundStock, 
+              shares: stock.quantity,
+              PurchasePrice: stock.purchase_price,
+              dbId: stock.ID } : null;
           }).filter(Boolean);
           setDisplayed(displayedStocks as typeof STOCKS[number][]);
         }
@@ -85,7 +90,7 @@ export default function StockHoldings() {
         // if we have user data, parse and use it to save the stock
         if (userJson) {
           const user = JSON.parse(userJson);
-          const result = await addStock(user.ID, item.symbol, item.companyName, item.shares, item.sector);
+          const result = await addStock(user.ID, item.symbol, item.companyName, item.shares, item.purchasePrice ,item.sector);
           if (result) {
             await loadUserStocks();
           }
@@ -177,6 +182,13 @@ export default function StockHoldings() {
                 keyboardType="numeric"
                 placeholder="Enter shares"
               />
+              <TextInput
+                style={styles.modalInput}
+                value={editPurchasePrice}
+                onChangeText={setEditPurchasePrice}
+                keyboardType="numeric"
+                placeholder="Enter shares"
+              />
             </View>
 
             <Pressable
@@ -184,7 +196,8 @@ export default function StockHoldings() {
               onPress={async () => {
                 if (selected && (selected as any).dbId) {
                   const shares = parseFloat(editShares) || 0;
-                  await updateStock((selected as any).dbId, shares);
+                  const purchasePrice = parseFloat(editPurchasePrice) || 0;
+                  await updateStock((selected as any).dbId, shares, purchasePrice);
                   await loadUserStocks();
                 }
                 setModalVisible(false);

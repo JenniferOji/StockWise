@@ -67,14 +67,16 @@ func UpdateStock(ctx iris.Context) {
 	}
 
 	stock.Quantity = updateInput.Quantity
+	stock.PurchasePrice = updateInput.PurchasePrice
 	storage.DB.Save(&stock)
 
 	ctx.JSON(iris.Map{
-		"ID":          stock.ID,
-		"Symbol":      stock.Symbol,
-		"CompanyName": stock.CompanyName,
-		"Quantity":    stock.Quantity,
-		"Sector":      stock.Sector,
+		"ID":            stock.ID,
+		"Symbol":        stock.Symbol,
+		"CompanyName":   stock.CompanyName,
+		"Quantity":      stock.Quantity,
+		"PurchasePrice": stock.PurchasePrice,
+		"Sector":        stock.Sector,
 	})
 }
 
@@ -211,21 +213,23 @@ func AddStock(ctx iris.Context) {
 	}
 
 	newStock := models.Stock{
-		UserID:      stockInput.UserID,
-		Symbol:      stockInput.Symbol,
-		CompanyName: stockInput.CompanyName,
-		Quantity:    stockInput.Quantity,
-		Sector:      stockInput.Sector,
+		UserID:        stockInput.UserID,
+		Symbol:        stockInput.Symbol,
+		CompanyName:   stockInput.CompanyName,
+		Quantity:      stockInput.Quantity,
+		PurchasePrice: stockInput.PurchasePrice,
+		Sector:        stockInput.Sector,
 	}
 
 	storage.DB.Create(&newStock)
 
 	ctx.JSON(iris.Map{
-		"ID":          newStock.ID,
-		"Symbol":      newStock.Symbol,
-		"CompanyName": newStock.CompanyName,
-		"Quantity":    newStock.Quantity,
-		"Sector":      newStock.Sector,
+		"ID":            newStock.ID,
+		"Symbol":        newStock.Symbol,
+		"CompanyName":   newStock.CompanyName,
+		"Quantity":      newStock.Quantity,
+		"PurchasePrice": newStock.PurchasePrice,
+		"Sector":        newStock.Sector,
 	})
 }
 
@@ -362,16 +366,18 @@ type LoginUserInput struct {
 }
 
 type AddStockInput struct {
-	UserID      uint    `json:"user_id" validate:"required"`
-	Symbol      string  `json:"symbol" validate:"required"`
-	CompanyName string  `json:"company_name" validate:"required"`
-	Quantity    float64 `json:"quantity" validate:"gte=0"`
-	Sector      string  `json:"sector" validate:"required"`
+	UserID        uint    `json:"user_id" validate:"required"`
+	Symbol        string  `json:"symbol" validate:"required"`
+	CompanyName   string  `json:"company_name" validate:"required"`
+	Quantity      float64 `json:"quantity" validate:"gte=0"`
+	PurchasePrice float64 `json:"purchase_price" validate:"required,gt=0"`
+	Sector        string  `json:"sector" validate:"required"`
 }
 
 type UpdateStockInput struct {
-	StockID  uint    `json:"stock_id" validate:"required"`
-	Quantity float64 `json:"quantity" validate:"gte=0"`
+	StockID       uint    `json:"stock_id" validate:"required"`
+	Quantity      float64 `json:"quantity" validate:"gte=0"`
+	PurchasePrice float64 `json:"purchase_price" validate:"gt=0"`
 }
 
 type UpdateRiskInput struct {

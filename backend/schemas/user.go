@@ -16,9 +16,10 @@ type Users struct {
 
 type Stock struct {
 	gorm.Model
-	UserID      uint    `json:"user_id"`
-	Symbol      string  `json:"symbol"`
-	CompanyName string  `json:"company_name"`
-	Quantity    float64 `json:"quantity"`
-	Sector      string  `json:"sector"`
+	UserID        uint    `json:"user_id"`
+	Symbol        string  `json:"symbol"`
+	CompanyName   string  `json:"company_name"`
+	Quantity      float64 `json:"quantity"`
+	PurchasePrice float64 `json:"purchase_price"`
+	Sector        string  `json:"sector"`
 }
