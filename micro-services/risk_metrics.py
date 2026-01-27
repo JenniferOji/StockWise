@@ -59,8 +59,14 @@ daily_returns, cumulative_returns = calculate_returns(portfolio_value)
 
 # THE MAIN RISK METRICS CALCULATION FUNCTIONS
 def calculate_volatility(returns):
-    """Annualized volatility"""
     returns = returns.dropna()
     # Annualised volatility - standard deviation of returns multiplied by sqrt(252 trading days) - because 252 trading days in a year
     return returns.std() * np.sqrt(252) * 100
+
+# sharpe ratio calculation with default risk free rate of 4% - because government bonds yield around 4% - sharpe ratio = (portfolio return - risk free rate) / portfolio volatility
+def calculate_sharpe_ratio(returns, risk_free_rate=0.04):
+    # returns = returns.dropna()
+    excess_returns = returns.mean() * 252 - risk_free_rate
+    return excess_returns / (returns.std() * np.sqrt(252))
+
 
