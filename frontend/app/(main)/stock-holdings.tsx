@@ -182,12 +182,13 @@ export default function StockHoldings() {
                 keyboardType="numeric"
                 placeholder="Enter shares"
               />
+              <Text style={styles.modalLabel}>Purchased price:</Text>
               <TextInput
                 style={styles.modalInput}
                 value={editPurchasePrice}
                 onChangeText={setEditPurchasePrice}
                 keyboardType="numeric"
-                placeholder="Enter shares"
+                placeholder="Enter price"
               />
             </View>
 
