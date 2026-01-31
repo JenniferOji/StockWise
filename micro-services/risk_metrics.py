@@ -75,8 +75,8 @@ def calculate_var(returns, confidence=0.05):
 def calculate_risk_metrics(daily_returns):
     """Calculate all risk metrics together"""
     return {
-        'Volatility': f"{calculate_volatility(daily_returns):.2f}%",
-        'Sharpe Ratio': f"{calculate_sharpe_ratio(daily_returns):.2f}",
-        'Max Drawdown': f"{calculate_max_drawdown(daily_returns):.2f}%",
-        'VaR (95%)': f"{calculate_var(daily_returns):.2f}%"
-    }
+        'volatility': f"{calculate_volatility(daily_returns):.2f}%",
+        'sharpe_ratio': f"{calculate_sharpe_ratio(daily_returns):.2f}",
+        'max_drawdown': f"{calculate_max_drawdown(daily_returns):.2f}%",
+        'var_95': f"{calculate_var(daily_returns):.2f}%"
+}
