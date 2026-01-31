@@ -22,7 +22,7 @@ def get_portfolio_data(portfolio, start_date, end_date):
     tickers = list(portfolio.keys())
     # download all data
     data = yf.download(tickers, start=start_date, end=end_date, auto_adjust=True)['Close']
-    data = data.dropna(axis=1, how='all')
+    data = data.dropna()
     # ffill - forward fill to handle missing data
     # bfill - backward fill to handle any remaining missing data
     # data = data.fillna(method='ffill').fillna(method='bfill')

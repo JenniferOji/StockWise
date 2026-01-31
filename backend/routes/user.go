@@ -11,29 +11,39 @@ import (
 	"time"
 
 	models "github.com/YourGitHubUser/StockWise/backend/schemas"
+	"github.com/YourGitHubUser/StockWise/backend/services"
 	"github.com/YourGitHubUser/StockWise/backend/storage"
 	"github.com/YourGitHubUser/StockWise/backend/utils"
-	"github.com/YourGitHubUser/StockWise/backend/services"
 	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
 	"golang.org/x/crypto/bcrypt"
 )
+
 func GetRiskMetrics(ctx iris.Context) {
-    var req services.RiskMetricsRequest
-    if err := ctx.ReadJSON(&req); err != nil {
-        ctx.StatusCode(iris.StatusBadRequest)
-        ctx.JSON(iris.Map{"error": "Invalid request"})
-        return
-    }
-
-    result, err := services.CalculateRiskMetrics(req.Stocks)
-    if err != nil {
-        ctx.StatusCode(iris.StatusInternalServerError)
-        ctx.JSON(iris.Map{"error": err.Error()})
-        return
-    }
-
-    ctx.JSON(result)
+	log.Println("[RiskMetrics] Incoming request to /api/services/risk-metrics")
+	var req services.RiskMetricsRequest
+	if err := ctx.ReadJSON(&req); err != nil {
+		log.Println("[RiskMetrics] Error reading JSON:", err)
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.JSON(iris.Map{"error": "Invalid request", "details": err.Error()})
+		return
+	}
+	log.Printf("[RiskMetrics] Request body: %+v\n", req)
+	if req.Stocks == nil || len(req.Stocks) == 0 {
+		log.Println("[RiskMetrics] No stocks provided in request.")
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.JSON(iris.Map{"error": "No stocks provided"})
+		return
+	}
+	result, err := services.CalculateRiskMetrics(req.Stocks)
+	if err != nil {
+		log.Println("[RiskMetrics] Error from CalculateRiskMetrics:", err)
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.JSON(iris.Map{"error": err.Error()})
+		return
+	}
+	log.Printf("[RiskMetrics] Success. Response: %+v\n", result)
+	ctx.JSON(result)
 }
 
 func GetUserStocks(ctx iris.Context) {
@@ -388,14 +398,14 @@ type AddStockInput struct {
 	Symbol        string  `json:"symbol" validate:"required"`
 	CompanyName   string  `json:"company_name" validate:"required"`
 	Quantity      float64 `json:"quantity" validate:"gte=0"`
-	PurchasePrice float64 `json:"purchase_price" validate:"required,gt=0"`
+	PurchasePrice float64 `json:"purchase_price" validate:"gte=0"`
 	Sector        string  `json:"sector" validate:"required"`
 }
 
 type UpdateStockInput struct {
 	StockID       uint    `json:"stock_id" validate:"required"`
 	Quantity      float64 `json:"quantity" validate:"gte=0"`
-	PurchasePrice float64 `json:"purchase_price" validate:"gt=0"`
+	PurchasePrice float64 `json:"purchase_price" validate:"gte=0"`
 }
 
 type UpdateRiskInput struct {

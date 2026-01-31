@@ -50,7 +50,7 @@ export default function StockHoldings() {
             return foundStock ? { 
               ...foundStock, 
               shares: stock.quantity,
-              PurchasePrice: stock.purchase_price,
+              purchasePrice: stock.purchasePrice,
               dbId: stock.ID } : null;
           }).filter(Boolean);
           setDisplayed(displayedStocks as typeof STOCKS[number][]);
@@ -90,7 +90,7 @@ export default function StockHoldings() {
         // if we have user data, parse and use it to save the stock
         if (userJson) {
           const user = JSON.parse(userJson);
-          const result = await addStock(user.ID, item.symbol, item.companyName, item.shares, item.purchasePrice ,item.sector);
+            const result = await addStock(user.ID, item.symbol, item.companyName, item.shares, item.purchasePrice ,item.sector);
           if (result) {
             await loadUserStocks();
           }

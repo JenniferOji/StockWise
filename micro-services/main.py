@@ -34,6 +34,7 @@ class Stock(BaseModel):
 
 class PortfolioRequest(BaseModel):
     stocks: List[Stock]  
+    days: int = 365
 
 @app.get("/")
 def root():
@@ -51,7 +52,7 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
     # calculate date range for historical data analysis
     start_date = (datetime.now() - timedelta(days=portfolio_request.days)).strftime('%Y-%m-%d')
     end_date = datetime.now().strftime('%Y-%m-%d')
-    
+
     # fetch historical price data from yahoo finance via yfinance library
     price_data = get_portfolio_data(portfolio, start_date, end_date)
     

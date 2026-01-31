@@ -1,9 +1,6 @@
-
-
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-// dummy data based on the data recieved fromt the backend risk metrics endpoint
 const dummyRiskData = {
   success: true,
   metrics: {

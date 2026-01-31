@@ -129,20 +129,36 @@ export const deleteStock = async (stockId: number) => {
     }
 }
 
+// export const getRiskMetrics = async (userId: number) => {
+//     try {
+//         const stocks = await getUserStocks(userId);
+//         if (!stocks) throw new Error("No stocks found");
+//         const response = await axios.post(endpoints.getRiskMetrics, {
+//             stocks: stocks
+//         });
+//         return response.data;
+//     } catch (error) {
+//         handleError(error);
+//         return null;
+//     }
+// };
+
 export const getRiskMetrics = async (userId: number) => {
-    try{
-        console.log('Getting risk insights for user ID:', userId);
-        console.log('Endpoint:', endpoints.riskMetrics);
-        const response = await axios.get(endpoints.riskMetrics, {
-            params: { user_id: userId }
+    try {
+        const stocks = await getUserStocks(userId);
+        if (!stocks) throw new Error("No stocks found");
+        // shape of stocks expected by risk metrics service
+        const formattedStocks = stocks.map((s: any) => ({
+            ticker: s.symbol,
+            shares: s.quantity,
+            purchase_price: s.purchasePrice
+        }));
+        const response = await axios.post(endpoints.getRiskMetrics, {
+            stocks: formattedStocks
         });
-        console.log('Response status:', response.status);
-        console.log('Response data:', response.data);
         return response.data;
     } catch (error) {
-        console.error('getUserRiskMetrics error:', error);
         handleError(error);
         return null;
     }
 };
-
