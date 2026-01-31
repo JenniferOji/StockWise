@@ -13,10 +13,28 @@ import (
 	models "github.com/YourGitHubUser/StockWise/backend/schemas"
 	"github.com/YourGitHubUser/StockWise/backend/storage"
 	"github.com/YourGitHubUser/StockWise/backend/utils"
+	"github.com/YourGitHubUser/StockWise/backend/services"
 	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
 	"golang.org/x/crypto/bcrypt"
 )
+func GetRiskMetrics(ctx iris.Context) {
+    var req services.RiskMetricsRequest
+    if err := ctx.ReadJSON(&req); err != nil {
+        ctx.StatusCode(iris.StatusBadRequest)
+        ctx.JSON(iris.Map{"error": "Invalid request"})
+        return
+    }
+
+    result, err := services.CalculateRiskMetrics(req.Stocks)
+    if err != nil {
+        ctx.StatusCode(iris.StatusInternalServerError)
+        ctx.JSON(iris.Map{"error": err.Error()})
+        return
+    }
+
+    ctx.JSON(result)
+}
 
 func GetUserStocks(ctx iris.Context) {
 	userID := ctx.URLParam("user_id")

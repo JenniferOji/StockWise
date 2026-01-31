@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/middleware/cors"
+
 	_ "github.com/lib/pq"
 )
 
@@ -24,11 +25,7 @@ func main() {
 		Handler())
 
 	app.Validator = validator.New()
-	// location := app.Party("/api/location")
-	// {
-	// 	location.Get("autocomplete", routes.Autocomplete)
-	// 	location.Get("search", routes.Search)
-	// }
+	
 	user := app.Party("/api/user")
 	{
 		user.Post("/register", routes.Register)
@@ -41,6 +38,10 @@ func main() {
 		user.Get("/news", routes.GetNews)
 	}
 
+	service := app.Party("/api/services")
+	{
+		service.Post("/risk-metrics", routes.GetRiskMetrics)
+	}
 	app.Listen(":4000")
 
 }
