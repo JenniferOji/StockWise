@@ -49,7 +49,7 @@ export default function RiskInsightsWidget() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={styles.card}>
         <ActivityIndicator size="small" />
         <Text>Loading risk insights...</Text>
       </View>
@@ -58,7 +58,7 @@ export default function RiskInsightsWidget() {
 
   if (error) {
     return (
-      <View style={styles.container}>
+      <View style={styles.card}>
         <Text style={styles.error}>{error}</Text>
       </View>
     );
@@ -66,55 +66,123 @@ export default function RiskInsightsWidget() {
 
   if (!riskData) {
     return (
-      <View style={styles.container}>
+      <View style={styles.card}>
         <Text>No risk metrics available.</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.portfolioValue}>Portfolio Value: ${riskData.portfolio_value.toLocaleString()}</Text>
-      <Text style={styles.metric}>Volatility: {riskData.metrics.volatility} <Text style={styles.desc}>- Indicates how much your portfolio value changes over time. Higher volatility means more price swings.</Text></Text>
-      <Text style={styles.metric}>Sharpe Ratio: {riskData.metrics.sharpe_ratio} <Text style={styles.desc}>- Measures your return compared to risk. A higher Sharpe Ratio means better risk-adjusted performance.</Text></Text>
-      <Text style={styles.metric}>Max Drawdown: {riskData.metrics.max_drawdown} <Text style={styles.desc}>- The largest percentage drop from a peak to a low point. Shows the worst loss you could have experienced.</Text></Text>
-      <Text style={styles.metric}>VaR (95%): {riskData.metrics.var_95} <Text style={styles.desc}>- Value at Risk: With 95% confidence, your loss should not exceed this value in a single period.</Text></Text>
+    <View style={styles.card}>
+      <View style={styles.valueRow}>
+        <Text style={styles.valueLabel}>Portfolio Value</Text>
+        <Text style={styles.valueNum}>${riskData.portfolio_value.toLocaleString()}</Text>
+      </View>
+      <View style={styles.metricsGrid}>
+        <View style={styles.metricBox}>
+          <Text style={styles.metricLabel}>Volatility</Text>
+          <Text style={styles.metricValue}>{riskData.metrics.volatility}</Text>
+          <Text style={styles.desc}>How much your portfolio value changes over time.</Text>
+        </View>
+        <View style={styles.metricBox}>
+          <Text style={styles.metricLabel}>Sharpe Ratio</Text>
+          <Text style={styles.metricValue}>{riskData.metrics.sharpe_ratio}</Text>
+          <Text style={styles.desc}>Return vs. risk. Higher is better.</Text>
+        </View>
+        <View style={styles.metricBox}>
+          <Text style={styles.metricLabel}>Max Drawdown</Text>
+          <Text style={styles.metricValue}>{riskData.metrics.max_drawdown}</Text>
+          <Text style={styles.desc}>Biggest drop from a peak to a low point.</Text>
+        </View>
+        <View style={styles.metricBox}>
+          <Text style={styles.metricLabel}>VaR (95%)</Text>
+          <Text style={styles.metricValue}>{riskData.metrics.var_95}</Text>
+          <Text style={styles.desc}>Max loss with 95% confidence.</Text>
+        </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    marginVertical: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+  card: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
+    padding: 20,
+    marginVertical: 12,
+    shadowColor: '#0b3d91',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#e0e7ef',
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  metric: {
-    fontSize: 16,
-    marginBottom: 4,
-    fontWeight: '500',
-  },
-  portfolioValue: {
-    fontSize: 16,
-    marginBottom: 4,
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#0b3d91',
+    marginBottom: 14,
     textAlign: 'center',
-    fontWeight: 'bold',
+    letterSpacing: 0.2,
   },
-  error: {
-    color: 'red',
+  valueRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 18,
+    backgroundColor: '#e0e7ef',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  valueLabel: {
+    fontSize: 15,
+    color: '#475569',
+    fontWeight: '600',
+  },
+  valueNum: {
+    fontSize: 17,
+    color: '#0b3d91',
+    fontWeight: '700',
+  },
+  metricsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  metricBox: {
+    width: '48%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    shadowColor: '#0b3d91',
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: '#e0e7ef',
+  },
+  metricLabel: {
+    fontSize: 14,
+    color: '#0b3d91',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  metricValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111',
+    marginBottom: 2,
   },
   desc: {
     fontSize: 12,
-    color: '#555',
+    color: '#64748b',
+    marginTop: 2,
+  },
+  error: {
+    color: 'red',
+    marginBottom: 8,
   },
 });
