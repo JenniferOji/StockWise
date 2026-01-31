@@ -3,7 +3,9 @@ import { View, TouchableOpacity, Text, StyleSheet, LayoutAnimation, ScrollView} 
 import { MaterialIcons as Icon } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NAV_HEIGHT } from '@/constants/layout';
+
 import PortfolioInsightsWidget from '@/components/PortfolioInsightsWidget';
+import RiskInsightsWidget from '@/components/RiskInsightsWidget';
 
 // accordion tutorial i used: https://sanjanahumanintech.medium.com/accordion-in-react-native-95586a738aee
 
@@ -31,10 +33,8 @@ interface AccordianProps {
 
 // accordion component - the collapsible sections you click on
 function Accordian({ title, isWidget = false }: AccordianProps) {
-    // tracks if this section is expanded or collapsed
     const [expanded, setExpanded] = useState(false);
 
-    // toggles the accordion to open or closed with a smooth animation
     const toggleExpand = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setExpanded(!expanded);
@@ -42,17 +42,14 @@ function Accordian({ title, isWidget = false }: AccordianProps) {
 
     return (
         <View style={styles.accordionContainer}>
-            {/* the header bar you click to expand/collapse */}
             <TouchableOpacity style={styles.row} onPress={toggleExpand}>
                 <Text style={styles.title}>{title}</Text>
-                {/* arrow icon that flips when expanded */}
                 <Icon name={expanded ? 'keyboard-arrow-up' : 'keyboard-arrow-down'} size={24} color={'#666'} />
             </TouchableOpacity>
             <View style={styles.parentHr}/>
-            {/* only show the widget if its expanded and isWidget is true */}
-            {
-                expanded && isWidget && <PortfolioInsightsWidget />
-            }
+            {/* Show RiskInsightsWidget for Risk Metrics, PortfolioInsightsWidget for Stock Allocation */}
+            {expanded && title === 'Risk Metrics' && <RiskInsightsWidget />}
+            {expanded && isWidget && title !== 'Risk Metrics' && <PortfolioInsightsWidget />}
         </View>
     );
 }

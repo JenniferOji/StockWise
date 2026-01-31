@@ -128,3 +128,21 @@ export const deleteStock = async (stockId: number) => {
         return null;
     }
 }
+
+export const getRiskMetrics = async (userId: number) => {
+    try{
+        console.log('Getting risk insights for user ID:', userId);
+        console.log('Endpoint:', endpoints.riskMetrics);
+        const response = await axios.get(endpoints.riskMetrics, {
+            params: { user_id: userId }
+        });
+        console.log('Response status:', response.status);
+        console.log('Response data:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('getUserRiskMetrics error:', error);
+        handleError(error);
+        return null;
+    }
+};
+

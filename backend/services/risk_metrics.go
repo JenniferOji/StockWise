@@ -37,7 +37,7 @@ func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
 	// calling the fastAPI microservice
 	resp, err := http.Post(
 		//"http://localhost:8000/api/risk-metrics",
-		"http://127.0.0.1:8000/api/risk-metrics",
+		"http://192.168.1.14:8000/api/risk-metrics",
 		"application/json",
 		// bytes because http.Post requires an io.Reader
 		bytes.NewBuffer(jsonData),
