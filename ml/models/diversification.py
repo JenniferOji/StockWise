@@ -9,6 +9,7 @@ from matplotlib import cm
 import skl2onnx
 from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
+import pickle
 
 # List of stock tickers
 tickers = [
@@ -71,6 +72,23 @@ optimal_k = 5  # Based on the elbow method
 kmeans = KMeans(n_clusters=optimal_k, n_init=50, random_state=42)
 labels = kmeans.fit_predict(Xs)
 df2['Cluster_labels'] = labels
+
+# Assigning risk leveles to clusters 
+cluster_risk = {}
+for cluster_idx in range(optimal_k):
+    cluster_data = df2[df2['Cluster_labels'] == cluster_idx]
+    avg_return = cluster_data['Returns'].mean()
+    avg_variance = cluster_data['Variances'].mean()
+    
+    if avg_return > 0.15 and avg_variance < 0.05:
+        risk_level = 'Low Risk'
+    elif avg_return > 0.10 and avg_variance < 0.10:
+        risk_level = 'Moderate Risk'
+    else:
+        risk_level = 'High Risk'
+    
+    cluster_risk[cluster_idx] = risk_level
+
 
 # Exporting the KMeans model to ONNX format
 #  Xs.shape[1]]
