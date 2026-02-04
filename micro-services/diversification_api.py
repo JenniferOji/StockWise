@@ -34,6 +34,18 @@ def get_diversification_suggestions(request: DiversificationRequest):
         target_clusters = [idx for idx, risk in cluster_risk.items() 
                           if risk == request.user_risk_preference]
         
+        # get available stocks from the target clusters excluding stocks the user is currently hodling
+        suggested_stocks  = df2[
+            (df2['Cluster_labels'].isin(target_clusters)) & 
+            (~df2['Stock Symbols'].isin(request.current_stocks))
+        ]
         
-    except Exception as e:       
-        raise HTTPException(status_code=500, detail=str(e))
+        if len(suggested_stocks ) == 0:
+            return {
+                "success": False,
+                "message": "No stocks",
+                "suggestions": []
+            }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))        
