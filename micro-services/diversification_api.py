@@ -22,3 +22,18 @@ onnx_path = os.path.join(BASE_DIR, 'ml/models/kmeans_stock_clustering.onnx')
 # session is the variable that holds the loaded model
 session = onnx_runtime.InferenceSession(onnx_path)
 
+# pydantic model for request validation and type checking
+class DiversificationRequest(BaseModel):
+    current_stocks: List[str]
+    user_risk_preference: str
+
+@router.post("/api/diversification-suggestions")
+def get_diversification_suggestions(request: DiversificationRequest):
+    try:
+        # find stock clusters matching users inputted risk preference
+        target_clusters = [idx for idx, risk in cluster_risk.items() 
+                          if risk == request.user_risk_preference]
+        
+        
+    except Exception as e:       
+        raise HTTPException(status_code=500, detail=str(e))

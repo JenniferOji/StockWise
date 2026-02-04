@@ -25,7 +25,7 @@ func main() {
 		Handler())
 
 	app.Validator = validator.New()
-	
+
 	user := app.Party("/api/user")
 	{
 		user.Post("/register", routes.Register)
@@ -42,6 +42,7 @@ func main() {
 	{
 		service.Post("/risk-metrics", routes.GetRiskMetrics)
 	}
+
 	app.Listen(":4000")
 
 }

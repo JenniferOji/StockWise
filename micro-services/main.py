@@ -12,10 +12,12 @@ from risk_metrics import (
     calculate_risk_metrics
 )
 from datetime import datetime, timedelta
+from diversification_api import router as diversification_router
 
 # resource used: https://fastapi.tiangolo.com/#example-upgrade
 
-app = FastAPI() 
+app = FastAPI()
+app.include_router(diversification_router) 
 
 # cors to allow the go backend to make requests to the fastapi 
 app.add_middleware(
