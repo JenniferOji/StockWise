@@ -89,6 +89,10 @@ for cluster_idx in range(optimal_k):
     
     cluster_risk[cluster_idx] = risk_level
 
+# save the cluster risk mapping for use in the api microservice using pickle
+with open('cluster_risk_mapping.pkl', 'wb') as f:
+    pickle.dump(cluster_risk, f)
+df2.to_csv('clustered_stocks.csv', index=False)
 
 # Exporting the KMeans model to ONNX format
 #  Xs.shape[1]]
