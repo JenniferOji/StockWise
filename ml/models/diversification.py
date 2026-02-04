@@ -6,6 +6,9 @@ import yfinance as yf
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from matplotlib import cm
+import skl2onnx
+from skl2onnx import convert_sklearn
+from skl2onnx.common.data_types import FloatTensorType
 
 # List of stock tickers
 tickers = [
@@ -14,27 +17,27 @@ tickers = [
     "NFLX", "KO", "XOM", "MRK", "PEP", "INTC", "T", "ABBV", "COST", "CRM", "AVGO",
     "NKE", "MCD", "TMO", "TXN", "ORCL", "CSCO", "LLY", "QCOM", "C", "NEE", "PM",
     "BMY", "AMAT", "LOW", "SBUX", "RTX", "AXP", "INTU", "GILD", "MDT", "BLK", "HON",
-    "UPS", "GS", "MS", "PLD", "ISRG", "LMT", "BKNG", "ZM", "SNY", "SQ", "ADP", "DUK",
-    "GE", "CVX", "SPGI", "NOW", "ANTM", "AMGN", "CAT", "SYK", "CB", "TGT", "DE",
+    "UPS", "GS", "MS", "PLD", "ISRG", "LMT", "BKNG", "ZM", "SNY", "ADP", "DUK",
+    "GE", "CVX", "SPGI", "NOW", "AMGN", "CAT", "SYK", "CB", "TGT", "DE",
     "PNC", "USB", "BDX", "ADSK", "MO", "ELV", "CL", "FIS", "TJX", "CI", "SCHW",
-    "MDLZ", "MMC", "ETN", "VRTX", "AON", "ICE", "COF", "BSX", "NOC", "KMB", "ATVI",
+    "MDLZ", "MMC", "ETN", "VRTX", "AON", "ICE", "COF", "BSX", "NOC", "KMB",
     "AEP", "EOG", "HUM", "KMI", "CME", "CSX", "SHW", "MCO", "LRCX", "BIIB", "ZTS",
     "WM", "TFC", "EQIX", "APD", "SO", "ECL", "ROP", "DHR", "MU", "LULU", "ILMN", "EA",
     "PNR", "CLX", "KLAC", "MAR", "PAYX", "ADM", "OXY", "STZ", "AIG", "DLR", "SLB",
     "EXC", "BBY", "HCA", "EXPE", "NVR", "ALGN", "MSI", "VZ", "ESS", "PLTR", "SYF",
-    "ORLY", "PGR", "AKAM", "KR", "F", "HPE", "EW", "WBA", "HSY", "TFX", "NEM",
+    "ORLY", "PGR", "AKAM", "KR", "F", "HPE", "EW", "HSY", "TFX", "NEM",
     "CPRT", "CTAS", "FTNT", "DG", "DOW", "APH", "ANET", "FTV", "RMD", "URI", "A",
     "PNW", "VFC", "GLW", "ABT", "AFL", "AEE", "PEG", "DLTR", "NCLH", "MKTX", "CPB",
-    "NRG", "PXD", "KHC", "NLOK", "AES", "CFG", "CNP", "MET", "ETR", "VRSK", "PPL",
+    "NRG", "KHC", "AES", "CFG", "CNP", "MET", "ETR", "VRSK", "PPL",
     "ARE", "BB", "AMC", "GME", "NIO", "XPEV", "LI", "WKHS", "RIVN", "FUBO", "PLTR",
-    "SPCE", "AFRM", "HOOD", "COIN", "DKNG", "ENV", "CLOV", "PYPL", "ZM", "SNOW",
+    "SPCE", "AFRM", "HOOD", "COIN", "DKNG", "CLOV", "PYPL", "ZM", "SNOW",
     "MDB", "CRWD", "NET", "ZS", "OKTA", "ROKU", "TWLO", "UBER", "LYFT", "DASH"
 ]
 
 # Download stock histories from Yahoo Finance
 stocks_histories = yf.download(tickers, period="5y", auto_adjust=True)['Close']
 stocks_histories = stocks_histories.dropna(axis=1, how='all')
-stocks_histories = stocks_histories.fillna(method='ffill').fillna(method='bfill')
+stocks_histories = stocks_histories.ffill().bfill()
 
 print("Prices shape after cleanup:", stocks_histories.shape)
 
@@ -55,6 +58,8 @@ df2 = pd.DataFrame({
 df2['Log_Returns'] = np.log1p(df2['Returns'])
 df2['Log_Variances'] = np.log1p(df2['Variances'])
 
+# Dropping rows with NaN values before scaling to avoid errors
+df2 = df2.dropna()
 X = df2[['Log_Returns', 'Log_Variances']].values
 
 # Scale the data
@@ -67,10 +72,16 @@ kmeans = KMeans(n_clusters=optimal_k, n_init=50, random_state=42)
 labels = kmeans.fit_predict(Xs)
 df2['Cluster_labels'] = labels
 
-# Assign a unique color to each cluster
+# Exporting the KMeans model to ONNX format
+#  Xs.shape[1]]
+initial_type = [('float_input', FloatTensorType([None, 2]))]
+onnx_model = convert_sklearn(kmeans, initial_types=initial_type)
+with open("kmeans_stock_clustering.onnx", "wb") as f:
+    f.write(onnx_model.SerializeToString())
+# Assigning a unique color to each cluster
 colors = cm.rainbow(np.linspace(0, 1, optimal_k))
 
-# Plot clusters
+# Plotting clusters
 plt.figure(figsize=(10, 8))
 for cluster_idx in range(optimal_k):
     cluster_data = df2[df2['Cluster_labels'] == cluster_idx]
@@ -88,7 +99,7 @@ plt.legend(loc="best")
 plt.grid(True)
 plt.show()
 
-# Display stocks associated with each cluster
+# Displays stocks associated with each cluster
 for cluster_idx in range(optimal_k):
     cluster_group = df2[df2['Cluster_labels'] == cluster_idx]
     print(f"Cluster {cluster_idx} ({len(cluster_group)} stocks):")

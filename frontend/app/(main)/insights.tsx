@@ -13,16 +13,17 @@ import RiskInsightsWidget from '@/components/RiskInsightsWidget';
 const menu = [
   { 
     title: "Risk Metrics",
-    isWidget: false  
   },
   { 
     title: "Performance Analysis",
-    isWidget: false  
   }, 
   { 
     title: "Stock Allocation",
-    isWidget: true  
   },
+  { 
+    title: "Diverification Suggestions",
+  },
+
 ];
 
 // props for each accordion section
@@ -49,7 +50,7 @@ function Accordian({ title, isWidget = false }: AccordianProps) {
             <View style={styles.parentHr}/>
             {/* Show RiskInsightsWidget for Risk Metrics, PortfolioInsightsWidget for Stock Allocation */}
             {expanded && title === 'Risk Metrics' && <RiskInsightsWidget />}
-            {expanded && isWidget && title !== 'Risk Metrics' && <PortfolioInsightsWidget />}
+            {expanded && title == 'Stock Allocation' && <PortfolioInsightsWidget />}
         </View>
     );
 }
@@ -130,7 +131,6 @@ export default function InsightsScreen() {
                     <Accordian 
                         key={index}
                         title={section.title} 
-                        isWidget={section.isWidget}
                     />
                 ))}
             </ScrollView>
