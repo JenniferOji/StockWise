@@ -31,7 +31,7 @@ tickers = [
     "PNW", "VFC", "GLW", "ABT", "AFL", "AEE", "PEG", "DLTR", "NCLH", "MKTX", "CPB",
     "NRG", "KHC", "AES", "CFG", "CNP", "MET", "ETR", "VRSK", "PPL",
     "ARE", "BB", "AMC", "GME", "NIO", "XPEV", "LI", "WKHS", "RIVN", "FUBO", "PLTR",
-    "SPCE", "AFRM", "HOOD", "COIN", "DKNG", "CLOV", "PYPL", "ZM", "SNOW",
+      "AFRM", "HOOD", "COIN", "DKNG", "CLOV", "PYPL", "ZM", "SNOW",
     "MDB", "CRWD", "NET", "ZS", "OKTA", "ROKU", "TWLO", "UBER", "LYFT", "DASH"
 ]
 
@@ -67,40 +67,44 @@ X = df2[['Log_Returns', 'Log_Variances']].values
 scaler = StandardScaler()
 Xs = scaler.fit_transform(X)
 
-# Perform KMeans clustering with the optimal number of clusters
-optimal_k = 5  # Based on the elbow method
+optimal_k = 3  # Based on the elbow method
 kmeans = KMeans(n_clusters=optimal_k, n_init=50, random_state=42)
 labels = kmeans.fit_predict(Xs)
 df2['Cluster_labels'] = labels
 
-# Assigning risk leveles to clusters 
+# assign the risk leveles to each of the clusters 
 cluster_risk = {}
 for cluster_idx in range(optimal_k):
     cluster_data = df2[df2['Cluster_labels'] == cluster_idx]
     avg_return = cluster_data['Returns'].mean()
     avg_variance = cluster_data['Variances'].mean()
     
-    if avg_return > 0.15 and avg_variance < 0.05:
-        risk_level = 'Low Risk'
-    elif avg_return > 0.10 and avg_variance < 0.10:
-        risk_level = 'Moderate Risk'
+    
+    if avg_return < 0:
+        # Negative returns are at least Moderate Risk
+        risk_level = 'Moderate Risk' if avg_variance < 0.30 else 'High Risk'
     else:
-        risk_level = 'High Risk'
+        if avg_variance < 0.20:
+            risk_level = 'Low Risk'  
+        elif avg_variance < 0.70:
+            risk_level = 'Moderate Risk'  # Positive + moderate volatility
+        else:
+            risk_level = 'High Risk'  # Positive + high volatility
     
     cluster_risk[cluster_idx] = risk_level
+    print(f"Cluster {cluster_idx}: Avg Return={avg_return:.4f}, Avg Variance={avg_variance:.4f} -> {risk_level}")
 
-# save the cluster risk mapping for use in the api microservice using pickle
+# save the cluster risk mapping for use in the api microservice 
 with open('cluster_risk_mapping.pkl', 'wb') as f:
     pickle.dump(cluster_risk, f)
 df2.to_csv('clustered_stocks.csv', index=False)
 
-# Exporting the KMeans model to ONNX format
+# exporting the model to ONNX 
 #  Xs.shape[1]]
 initial_type = [('float_input', FloatTensorType([None, 2]))]
 onnx_model = convert_sklearn(kmeans, initial_types=initial_type)
 with open("kmeans_stock_clustering.onnx", "wb") as f:
     f.write(onnx_model.SerializeToString())
-# Assigning a unique color to each cluster
 colors = cm.rainbow(np.linspace(0, 1, optimal_k))
 
 # Plotting clusters
