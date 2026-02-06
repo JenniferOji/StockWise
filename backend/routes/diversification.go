@@ -41,13 +41,37 @@ func GetDiversificationSuggestions(ctx iris.Context) {
 		return
 	}
 
-	// Call FastAPI endpoint
+	// call FastAPI endpoint
 	resp, err := http.Post(
 		"http://localhost:8000/api/diversification-suggestions",
 		"application/json",
 		bytes.NewBuffer(reqBody),
 	)
 
+	if err != nil {
+		ctx.StatusCode(500)
+		ctx.JSON(map[string]string{"error": "Failed to call to diversisifcation api"})
+		return
+	}
+	defer resp.Body.Close()
+
+	// read the response from the fastapi 
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		ctx.StatusCode(500)
+		ctx.JSON(map[string]string{"error": "Failed to read resp"})
+		return
+	}
+
+	// parse the response the the fastapi 
+	var diversificationResp DiversificationResponse
+	if err := json.Unmarshal(body, &diversificationResp); err != nil {
+		ctx.StatusCode(500)
+		ctx.JSON(map[string]string{"error": "Failed to parse res"})
+		return
+	}
+
+	ctx.JSON(diversificationResp)
 }
 
 	
