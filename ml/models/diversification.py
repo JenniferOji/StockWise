@@ -79,9 +79,7 @@ for cluster_idx in range(optimal_k):
     avg_return = cluster_data['Returns'].mean()
     avg_variance = cluster_data['Variances'].mean()
     
-    
     if avg_return < 0:
-        # Negative returns are at least Moderate Risk
         risk_level = 'Moderate Risk' if avg_variance < 0.30 else 'High Risk'
     else:
         if avg_variance < 0.20:

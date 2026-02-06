@@ -129,20 +129,6 @@ export const deleteStock = async (stockId: number) => {
     }
 }
 
-// export const getRiskMetrics = async (userId: number) => {
-//     try {
-//         const stocks = await getUserStocks(userId);
-//         if (!stocks) throw new Error("No stocks found");
-//         const response = await axios.post(endpoints.getRiskMetrics, {
-//             stocks: stocks
-//         });
-//         return response.data;
-//     } catch (error) {
-//         handleError(error);
-//         return null;
-//     }
-// };
-
 export const getRiskMetrics = async (userId: number) => {
     try {
         const stocks = await getUserStocks(userId);

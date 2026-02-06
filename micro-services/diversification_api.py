@@ -12,12 +12,14 @@ router = APIRouter()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# clustered stocks contains the stock symbols, their annual return, annual variance, log scaled return and variance, and the cluster label assigned by the kmeans model
 df2 = pd.read_csv(os.path.join(BASE_DIR, 'ml/models/clustered_stocks.csv'))
-# as f means file
+
+# cluster risk mapping contains the mapping of each cluster label to its assigned risk level (Low, Moderate, High)
 with open(os.path.join(BASE_DIR, 'ml/models/cluster_risk_mapping.pkl'), 'rb') as f:
     cluster_risk = pickle.load(f)
 
-# Load the onnx model from the file path
+# load the onnx model from the file path
 onnx_path = os.path.join(BASE_DIR, 'ml/models/kmeans_stock_clustering.onnx')
 # session is the variable that holds the loaded model
 session = onnx_runtime.InferenceSession(onnx_path)
@@ -47,7 +49,6 @@ def get_diversification_suggestions(request: DiversificationRequest):
                 "suggestions": []
             }
         
-        # suggest 5 random stocks from the suggested stocks 
         num_suggestions = min(5, len(suggested_stocks))
         suggestions = suggested_stocks.sample(
             n=num_suggestions, 

@@ -29,11 +29,11 @@ const menu = [
 // props for each accordion section
 interface AccordianProps {
     title: string;
-    isWidget?: boolean;
+    // isWidget?: boolean;
 }
 
 // accordion component - the collapsible sections you click on
-function Accordian({ title, isWidget = false }: AccordianProps) {
+function Accordian({ title }: AccordianProps) {
     const [expanded, setExpanded] = useState(false);
 
     const toggleExpand = () => {
@@ -52,6 +52,23 @@ function Accordian({ title, isWidget = false }: AccordianProps) {
             {expanded && title === 'Risk Metrics' && <RiskInsightsWidget />}
             {expanded && title == 'Stock Allocation' && <PortfolioInsightsWidget />}
         </View>
+    );
+}
+
+// main insights screen component
+export default function InsightsScreen() {
+    return (
+        <SafeAreaView style={styles.container}>
+            <ScrollView contentContainerStyle={styles.scrollContainer}>
+                {/* map through menu array to create accordion sections */}
+                {menu.map((section, index) => (
+                    <Accordian 
+                        key={index}
+                        title={section.title} 
+                    />
+                ))}
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 
@@ -120,20 +137,3 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 });
-
-// main insights screen component
-export default function InsightsScreen() {
-    return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-                {/* map through menu array to create accordion sections */}
-                {menu.map((section, index) => (
-                    <Accordian 
-                        key={index}
-                        title={section.title} 
-                    />
-                ))}
-            </ScrollView>
-        </SafeAreaView>
-    );
-}

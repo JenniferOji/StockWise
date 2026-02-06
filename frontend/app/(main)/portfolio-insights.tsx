@@ -28,25 +28,25 @@ export default function PortfolioInsights() {
 		// get user from secure store 
 		try {
 		let userJson = null;
-		try {
-			userJson = await SecureStore.getItemAsync('user');
-		} catch (secureStoreError) {
-			if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
-			userJson = (globalThis as any).localStorage.getItem('user');
+			try {
+				userJson = await SecureStore.getItemAsync('user');
+			} catch (secureStoreError) {
+				if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
+				userJson = (globalThis as any).localStorage.getItem('user');
+				}
 			}
-		}
-		// if we have user data, parse and use it to get the stocks
-		if (userJson) {
-			const user = JSON.parse(userJson);
-			const loadedStocks = await getUserStocks(user.ID);
-			// validate loadedStocks is an array before setting state
-			if (loadedStocks && Array.isArray(loadedStocks)) {
-				setStocks(loadedStocks);
-			} else {
-				console.error('Invalid stocks data:', loadedStocks);
-				setStocks([]);
+			// if we have user data, parse and use it to get the stocks
+			if (userJson) {
+				const user = JSON.parse(userJson);
+				const loadedStocks = await getUserStocks(user.ID);
+				// validate loadedStocks is an array before setting state
+				if (loadedStocks && Array.isArray(loadedStocks)) {
+					setStocks(loadedStocks);
+				} else {
+					console.error('Invalid stocks data:', loadedStocks);
+					setStocks([]);
+				}
 			}
-		}
 		} catch (err) {
 			console.error('Error loading stocks:', err);
 		}
@@ -86,7 +86,8 @@ export default function PortfolioInsights() {
 		// maps the sectorData object to an array of { sector, allocation } objects
 		const allocations = Object.entries(sectorData).map(([sector, shares]) => ({
 			sector,
-			allocation: totalShares > 0 ? (shares / totalShares) * 100 : 0
+			// allocation: totalShares > 0 ? (shares / totalShares) * 100 : 0
+			allocation: totalShares ? (shares / totalShares) * 100 : 0,
 		}));
 		console.log('Sector allocations:', allocations);
 		return allocations;
@@ -112,7 +113,8 @@ export default function PortfolioInsights() {
 	const selectedSectorData = useMemo(() => {
 		if (!selectedSector) return null;
 		const sectorStocks = stocks.filter(stock => stock.sector === selectedSector);
-		const allocation = sectorAllocations.find(s => s.sector === selectedSector)?.allocation || 0;
+		// const allocation = sectorAllocations.find(s => s.sector === selectedSector)?.allocation || 0;
+		const allocation = sectorAllocations.find(s => s.sector === selectedSector)!.allocation;
 		return { stocks: sectorStocks, allocation };
 	}, [selectedSector, stocks, sectorAllocations]);
 

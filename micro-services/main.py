@@ -5,6 +5,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, List
+
 from risk_metrics import (
     get_portfolio_data, 
     calculate_portfolio_value, 
@@ -60,7 +61,7 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
     
     # validate that the data was recieved for the tickers
     if price_data.empty:
-        raise HTTPException(status_code=404, detail="No data found for the tickers")
+        raise HTTPException(status_code=404, detail="No data for the tickers")
     
     # calculate total portfolio value over time 
     portfolio_value = calculate_portfolio_value(price_data, portfolio)

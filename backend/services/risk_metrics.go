@@ -24,6 +24,7 @@ type RiskMetricsResponse struct {
 	PortfolioValue float64           `json:"portfolio_value"`
 }
 
+// either returns the risk metrics respinse or an error 
 func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
 	requestBody := RiskMetricsRequest{
 		Stocks: stocks,
