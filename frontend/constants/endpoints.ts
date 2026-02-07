@@ -18,6 +18,6 @@ export const endpoints = {
   updateRisk: userEndpoint + "/risk",
   getRiskMetrics: servicesEndpoint + "/risk-metrics",
   getRiskPreference: userEndpoint + "/risk-preference",
-  getDiversificationSuggestions: userEndpoint + "diversification-suggestions"
+  getDiversificationSuggestions: userEndpoint + "/diversification-suggestions"
 
 };

@@ -23,7 +23,7 @@ type DiversificationResponse struct {
 
 // GetDiversificationSuggestions handles HTTP requests.
 func GetDiversificationSuggestions(ctx iris.Context) {
-	// variable to hold the request body 
+	// variable to hold the request body
 	var req DiversificationRequest
 
 	// reads the JSON request body and binds it to the req variable
@@ -43,7 +43,7 @@ func GetDiversificationSuggestions(ctx iris.Context) {
 
 	// call FastAPI endpoint
 	resp, err := http.Post(
-		"http://localhost:8000/api/diversification-suggestions",
+		"http://192.168.1.14:8000/api/diversification-suggestions",
 		"application/json",
 		bytes.NewBuffer(reqBody),
 	)
@@ -55,7 +55,7 @@ func GetDiversificationSuggestions(ctx iris.Context) {
 	}
 	defer resp.Body.Close()
 
-	// read the response from the fastapi 
+	// read the response from the fastapi
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		ctx.StatusCode(500)
@@ -63,7 +63,7 @@ func GetDiversificationSuggestions(ctx iris.Context) {
 		return
 	}
 
-	// parse the response the the fastapi 
+	// parse the response the the fastapi
 	var diversificationResp DiversificationResponse
 	if err := json.Unmarshal(body, &diversificationResp); err != nil {
 		ctx.StatusCode(500)
@@ -73,5 +73,3 @@ func GetDiversificationSuggestions(ctx iris.Context) {
 
 	ctx.JSON(diversificationResp)
 }
-
-	

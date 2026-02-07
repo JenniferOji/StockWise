@@ -14,7 +14,7 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [showRiskDropdown, setShowRiskDropdown] = useState(false);
 
-  const riskOptions = ['Low', 'Medium', 'High'];
+  const riskOptions = ['Low Risk', 'Moderate Risk', 'High Risk'];
 
   const handleSignUp = async () => {
     setLoading(true);
@@ -98,9 +98,9 @@ export default function SignUpPage() {
                   <Text style={styles.optionText}>{option}</Text>
                   {/* showing a description for each risk level */}
                   <Text style={styles.optionDescription}>
-                    {option === 'Low' && 'Conservative - Minimal risk, stable returns'}
-                    {option === 'Medium' && 'Balanced - Moderate risk and returns'}
-                    {option === 'High' && 'Aggressive - Higher risk, higher potential returns'}
+                    {option === 'Low Risk' && 'Conservative - Minimal risk, stable returns'}
+                    {option === 'Moderate Risk' && 'Balanced - Moderate risk and returns'}
+                    {option === 'High Risk' && 'Aggressive - Higher risk, higher potential returns'}
                   </Text>
                 </View>                
                 {risk === option && <Text style={styles.checkmark}>✓</Text>}

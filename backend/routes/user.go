@@ -23,26 +23,22 @@ func GetRiskMetrics(ctx iris.Context) {
 	log.Println("[RiskMetrics] Incoming request to /api/services/risk-metrics")
 	var req services.RiskMetricsRequest
 	if err := ctx.ReadJSON(&req); err != nil {
-		log.Println("[RiskMetrics] Error reading JSON:", err)
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.JSON(iris.Map{"error": "Invalid request", "details": err.Error()})
 		return
 	}
 	log.Printf("[RiskMetrics] Request body: %+v\n", req)
 	if req.Stocks == nil || len(req.Stocks) == 0 {
-		log.Println("[RiskMetrics] No stocks provided in request.")
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.JSON(iris.Map{"error": "No stocks provided"})
 		return
 	}
 	result, err := services.CalculateRiskMetrics(req.Stocks)
 	if err != nil {
-		log.Println("[RiskMetrics] Error from CalculateRiskMetrics:", err)
 		ctx.StatusCode(iris.StatusInternalServerError)
 		ctx.JSON(iris.Map{"error": err.Error()})
 		return
 	}
-	log.Printf("[RiskMetrics] Success. Response: %+v\n", result)
 	ctx.JSON(result)
 }
 
@@ -53,13 +49,13 @@ func GetRiskPreference(ctx iris.Context) {
 		return
 	}
 	var user models.Users
-	result := storage.DB.Where("user_id = ?", userID).Find(&user.Risk)
+	result := storage.DB.Where("id = ?", userID).First(&user)
 	if result.Error != nil {
 		utils.CreateInternalServerError(ctx)
 		return
 	}
 
-	ctx.JSON(user.Risk)
+	ctx.JSON(iris.Map{"risk": user.Risk})
 }
 
 func GetUserStocks(ctx iris.Context) {

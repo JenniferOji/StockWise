@@ -35,8 +35,9 @@ func main() {
 		user.Put("/stock", routes.UpdateStock)
 		user.Delete("/stock", routes.DeleteStock)
 		user.Put("/risk", routes.UpdateRisk)
+		user.Get("/risk-preference", routes.GetRiskPreference)
 		user.Get("/news", routes.GetNews)
-		user.Get("/diversification-suggestions", routes.GetDiversificationSuggestions)
+		user.Post("/diversification-suggestions", routes.GetDiversificationSuggestions)
 	}
 
 	service := app.Party("/api/services")

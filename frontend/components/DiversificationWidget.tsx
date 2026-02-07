@@ -1,16 +1,69 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+import { getDiversificationSuggestions } from '@/services/user';
 
 type DiversificationSuggestions = string[];
 
 export default function DiversificationWidget() {
-  const suggestions: DiversificationSuggestions = [
-    'AAPL',
-    'GOOGL',
-    'AMZN',
-    'MSFT',
-    'TSLA',
-  ];
+  const [suggestions, setSuggestions] = useState<DiversificationSuggestions | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
+
+  useEffect(() => {
+    async function fetchDiversificationSuggestions() {
+      setError('');
+      setLoading(true);
+
+      let userJson = null;
+      try {
+        userJson = await SecureStore.getItemAsync('user');
+      } catch (secureStoreError) {
+        if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
+          userJson = (globalThis as any).localStorage.getItem('user');
+        }
+      }
+      if (userJson) {
+        const user = JSON.parse(userJson);
+        const data = await getDiversificationSuggestions(user.ID);
+        if (data) {
+          setSuggestions(data);
+        } else {
+          setError('Failed to load suggestions');
+        }
+      } else {
+        setError('User not found');
+      }
+      setLoading(false);
+    }
+    fetchDiversificationSuggestions();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.card}>
+        <ActivityIndicator size="small" />
+        <Text>Loading diversification suggestions...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.card}>
+        <Text style={styles.error}>{error}</Text>
+      </View>
+    );
+  }
+
+  if (!suggestions || suggestions.length === 0) {
+    return (
+      <View style={styles.card}>
+        <Text style={styles.title}>Diversification Suggestions</Text>
+        <Text>No suggestions available at this time.</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.card}>

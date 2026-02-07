@@ -154,28 +154,29 @@ export const getRiskPreference = async(userId: number) => {
         const response = await axios.get(endpoints.getRiskPreference, {
             params: { user_id: userId }
         });
-        if (response.data) return response.data.risk;
-        return null;
+        console.log('getRiskPreference full response:', response.data);
+        return response.data.risk;
     } catch (error) {
+        console.error('getRiskPreference error:', error);
         handleError(error);
         return null;
     }
 };
 
 export const getDiversificationSuggestions = async (userID: number) => {
-    try {
+    try {        
         const stocks = await getUserStocks(userID);
         if (!stocks) throw new Error("No stocks found");
 
         const risk = await getRiskPreference(userID);
-        if (!risk) throw new Error("No risk preference found");
-
         const currentStocks = stocks.map((s: any) => s.symbol);
+        
         const response = await axios.post(endpoints.getDiversificationSuggestions, {
             current_stocks: currentStocks,
             user_risk_preference: risk
         });
         return response.data;
+
     } catch (error) {
         handleError(error);
         return null;
