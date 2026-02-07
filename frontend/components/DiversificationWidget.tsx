@@ -1,21 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
-import { getRiskMetrics } from '../services/user';
+import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
 
-type DiversificationSuggestions = {
-    suggestions: string[];
-};
+type DiversificationSuggestions = string[];
 
-export default function RiskInsightsWidget() {
-  const [suggestions, setSuggestions] = useState<DiversificationSuggestions | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function DiversificationWidget() {
+  const suggestions: DiversificationSuggestions = [
+    'AAPL',
+    'GOOGL',
+    'AMZN',
+    'MSFT',
+    'TSLA',
+  ];
 
   return (
     <View style={styles.card}>
-      <View style={styles.valueRow}>
-        <Text style={styles.valueLabel}>Portfolio Value</Text>
-      </View>
+      <Text style={styles.title}>Diversification Suggestions</Text>
+      <FlatList
+        data={suggestions}
+        keyExtractor={(item, index) => index.toString()}
+        scrollEnabled={false}
+        renderItem={({ item, index }) => (
+          <View style={styles.suggestionItem}>
+            <Text style={styles.suggestionNumber}>{index + 1}.</Text>
+            <Text style={styles.suggestionText}>{item}</Text>
+          </View>
+        )}
+      />
+      <Text style={styles.countText}>Total suggestions: {suggestions.length}</Text>
     </View>
   );
 }
@@ -40,26 +51,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     textAlign: 'center',
     letterSpacing: 0.2,
-  },
-  valueRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 18,
-    backgroundColor: '#e0e7ef',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-  },
-  valueLabel: {
-    fontSize: 15,
-    color: '#475569',
-    fontWeight: '600',
-  },
-  valueNum: {
-    fontSize: 17,
-    color: '#0b3d91',
-    fontWeight: '700',
   },
   metricsGrid: {
     flexDirection: 'row',
@@ -100,5 +91,34 @@ const styles = StyleSheet.create({
   error: {
     color: 'red',
     marginBottom: 8,
+  },
+  suggestionItem: {
+    flexDirection: 'row',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    marginBottom: 8,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    borderLeftWidth: 4,
+    borderLeftColor: '#0b3d91',
+  },
+  suggestionNumber: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0b3d91',
+    marginRight: 10,
+  },
+  suggestionText: {
+    fontSize: 14,
+    color: '#333',
+    flex: 1,
+    fontWeight: '500',
+  },
+  countText: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 16,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
 });

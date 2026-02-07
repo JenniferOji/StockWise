@@ -164,15 +164,16 @@ export const getRiskPreference = async(userId: number) => {
 
 export const getDiversificationSuggestions = async (userID: number) => {
     try {
-        const stocks = await getUserStocks(userID)
-        if(!stocks) throw new Error("No stocks found")
+        const stocks = await getUserStocks(userID);
+        if (!stocks) throw new Error("No stocks found");
 
         const risk = await getRiskPreference(userID);
-        if(!risk) throw new Error("No risk preference found")
+        if (!risk) throw new Error("No risk preference found");
 
+        const currentStocks = stocks.map((s: any) => s.symbol);
         const response = await axios.post(endpoints.getDiversificationSuggestions, {
-            stocks: stocks,
-            risk: risk
+            current_stocks: currentStocks,
+            user_risk_preference: risk
         });
         return response.data;
     } catch (error) {
