@@ -148,3 +148,26 @@ export const getRiskMetrics = async (userId: number) => {
         return null;
     }
 };
+
+export const getUseRiskPreference = async(userId: number) => {
+    try {        
+            const response = await axios.get(endpoints.getRiskPreference, {
+                params: { user_id: userId }
+        });
+        if (response.data) return response.data.risk_preference;
+        return null;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+};
+
+export const getDiversificationSuggestions = async (userID: number) => {
+    try {
+        const stocks = await getUserStocks(userID)
+        if(!stocks) throw new Error("No stocks found")
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+};

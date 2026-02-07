@@ -46,6 +46,22 @@ func GetRiskMetrics(ctx iris.Context) {
 	ctx.JSON(result)
 }
 
+func GetRiskPreference(ctx iris.Context) {
+	userID := ctx.URLParam("user_id")
+	if userID == "" {
+		utils.CreateError(iris.StatusBadRequest, "Bad Request", "User ID is required", ctx)
+		return
+	}
+	var user models.Users
+	result := storage.DB.Where("user_id = ?", userID).Find(&user.Risk)
+	if result.Error != nil {
+		utils.CreateInternalServerError(ctx)
+		return
+	}
+
+	ctx.JSON(user.Risk)
+}
+
 func GetUserStocks(ctx iris.Context) {
 	userID := ctx.URLParam("user_id")
 	if userID == "" {

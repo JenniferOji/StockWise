@@ -6,6 +6,7 @@ import { NAV_HEIGHT } from '@/constants/layout';
 
 import PortfolioInsightsWidget from '@/components/PortfolioInsightsWidget';
 import RiskInsightsWidget from '@/components/RiskInsightsWidget';
+import DiversificationWidget from '@/components/DiversificationWidget';
 
 // accordion tutorial i used: https://sanjanahumanintech.medium.com/accordion-in-react-native-95586a738aee
 
@@ -21,7 +22,7 @@ const menu = [
     title: "Stock Allocation",
   },
   { 
-    title: "Diverification Suggestions",
+    title: "Diversification Suggestions",
   },
 
 ];
@@ -48,9 +49,10 @@ function Accordian({ title }: AccordianProps) {
                 <Icon name={expanded ? 'keyboard-arrow-up' : 'keyboard-arrow-down'} size={24} color={'#666'} />
             </TouchableOpacity>
             <View style={styles.parentHr}/>
-            {/* Show RiskInsightsWidget for Risk Metrics, PortfolioInsightsWidget for Stock Allocation */}
             {expanded && title === 'Risk Metrics' && <RiskInsightsWidget />}
             {expanded && title == 'Stock Allocation' && <PortfolioInsightsWidget />}
+            {expanded && title == 'Diversification Suggestions' && <DiversificationWidget />}
+
         </View>
     );
 }

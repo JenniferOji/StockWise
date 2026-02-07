@@ -17,5 +17,7 @@ export const endpoints = {
   deleteStock: userEndpoint + "/stock",
   updateRisk: userEndpoint + "/risk",
   getRiskMetrics: servicesEndpoint + "/risk-metrics",
+  getRiskPreference: userEndpoint + "/risk-preference",
+  getDiversificationSuggestions: userEndpoint + "diversification-suggestions"
 
 };
