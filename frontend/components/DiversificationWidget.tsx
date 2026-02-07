@@ -5,6 +5,13 @@ import { getDiversificationSuggestions } from '@/services/user';
 
 type DiversificationSuggestions = string[];
 
+type DiversificationResponse = {
+  success: boolean;
+  suggestions: string[];
+  count: number;
+  risk_preference: string;
+};
+
 export default function DiversificationWidget() {
   const [suggestions, setSuggestions] = useState<DiversificationSuggestions | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,9 +32,9 @@ export default function DiversificationWidget() {
       }
       if (userJson) {
         const user = JSON.parse(userJson);
-        const data = await getDiversificationSuggestions(user.ID);
-        if (data) {
-          setSuggestions(data);
+        const data = (await getDiversificationSuggestions(user.ID)) as DiversificationResponse;
+        if (data && data.success && data.suggestions) {
+          setSuggestions(data.suggestions);
         } else {
           setError('Failed to load suggestions');
         }
@@ -79,7 +86,6 @@ export default function DiversificationWidget() {
           </View>
         )}
       />
-      <Text style={styles.countText}>Total suggestions: {suggestions.length}</Text>
     </View>
   );
 }
