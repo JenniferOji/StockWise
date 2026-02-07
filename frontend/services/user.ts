@@ -151,10 +151,10 @@ export const getRiskMetrics = async (userId: number) => {
 
 export const getUseRiskPreference = async(userId: number) => {
     try {        
-            const response = await axios.get(endpoints.getRiskPreference, {
-                params: { user_id: userId }
+        const response = await axios.get(endpoints.getRiskPreference, {
+            params: { user_id: userId }
         });
-        if (response.data) return response.data.risk_preference;
+        if (response.data) return response.data.risk;
         return null;
     } catch (error) {
         handleError(error);
