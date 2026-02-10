@@ -5,6 +5,7 @@ import { storage } from '@/utils/storage';
 
 type StockSuggestion = {
   symbol: string;
+  company_name: string;
   sector: string;
   reason: string;
 };
@@ -82,7 +83,7 @@ export default function DiversificationWidget() {
         renderItem={({ item }) => (
           <View style={styles.suggestionItem}>
             <View style={styles.suggestionHeader}>
-              <Text style={styles.suggestionSymbol}>{item.symbol}</Text>
+              <Text style={styles.suggestionSymbol}>{item.symbol} - {item.company_name}</Text>
               <Text style={styles.suggestionSector}>{item.sector}</Text>
             </View>
             <Text style={styles.suggestionReason}>{item.reason}</Text>
@@ -277,6 +278,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#0b3d91',
+    flex: 1,
   },
   suggestionSector: {
     fontSize: 12,

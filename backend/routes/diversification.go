@@ -22,9 +22,10 @@ type DiversificationRequest struct {
 }
 
 type StockSuggestion struct {
-	Symbol string `json:"symbol"`
-	Sector string `json:"sector"`
-	Reason string `json:"reason"`
+	Symbol      string `json:"symbol"`
+	CompanyName string `json:"company_name"`
+	Sector      string `json:"sector"`
+	Reason      string `json:"reason"`
 }
 
 type DiversificationResponse struct {
