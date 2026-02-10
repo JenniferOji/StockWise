@@ -24,7 +24,7 @@ type RiskMetricsResponse struct {
 	PortfolioValue float64           `json:"portfolio_value"`
 }
 
-// either returns the risk metrics respinse or an error 
+// either returns the risk metrics respinse or an error
 func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
 	requestBody := RiskMetricsRequest{
 		Stocks: stocks,
@@ -36,9 +36,10 @@ func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
 	}
 
 	// calling the fastAPI microservice
+	fastAPIURL := "http://localhost:8000"
+
 	resp, err := http.Post(
-		//"http://localhost:8000/api/risk-metrics",
-		"http://192.168.1.6:8000/api/risk-metrics",
+		fastAPIURL+"/api/risk-metrics",
 		"application/json",
 		// bytes because http.Post requires an io.Reader
 		bytes.NewBuffer(jsonData),

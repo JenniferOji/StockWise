@@ -141,20 +141,30 @@ def get_diversification_suggestions(request: DiversificationRequest):
             return {
                 "success": False,
                 "message": "No stocks",
-                "suggestions": []
+                "suggestions": [],
+                "risk_preference": request.user_risk_preference
             }
         
         num_suggestions = min(5, len(suggested_stocks))
-        suggestions = suggested_stocks.sample(
+        selected_stocks = suggested_stocks.sample(
             n=num_suggestions, 
             random_state=42
-        )['Stock Symbols'].tolist()
+        )
+        
+        suggestions = []
+        for symbol in selected_stocks['Stock Symbols'].tolist():
+            sector = STOCK_SECTORS.get(symbol, "Unknown")
+            reason = f"Aligns with your {request.user_risk_preference} risk preference"
+            suggestions.append({
+                "symbol": symbol,
+                "sector": sector,
+                "reason": reason
+            })
         
         return {
             "success": True,
             "risk_preference": request.user_risk_preference,
-            "suggestions": suggestions,
-            "count": len(suggestions)
+            "suggestions": suggestions
         }
     
     except Exception as e:

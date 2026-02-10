@@ -18,7 +18,7 @@ export default function SettingsPage() {
   const [userId, setUserId] = useState<string>('');
 
   // the three risk options the user can choose from
-  const riskOptions = ['Low', 'Medium', 'High'];
+  const riskOptions = ['Low Risk', 'Moderate Risk', 'High Risk'];
 
   // load user data when the page first loads
   useEffect(() => {
@@ -132,9 +132,9 @@ export default function SettingsPage() {
                   <Text style={styles.optionText}>{option}</Text>
                   {/* showing a description for each risk level */}
                   <Text style={styles.optionDescription}>
-                    {option === 'Low' && 'Conservative - Minimal risk, stable returns'}
-                    {option === 'Medium' && 'Balanced - Moderate risk and returns'}
-                    {option === 'High' && 'Aggressive - Higher risk, higher potential returns'}
+                    {option === 'Low Risk' && 'Conservative - Minimal risk, stable returns'}
+                    {option === 'Moderate Risk' && 'Balanced - Moderate risk and returns'}
+                    {option === 'High Risk' && 'Aggressive - Higher risk, higher potential returns'}
                   </Text>
                 </View>
                 {/* show checkmark next to the currently selected option */}

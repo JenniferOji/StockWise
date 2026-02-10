@@ -55,8 +55,10 @@ func GetDiversificationSuggestions(ctx iris.Context) {
 	}
 
 	// call FastAPI endpoint
+	fastAPIURL := "http://localhost:8000"
+
 	resp, err := http.Post(
-		"http://192.168.1.6:8000/api/diversification-suggestions",
+		fastAPIURL+"/api/diversification-suggestions",
 		"application/json",
 		bytes.NewBuffer(reqBody),
 	)
