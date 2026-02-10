@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import { AuthContext } from "../context";
 import { useState, useEffect } from "react";
 import { User } from "../types/user";
-import * as SecureStore from 'expo-secure-store';
+import { storage } from "../utils/storage";
 const { width } = Dimensions.get('window');
 
 export default function IntroPage() {
@@ -11,19 +11,12 @@ export default function IntroPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null); // it will either be user or null but we initialise it to null
 
-  // everytime user opens the we open the securestore and check if there is a user saved
+  // everytime user opens the app, check if there is a user saved
   useEffect(() => {
     async function getUser() {
-      try {
-        const getItem = (SecureStore as any).getItemAsync;
-        if (typeof getItem === 'function') {
-          const user = await getItem('user');
-          if (user) setUser(JSON.parse(user) as User);
-        } else if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
-          const u = (globalThis as any).localStorage.getItem('user');
-          if (u) setUser(JSON.parse(u) as User);
-        }
-      } catch (e) {
+      const user = await storage.getItem('user');
+      if (user) {
+        setUser(JSON.parse(user) as User);
       }
     }
     getUser();

@@ -22,7 +22,7 @@ with open(os.path.join(BASE_DIR, 'ml/models/cluster_risk_mapping.pkl'), 'rb') as
 # load the onnx model from the file path
 onnx_path = os.path.join(BASE_DIR, 'ml/models/kmeans_stock_clustering.onnx')
 # session is the variable that holds the loaded model
-session = onnx_runtime.InferenceSession(onnx_path)
+session = onnx_runtime.InferenceSession(onnx_path) 
 
 STOCK_SECTORS = {
     # Technology

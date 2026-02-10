@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
 import { getRiskMetrics } from '../services/user';
+import { storage } from '../utils/storage';
 
 type RiskMetrics = {
   success: boolean;
@@ -23,14 +23,7 @@ export default function RiskInsightsWidget() {
     async function fetchRiskMetricsForUser() {
       setLoading(true);
       setError('');
-      let userJson = null;
-      try {
-        userJson = await SecureStore.getItemAsync('user');
-      } catch (secureStoreError) {
-        if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
-          userJson = (globalThis as any).localStorage.getItem('user');
-        }
-      }
+      const userJson = await storage.getItem('user');
       if (userJson) {
         const user = JSON.parse(userJson);
         const data = await getRiskMetrics(user.ID);
