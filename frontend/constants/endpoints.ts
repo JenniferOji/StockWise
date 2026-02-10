@@ -1,7 +1,7 @@
 import { getRiskMetrics } from '@/services/user';
 import { Platform } from 'react-native';
 
-const serverUrl = Platform.OS === 'web' ? 'http://localhost:4000/api' : 'http://192.168.1.14:4000/api'; // a device accessible IP for mobile
+const serverUrl = Platform.OS === 'web' ? 'http://localhost:4000/api' : 'http://192.168.1.6:4000/api'; // a device accessible IP for mobile
 const user = "/user";
 const services = "/services";
 

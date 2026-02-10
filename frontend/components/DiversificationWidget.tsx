@@ -3,17 +3,22 @@ import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-nativ
 import * as SecureStore from 'expo-secure-store';
 import { getDiversificationSuggestions } from '@/services/user';
 
-type DiversificationSuggestions = string[];
+type StockSuggestion = {
+  symbol: string;
+  sector: string;
+  reason: string;
+};
 
 type DiversificationResponse = {
   success: boolean;
-  suggestions: string[];
-  count: number;
+  suggestions: StockSuggestion[];
   risk_preference: string;
+  message?: string;
 };
 
 export default function DiversificationWidget() {
-  const [suggestions, setSuggestions] = useState<DiversificationSuggestions | null>(null);
+  const [suggestions, setSuggestions] = useState<StockSuggestion[]>([]);
+  const [risk, setRisk] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
@@ -32,11 +37,12 @@ export default function DiversificationWidget() {
       }
       if (userJson) {
         const user = JSON.parse(userJson);
-        const data = (await getDiversificationSuggestions(user.ID)) as DiversificationResponse;
-        if (data && data.success && data.suggestions) {
-          setSuggestions(data.suggestions);
+        const response = (await getDiversificationSuggestions(user.ID)) as DiversificationResponse;
+        if (response && response.success) {
+          setSuggestions(response.suggestions);
+          setRisk(response.risk_preference);
         } else {
-          setError('Failed to load suggestions');
+          setError(response?.message || 'Failed to load suggestions');
         }
       } else {
         setError('User not found');
@@ -49,8 +55,8 @@ export default function DiversificationWidget() {
   if (loading) {
     return (
       <View style={styles.card}>
-        <ActivityIndicator size="small" />
-        <Text>Loading diversification suggestions...</Text>
+        <ActivityIndicator size="small" color="#0b3d91" />
+        <Text style={styles.loadingText}>Loading diversification suggestions...</Text>
       </View>
     );
   }
@@ -67,7 +73,7 @@ export default function DiversificationWidget() {
     return (
       <View style={styles.card}>
         <Text style={styles.title}>Diversification Suggestions</Text>
-        <Text>No suggestions available at this time.</Text>
+        <Text style={styles.noDataText}>No suggestions available at this time.</Text>
       </View>
     );
   }
@@ -75,14 +81,18 @@ export default function DiversificationWidget() {
   return (
     <View style={styles.card}>
       <Text style={styles.title}>Diversification Suggestions</Text>
+      <Text style={styles.subtitle}>{risk} Preference</Text>
       <FlatList
         data={suggestions}
         keyExtractor={(item, index) => index.toString()}
         scrollEnabled={false}
-        renderItem={({ item, index }) => (
+        renderItem={({ item }) => (
           <View style={styles.suggestionItem}>
-            <Text style={styles.suggestionNumber}>{index + 1}.</Text>
-            <Text style={styles.suggestionText}>{item}</Text>
+            <View style={styles.suggestionHeader}>
+              <Text style={styles.suggestionSymbol}>{item.symbol}</Text>
+              <Text style={styles.suggestionSector}>{item.sector}</Text>
+            </View>
+            <Text style={styles.suggestionReason}>{item.reason}</Text>
           </View>
         )}
       />
@@ -91,6 +101,9 @@ export default function DiversificationWidget() {
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flex: 1,
+  },
   card: {
     backgroundColor: '#f8fafc',
     borderRadius: 16,
@@ -104,80 +117,186 @@ const styles = StyleSheet.create({
     borderColor: '#e0e7ef',
   },
   title: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '700',
     color: '#0b3d91',
-    marginBottom: 14,
+    marginBottom: 5,
     textAlign: 'center',
     letterSpacing: 0.2,
   },
-  metricsGrid: {
+  subtitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#404348',
+    marginBottom: 20,
+    textAlign: 'center',
+    letterSpacing: 0.2,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+  },
+  error: {
+    color: '#dc2626',
+    fontSize: 14,
+    textAlign: 'center',
+    padding: 10,
+  },
+  noDataText: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  section: {
+    marginBottom: 25,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0b3d91',
+    marginBottom: 12,
+  },
+  comparisonRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
     gap: 10,
   },
+  comparisonColumn: {
+    flex: 1,
+  },
+  columnHeader: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748b',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
   metricBox: {
-    width: '48%',
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 10,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 8,
     shadowColor: '#0b3d91',
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 1,
     borderWidth: 1,
     borderColor: '#e0e7ef',
   },
   metricLabel: {
-    fontSize: 14,
-    color: '#0b3d91',
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  metricValue: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#111',
-    marginBottom: 2,
-  },
-  desc: {
     fontSize: 12,
     color: '#64748b',
-    marginTop: 2,
+    fontWeight: '600',
+    marginBottom: 4,
   },
-  error: {
-    color: 'red',
-    marginBottom: 8,
-  },
-  suggestionItem: {
-    flexDirection: 'row',
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    marginBottom: 8,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    borderLeftWidth: 4,
-    borderLeftColor: '#0b3d91',
-  },
-  suggestionNumber: {
-    fontSize: 14,
+  metricValue: {
+    fontSize: 18,
     fontWeight: '700',
-    color: '#0b3d91',
-    marginRight: 10,
+    color: '#111',
   },
-  suggestionText: {
-    fontSize: 14,
-    color: '#333',
+  changeText: {
+    fontSize: 11,
+    color: '#16a34a',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  improvementItem: {
+    flexDirection: 'row',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginBottom: 6,
+    backgroundColor: '#f0f9ff',
+    borderRadius: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#0ea5e9',
+  },
+  improvementBullet: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0ea5e9',
+    marginRight: 8,
+  },
+  improvementText: {
+    fontSize: 13,
+    color: '#334155',
     flex: 1,
     fontWeight: '500',
   },
-  countText: {
-    fontSize: 12,
+  sectorSubtitle: {
+    fontSize: 14,
+    fontWeight: '600',
     color: '#64748b',
-    marginTop: 16,
-    textAlign: 'center',
-    fontStyle: 'italic',
+    marginBottom: 10,
+    marginTop: 5,
+  },
+  sectorItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    gap: 8,
+  },
+  sectorName: {
+    fontSize: 12,
+    color: '#334155',
+    fontWeight: '500',
+    width: 120,
+  },
+  sectorBarContainer: {
+    flex: 1,
+    height: 20,
+    backgroundColor: '#e0e7ef',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  sectorBar: {
+    height: '100%',
+    backgroundColor: '#0b3d91',
+    borderRadius: 10,
+  },
+  sectorPercentage: {
+    fontSize: 12,
+    color: '#0b3d91',
+    fontWeight: '700',
+    width: 45,
+    textAlign: 'right',
+  },
+  suggestionItem: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+    borderLeftWidth: 4,
+    borderLeftColor: '#0b3d91',
+    shadowColor: '#0b3d91',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  suggestionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  suggestionSymbol: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0b3d91',
+  },
+  suggestionSector: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748b',
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  suggestionReason: {
+    fontSize: 13,
+    color: '#475569',
+    lineHeight: 18,
   },
 });

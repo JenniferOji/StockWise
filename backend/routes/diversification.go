@@ -9,16 +9,29 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
+type StockHolding struct {
+	Symbol        string  `json:"symbol"`
+	Sector        string  `json:"sector,omitempty"`
+	Quantity      float64 `json:"quantity,omitempty"`
+	PurchasePrice float64 `json:"purchase_price,omitempty"`
+}
+
 type DiversificationRequest struct {
-	CurrentStocks      []string `json:"current_stocks"`
-	UserRiskPreference string   `json:"user_risk_preference"`
+	CurrentStocks      []StockHolding `json:"current_stocks"`
+	UserRiskPreference string         `json:"user_risk_preference"`
+}
+
+type StockSuggestion struct {
+	Symbol string `json:"symbol"`
+	Sector string `json:"sector"`
+	Reason string `json:"reason"`
 }
 
 type DiversificationResponse struct {
-	Success        bool     `json:"success"`
-	RiskPreference string   `json:"risk_preference"`
-	Suggestions    []string `json:"suggestions"`
-	Count          int      `json:"count"`
+	Success        bool              `json:"success"`
+	Suggestions    []StockSuggestion `json:"suggestions"`
+	RiskPreference string            `json:"risk_preference"`
+	Message        string            `json:"message,omitempty"`
 }
 
 // GetDiversificationSuggestions handles HTTP requests.
@@ -43,7 +56,7 @@ func GetDiversificationSuggestions(ctx iris.Context) {
 
 	// call FastAPI endpoint
 	resp, err := http.Post(
-		"http://192.168.1.14:8000/api/diversification-suggestions",
+		"http://192.168.1.6:8000/api/diversification-suggestions",
 		"application/json",
 		bytes.NewBuffer(reqBody),
 	)

@@ -169,7 +169,14 @@ export const getDiversificationSuggestions = async (userID: number) => {
         if (!stocks) throw new Error("No stocks found");
 
         const risk = await getRiskPreference(userID);
-        const currentStocks = stocks.map((s: any) => s.symbol);
+        
+        // Send full stock holdings with sector information
+        const currentStocks = stocks.map((s: any) => ({
+            symbol: s.symbol,
+            sector: s.sector,
+            quantity: s.quantity,
+            purchase_price: s.purchasePrice
+        }));
         
         const response = await axios.post(endpoints.getDiversificationSuggestions, {
             current_stocks: currentStocks,
