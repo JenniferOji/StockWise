@@ -5,7 +5,7 @@ import { STOCKS } from '../../constants/stocks';
 import { NAV_HEIGHT } from '@/constants/layout';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../utils/storage';
 import { addStock, getUserStocks, updateStock, deleteStock } from '../../services/user';
 
 export default function StockHoldings() {
@@ -30,16 +30,8 @@ export default function StockHoldings() {
 
   // function to load the users stocks from the backend  
   const loadUserStocks = async () => {
-    // get user from secure store 
     try {
-      let userJson = null;
-      try {
-        userJson = await SecureStore.getItemAsync('user');
-      } catch (secureStoreError) {
-        if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
-          userJson = (globalThis as any).localStorage.getItem('user');
-        }
-      }
+      const userJson = await storage.getItem('user');
       // if we have user data, parse and use it to get the stocks
       if (userJson) {
         const user = JSON.parse(userJson);
@@ -78,19 +70,11 @@ export default function StockHoldings() {
   // saving a users stock to the backend
   const saveStock = async (item: typeof STOCKS[number]) => {
       try {
-        let userJson = null;
-        // first try SecureStore
-        try {
-          userJson = await SecureStore.getItemAsync('user');
-        } catch (secureStoreError) {
-          if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
-            userJson = (globalThis as any).localStorage.getItem('user');
-          }
-        }
+        const userJson = await storage.getItem('user');
         // if we have user data, parse and use it to save the stock
         if (userJson) {
           const user = JSON.parse(userJson);
-            const result = await addStock(user.ID, item.symbol, item.companyName, item.shares, item.purchasePrice ,item.sector);
+          const result = await addStock(user.ID, item.symbol, item.companyName, item.shares, item.purchasePrice, item.sector);
           if (result) {
             await loadUserStocks();
           }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '@/utils/storage';
 import { User } from '@/types/user';
 import axios from 'axios';
 import { endpoints } from '@/constants/endpoints';
@@ -27,19 +27,7 @@ export default function SettingsPage() {
 
   const loadUserData = async () => {
     try {
-      // get the secure store function
-      const getItem = (SecureStore as any).getItemAsync;
-      let userStr = null;
-      
-      // try to get the user data from secure storage 
-      if (typeof getItem === 'function') {
-        userStr = await getItem('user');
-      } else if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
-        // fallback to localStorage for web
-        userStr = (globalThis as any).localStorage.getItem('user');
-      }
-
-      // if we found user data, parse it and set the risk and id
+      const userStr = await storage.getItem('user');
       if (userStr) {
         const user: User = JSON.parse(userStr);
         console.log('Loaded user data from storage:', user);
@@ -66,28 +54,12 @@ export default function SettingsPage() {
 
       if (response.data) {
         // update the risk in local storage so it persists
-        const getItem = (SecureStore as any).getItemAsync;
-        const setItem = (SecureStore as any).setItemAsync;
-        let userStr = null;
-        
-        if (typeof getItem === 'function') {
-          userStr = await getItem('user');
-        } else if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
-          userStr = (globalThis as any).localStorage.getItem('user');
-        }
-
+        const userStr = await storage.getItem('user');
         if (userStr) {
           const user: User = JSON.parse(userStr);
           user.Risk = newRisk;
-          
-          // save the updated user object back to storage
-          if (typeof setItem === 'function') {
-            await setItem('user', JSON.stringify(user));
-          } else if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
-            (globalThis as any).localStorage.setItem('user', JSON.stringify(user));
-          }
+          await storage.setItem('user', JSON.stringify(user));
         }
-
         // update the UI and close the modal
         setCurrentRisk(newRisk);
         setShowRiskModal(false);

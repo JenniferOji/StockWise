@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NEWS } from '@/constants/news';
 import { NAV_HEIGHT } from '@/constants/layout';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../utils/storage';
 import { getNews } from '../../services/user';
 
 export default function News() {
@@ -18,16 +18,8 @@ export default function News() {
   
   // function to load the users stocks from the backend  
   const loadUserStocks = async () => {
-    // get user from secure store 
     try {
-      let userJson = null;
-      try {
-        userJson = await SecureStore.getItemAsync('user');
-      } catch (secureStoreError) {
-        if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
-          userJson = (globalThis as any).localStorage.getItem('user');
-        }
-      }
+      const userJson = await storage.getItem('user');
       // if we have user data, parse and use it to get the stocks
       if (userJson) {
         const user = JSON.parse(userJson);

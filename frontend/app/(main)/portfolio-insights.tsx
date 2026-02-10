@@ -5,7 +5,7 @@ import { PieChart } from 'react-native-chart-kit'
 import { INSIGHTS } from '../../constants/insights'
 import {NAV_HEIGHT} from '../../constants/layout'
 import { getUserStocks } from '../../services/user';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../utils/storage';
 import { useFocusEffect } from '@react-navigation/native';
 
 // the structure of a stock when returned from the backend 
@@ -25,16 +25,8 @@ export default function PortfolioInsights() {
 	
 	// function to load the users stocks from the backend  
 	const loadUserStocks = async () => {
-		// get user from secure store 
 		try {
-		let userJson = null;
-			try {
-				userJson = await SecureStore.getItemAsync('user');
-			} catch (secureStoreError) {
-				if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
-				userJson = (globalThis as any).localStorage.getItem('user');
-				}
-			}
+		const userJson = await storage.getItem('user');
 			// if we have user data, parse and use it to get the stocks
 			if (userJson) {
 				const user = JSON.parse(userJson);

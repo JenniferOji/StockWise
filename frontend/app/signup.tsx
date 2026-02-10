@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Modal, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../utils/storage';
 import { User } from '../types/user';
 import { registerUser } from '../services/user';
 
@@ -22,15 +22,7 @@ export default function SignUpPage() {
       const created = await registerUser(username, email, password, risk);
       console.log('Registration result:', created);
       if (created) {
-        try {
-          const setItem = (SecureStore as any).setItemAsync;
-          if (typeof setItem === 'function') {
-            await setItem('user', JSON.stringify(created));
-          } else if (typeof globalThis !== 'undefined' && (globalThis as any).localStorage) {
-            (globalThis as any).localStorage.setItem('user', JSON.stringify(created));
-          }
-        } catch (e) {
-        }
+        await storage.setItem('user', JSON.stringify(created));
         setLoading(false);
         console.log('About to navigate to stock holdings...');
         router.replace('/(main)/stock-holdings' as any);
