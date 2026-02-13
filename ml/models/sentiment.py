@@ -18,7 +18,7 @@ import pandas as pd
 import os
 import numpy as np
 import requests
-import nltk
+import pickle
 
 # https://medium.com/@lei.xiaofan/quick-start-building-sentiment-analysis-models-8c1e78c30b2c
 # Download tokenizers and lemmatization dataset
@@ -85,8 +85,8 @@ def text_preprocess(doc):
 
     return temp
 
-text_preprocess("Sooo happppyyy to seee youuu!!! Visit my blog at http://example.com #excited @friend")
-'soo happy see you visit blog'
+# text_preprocess("Sooo happppyyy to seee youuu!!! Visit my blog at http://example.com #excited @friend")
+# 'soo happy see you visit blog'
 
 
 tfidf = TfidfVectorizer(ngram_range=(1, 2), min_df=3, max_df=0.95)
@@ -172,54 +172,9 @@ plt.show()
 LABEL_MAP = {-1: "negative", 1: "positive", 0: "neutral"}
 NAME_TO_ID = {v: k for k, v in LABEL_MAP.items()}
 
-def predict_text_single(text):
-    cleaned = text_preprocess(text)
-    X = pipe.transform([cleaned])
-    pred_raw = cat_classifier.predict(X)[0]
-    val = np.asarray(pred_raw).ravel()[0]
-    if isinstance(val, bytes):
-        val = val.decode()
-    if isinstance(val, str):
-        label_id = NAME_TO_ID[val]
-    else:
-        label_id = int(val)
-    proba = cat_classifier.predict_proba(X)[0].tolist()
-    return {"text": text, "cleaned": cleaned, "label_id": label_id, "label": LABEL_MAP[label_id], "proba": proba}
+# resource for catboost export to onnx : https://catboost.ai/docs/en/concepts/apply-onnx-ml
 
-def predict_texts_batch(texts):
-    cleaned = [text_preprocess(t) for t in texts]
-    X = pipe.transform(cleaned)
-    preds = cat_classifier.predict(X)
-    probas = cat_classifier.predict_proba(X)
-    results = []
-    for i, t in enumerate(texts):
-        pred_raw = preds[i]
-        val = np.asarray(pred_raw).ravel()[0]
-        if isinstance(val, bytes):
-            val = val.decode()
-        if isinstance(val, str):
-            label_id = NAME_TO_ID[val]
-        else:
-            label_id = int(val)
-        results.append({
-            "text": t,
-            "cleaned": cleaned[i],
-            "label_id": label_id,
-            "label": LABEL_MAP[label_id],
-            "proba": probas[i].tolist()
-        })
-    return results
+# Save the text preprocessing pipeline 
+with open('sentiment_preprocessor.pkl', 'wb') as f:
+    pickle.dump(pipe, f)
 
-result = predict_text_single("Stocks are looking good today!")
-print(result)
-
-result2 = predict_text_single("I hate mondays they always make me feel horrible")
-print(result2)
-
-result3 = predict_text_single("The sky is blue")
-print(result3)
-
-print("CatBoost classes order:", list(cat_classifier.classes_))
-
-print("train label counts:")
-print(pd.Series(y_train).value_counts())
