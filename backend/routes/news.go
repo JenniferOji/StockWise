@@ -66,7 +66,7 @@ func GetStockNews(ctx iris.Context) {
 	fastAPIURL := "http://localhost:8000"
 
 	resp, err := http.Post(
-		fastAPIURL+"/news",
+		fastAPIURL+"/stock-news",
 		"application/json",
 		bytes.NewBuffer(reqBody),
 	)

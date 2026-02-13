@@ -1,12 +1,17 @@
-import React, {useEffect} from 'react';
 import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NEWS } from '@/constants/news';
 import { NAV_HEIGHT } from '@/constants/layout';
 import { storage } from '../../utils/storage';
 import {getStockNews} from '../../services/user';
+import React, { useEffect, useState } from 'react';
 
 export default function News() {
+  
+  const [news, setNews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   // function to convert a sentiment value into a label and colour
   const getSentiment = (score: number) => {
     if (score > 0.55) return { label: 'Positive', color: '#2ecc71' };
@@ -14,27 +19,31 @@ export default function News() {
     else return { label: 'Neutral', color: '#f39c12' };
   };
 
-    // const [news, setNews] = useState<typeof NEW[number][]>([]);
-  
-  // function to load the users stocks from the backend  
-  const loadUserStocks = async () => {
+  // function to load news from the backend  
+  const loadStockNews = async () => {
     try {
+      setLoading(true);
       const userJson = await storage.getItem('user');
-      // if we have user data, parse and use it to get the stocks
       if (userJson) {
         const user = JSON.parse(userJson);
-        const news = await getStockNews(user.ID);
+        const res = await getStockNews(user.ID);
+        console.log('Stock news response:', res);
+        setNews(res?.articles ?? []);
+      } else {
+        setNews([]);
       }
     } catch (err) {
-      console.error('Error loading stocks:', err);
+      setError('Failed to load news');
+      setNews([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // when the pasge loads it will get the users stocks from the backend and display it 
   useEffect(() => {
-    loadUserStocks();
+    loadStockNews();
   }, []);
-  
+
   return (
     // SafeAreaView keeps content out of status bar areas on devices 
     <SafeAreaView style={styles.container}>
