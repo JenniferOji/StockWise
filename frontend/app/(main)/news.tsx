@@ -4,7 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { NEWS } from '@/constants/news';
 import { NAV_HEIGHT } from '@/constants/layout';
 import { storage } from '../../utils/storage';
-import { getNews } from '../../services/user';
+import {getStockNews} from '../../services/user';
 
 export default function News() {
   // function to convert a sentiment value into a label and colour
@@ -23,10 +23,7 @@ export default function News() {
       // if we have user data, parse and use it to get the stocks
       if (userJson) {
         const user = JSON.parse(userJson);
-        const news = await getNews(user.ID);
-        // if (stocks && Array.isArray(stocks)) {
-        //   setNews(news as typeof NEWS[number][]);
-        // }
+        const news = await getStockNews(user.ID);
       }
     } catch (err) {
       console.error('Error loading stocks:', err);
