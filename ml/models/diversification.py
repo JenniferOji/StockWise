@@ -55,7 +55,7 @@ df2 = pd.DataFrame({
     'Returns': annual_means_returns.values
 })
 
-# Apply log scaling to compress extreme values
+# log scaling to compress extreme values
 df2['Log_Returns'] = np.log1p(df2['Returns'])
 df2['Log_Variances'] = np.log1p(df2['Variances'])
 
@@ -85,27 +85,27 @@ for cluster_idx in range(optimal_k):
         if avg_variance < 0.20:
             risk_level = 'Low Risk'  
         elif avg_variance < 0.70:
-            risk_level = 'Moderate Risk'  # Positive + moderate volatility
+            risk_level = 'Moderate Risk'  
         else:
-            risk_level = 'High Risk'  # Positive + high volatility
+            risk_level = 'High Risk'  
     
     cluster_risk[cluster_idx] = risk_level
-    print(f"Cluster {cluster_idx}: Avg Return={avg_return:.4f}, Avg Variance={avg_variance:.4f} -> {risk_level}")
+    print(f"Cluster {cluster_idx}: Avg Return={avg_return:.4f}, Avg Variance={avg_variance:.4f} - {risk_level}")
 
-# save the cluster risk mapping for use in the api microservice 
+# save the cluster risk mapping to use in the api microservice 
 with open('cluster_risk_mapping.pkl', 'wb') as f:
     pickle.dump(cluster_risk, f)
 df2.to_csv('clustered_stocks.csv', index=False)
 
-# exporting the model to ONNX 
-#  Xs.shape[1]]
-initial_type = [('float_input', FloatTensorType([None, 2]))]
-onnx_model = convert_sklearn(kmeans, initial_types=initial_type)
-with open("kmeans_stock_clustering.onnx", "wb") as f:
-    f.write(onnx_model.SerializeToString())
-colors = cm.rainbow(np.linspace(0, 1, optimal_k))
+# # https://onnx.ai/sklearn-onnx/introduction.html
+# initial_type = [('float_input', FloatTensorType([None, 2]))]
+# onnx_model = convert_sklearn(kmeans, initial_types=initial_type)
+# with open("kmeans_stock_clustering.onnx", "wb") as f:
+#     f.write(onnx_model.SerializeToString())
 
-# Plotting clusters
+
+# Plotting the clusters
+colors = cm.rainbow(np.linspace(0, 1, optimal_k))
 plt.figure(figsize=(10, 8))
 for cluster_idx in range(optimal_k):
     cluster_data = df2[df2['Cluster_labels'] == cluster_idx]

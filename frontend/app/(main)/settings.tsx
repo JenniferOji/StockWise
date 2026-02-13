@@ -5,6 +5,7 @@ import { storage } from '@/utils/storage';
 import { User } from '@/types/user';
 import axios from 'axios';
 import { endpoints } from '@/constants/endpoints';
+import { NAV_HEIGHT } from '@/constants/layout';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -153,6 +154,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     padding: 20,
+    paddingTop: NAV_HEIGHT + 20,
   },
   title: {
     fontSize: 28,

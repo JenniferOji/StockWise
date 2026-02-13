@@ -1,2 +1,2 @@
 // shared varibales for all classes to use 
-export const NAV_HEIGHT = 50;
+export const NAV_HEIGHT = 80;
