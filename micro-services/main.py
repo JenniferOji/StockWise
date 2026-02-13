@@ -9,7 +9,7 @@ from news_api import router as news_router
 # resource used: https://fastapi.tiangolo.com/#example-upgrade
 
 app = FastAPI()
-app.include_router(diversification_router) 
+app.include_router(diversification_router)  
 app.include_router(risk_metrics_router) 
 app.include_router(news_router) 
 

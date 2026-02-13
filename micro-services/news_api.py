@@ -27,33 +27,44 @@ with open(os.path.join(BASE_DIR, "ml", "models", "sentiment_label_map.pkl"), "rb
     sentiment_label = pickle.load(f)
 
 class StockRequest(BaseModel):
-    tickers: List[str]
+    names: List[str]
+
+
+def split_company_name(company_name: str):
+    name = company_name.split('(')[0].strip()
+
+    name = name.split(',')[0].strip()
+    if '.' in name:
+        name = name.split('.')[0]
+    words = name.split()
+   
+    return words[0] if words else company_name
 
 
 @router.post("/stock-news")
-def fetch_news_by_tickers(request: StockRequest):
-    api_key = os.getenv("NEWS_API_KEY")
+def fetch_news_by_names(request: StockRequest):
+    api_key = os.getenv("NEWS_API_KEY") 
     
-    tickers = request.tickers
+    names = request.names
 
-    if len(tickers) == 0:
-        raise HTTPException(status_code=400, detail="No stock tickers provided")
-
-    # get news from last week only
-    week = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+    if len(names) == 0:
+        raise HTTPException(status_code=400, detail="No stock names provided")
     
-    query = " OR ".join(tickers)
+    # get the frist part of the company name 
+    search_terms = [split_company_name(name) for name in names]
+    name_query = " OR ".join(search_terms)
+
     params = {
-        "q": query,
+        "q": name_query,
         "language": "en",
-        "sortBy": "publishedAt",
-        "from": week,
+        # "from": week,
         "pageSize": 15,
         "apiKey": api_key,
     }
 
     resp = requests.get("https://newsapi.org/v2/everything", params=params, timeout=10)
     if resp.status_code != 200:
+        print("NewsAPI error:", resp.status_code, resp.text)
         raise HTTPException(status_code=resp.status_code, detail=resp.text)
 
     data = resp.json()
@@ -64,29 +75,31 @@ def fetch_news_by_tickers(request: StockRequest):
     for article in articles:
         image = article.get("urlToImage")
         
-        # only consider articles with images
         if not image:
             continue
         
-        # find the ticker from the article 
+        # find the name from the article 
         title = article.get("title", "").lower()
-        ticker_in_article = None
-        for ticker in tickers:
-            if ticker.lower() in title:
-                ticker_in_article = ticker
+        name_in_article = None
+        for i, search_term in enumerate(search_terms):
+            if search_term.lower() in title:
+                name_in_article = names[i]
                 break
+        
+        if not name_in_article:
+            continue
         
         # return the fromatted articles 
         formatted_articles.append({
             "image": image,
-            "ticker": ticker_in_article,
+            "name": name_in_article,
             "headline": article.get("title"),
             "source": article.get("source", {}).get("name")
         })
 
     return {
         "success": True,
-        "tickers": tickers,
+        "names": names,
         "count": len(formatted_articles),
         "articles": formatted_articles
     }

@@ -10,7 +10,7 @@ import (
 )
 
 type StockHoldings struct {
-	Symbol string `json:"symbol"`
+	Name string `json:"name"`
 }
 
 type NewsRequest struct {
@@ -19,20 +19,20 @@ type NewsRequest struct {
 
 type Article struct {
 	Image    string `json:"image"`
-	Ticker   string `json:"ticker"`
+	Name     string `json:"name"`
 	Headline string `json:"headline"`
 	Source   string `json:"source"`
 }
 
 type NewsResponse struct {
 	Success  bool      `json:"success"`
-	Tickers  []string  `json:"tickers"`
+	Names    []string  `json:"names"`
 	Count    int       `json:"count"`
 	Articles []Article `json:"articles"`
 }
 
 type NewsAPIRequest struct {
-	Tickers []string `json:"tickers"`
+	Names []string `json:"names"`
 }
 
 // GetStockNews handles http requests for stock news
@@ -47,14 +47,14 @@ func GetStockNews(ctx iris.Context) {
 		return
 	}
 
-	// get the tickers from stock holdings
-	tickers := make([]string, len(req.CurrentStocks))
+	// get the names from stock holdings
+	names := make([]string, len(req.CurrentStocks))
 	for i, stock := range req.CurrentStocks {
-		tickers[i] = stock.Symbol
+		names[i] = stock.Name
 	}
 
 	// create request for Python API
-	apiReq := NewsAPIRequest{Tickers: tickers}
+	apiReq := NewsAPIRequest{Names: names}
 	reqBody, err := json.Marshal(apiReq)
 	if err != nil {
 		ctx.StatusCode(500)

@@ -26,6 +26,7 @@ export default function News() {
       const userJson = await storage.getItem('user');
       if (userJson) {
         const user = JSON.parse(userJson);
+        console.log('User ID:', user.ID);
         const res = await getStockNews(user.ID);
         console.log('Stock news response:', res);
         setNews(res?.articles ?? []);

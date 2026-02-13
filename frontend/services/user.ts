@@ -194,16 +194,17 @@ export const getDiversificationSuggestions = async (userID: number) => {
 export const getStockNews = async (userID: number) => {
     try {        
         const stocks = await getUserStocks(userID);
+        console.log('Stocks data:', stocks);
         if (!stocks) throw new Error("No stocks found");
         // send all the users stock holdings 
         const currentStocks = stocks.map((stock: any) => ({
-            symbol: stock.symbol,
+            name: stock.company_name,
         }));
+        console.log('Current stocks to send:', currentStocks);
         
         const response = await axios.post(endpoints.getStockNews, {
             current_stocks: currentStocks,
         });
-        
         return response.data;
 
     } catch (error) {
@@ -211,3 +212,4 @@ export const getStockNews = async (userID: number) => {
         return null;
     }
 };
+
