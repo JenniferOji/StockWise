@@ -1,5 +1,6 @@
 import os
 import pickle
+from datetime import datetime, timedelta
 
 import onnxruntime as ort
 import requests
@@ -38,12 +39,16 @@ def fetch_news_by_tickers(request: StockRequest):
     if len(tickers) == 0:
         raise HTTPException(status_code=400, detail="No stock tickers provided")
 
+    # get news from last week only
+    week = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+    
     query = " OR ".join(tickers)
     params = {
         "q": query,
         "language": "en",
         "sortBy": "publishedAt",
-        "pageSize": 20,
+        "from": week,
+        "pageSize": 15,
         "apiKey": api_key,
     }
 
@@ -53,5 +58,30 @@ def fetch_news_by_tickers(request: StockRequest):
 
     data = resp.json()
     articles = data.get("articles", [])
-    return {"tickers": tickers, "count": len(articles), "articles": articles}
+    
+    # clean articles to only return article image, headline, and the ticker 
+    formatted_articles = []
+    for article in articles:
+        image = article.get("urlToImage")
+        
+        # only consider articles with images
+        if not image:
+            continue
+        
+        # find the ticker from the article 
+        title = article.get("title", "").lower()
+        ticker_in_article = None
+        for ticker in tickers:
+            if ticker.lower() in title:
+                ticker_in_article = ticker
+                break
+        
+        # return the fromatted articles 
+        formatted_articles.append({
+            "image": image,
+            "ticker": ticker_in_article,
+            "headline": article.get("title")
+        })
+    
+    return {"tickers": tickers, "count": len(formatted_articles), "articles": formatted_articles}
     
