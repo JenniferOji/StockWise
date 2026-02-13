@@ -80,8 +80,15 @@ def fetch_news_by_tickers(request: StockRequest):
         formatted_articles.append({
             "image": image,
             "ticker": ticker_in_article,
-            "headline": article.get("title")
+            "headline": article.get("title"),
+            "source": article.get("source", {}).get("name")
         })
-    
-    return {"tickers": tickers, "count": len(formatted_articles), "articles": formatted_articles}
+
+    return {
+        "success": True,
+        "tickers": tickers,
+        "count": len(formatted_articles),
+        "articles": formatted_articles
+    }
+
     
