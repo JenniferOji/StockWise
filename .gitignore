@@ -9,3 +9,4 @@ frontend/.expo
 frontend/.vscode
 micro-services/__pycache__
 ml/models/kmeans_stock_clustering.onnx
+micro-services/.env
