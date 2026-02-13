@@ -30,7 +30,7 @@ class StockRequest(BaseModel):
     tickers: List[str]
 
 
-@router.post("/news")
+@router.post("/stock-news")
 def fetch_news_by_tickers(request: StockRequest):
     api_key = os.getenv("NEWS_API_KEY")
     
