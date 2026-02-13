@@ -1,24 +1,25 @@
-from pathlib import Path
-from sklearn.model_selection import train_test_split
-from autocorrect import Speller
-spell = Speller(lang='en')
-import nltk
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
-from sklearn.pipeline import make_pipeline
-from catboost import CatBoostClassifier
-from sklearn.metrics import accuracy_score
-import matplotlib.pyplot as plt
-import re
-import pandas as pd
 import os
-import numpy as np
-import requests
 import pickle
+import re
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import nltk
+import numpy as np
+import pandas as pd
+import requests
+from autocorrect import Speller
+from catboost import CatBoostClassifier
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
+from skl2onnx import convert_sklearn
+from skl2onnx.common.data_types import StringTensorType
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+
+spell = Speller(lang='en')
 
 # https://medium.com/@lei.xiaofan/quick-start-building-sentiment-analysis-models-8c1e78c30b2c
 # Download tokenizers and lemmatization dataset
@@ -174,7 +175,29 @@ NAME_TO_ID = {v: k for k, v in LABEL_MAP.items()}
 
 # resource for catboost export to onnx : https://catboost.ai/docs/en/concepts/apply-onnx-ml
 
-# Save the text preprocessing pipeline 
-with open('sentiment_preprocessor.pkl', 'wb') as f:
-    pickle.dump(pipe, f)
+# convert the preprocessing pipeline to ONNX
+onnx_preprocessor = convert_sklearn(
+    pipe, 
+    initial_types=[('input', StringTensorType([None, 1]))]
+)
+
+with open("sentiment_preprocessor.onnx", "wb") as f:
+    f.write(onnx_preprocessor.SerializeToString())
+
+# saving the catboost model in ONNX format to use in the api microservice
+cat_classifier.save_model(
+    'sentiment_catboost_model.onnx',
+    format='onnx',
+    export_parameters={
+        'onnx_domain': 'ai.catboost',
+        'onnx_model_version': 1,
+        'onnx_doc_string': 'News sentiment classification model',
+        'onnx_graph_name': 'CatBoostModel_for_Sentiment'
+    }
+)
+
+# saving the label mapping for inference
+with open('sentiment_label_map.pkl', 'wb') as f:
+    pickle.dump(LABEL_MAP, f)
+
 
