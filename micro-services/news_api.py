@@ -42,6 +42,12 @@ def split_company_name(company_name: str):
     return words[0] if words else company_name
 
 
+def format_date(value: str):
+    fixed = value.replace("Z", "+00:00")
+    dt = datetime.fromisoformat(fixed)
+    return dt.date().isoformat()
+
+
 def get_sentiment_label(text: str):
     # preprocess the text using the onnx preprocessor
     preproc_input = preproc_sess.get_inputs()[0].name
@@ -120,7 +126,7 @@ def fetch_news_by_names(request: StockRequest):
             "name": name_in_article,
             "headline": article.get("title"),
             "source": article.get("source", {}).get("name"),
-            # "date": format_date(article.get("publishedAt")),
+            "date": format_date(article.get("publishedAt")),
             "sentiment": sentiment_label
         })
 
