@@ -2,6 +2,7 @@ import os
 import pickle
 from datetime import datetime, timedelta
 
+import numpy as np
 import onnxruntime as ort
 import requests
 from fastapi import APIRouter, HTTPException
@@ -39,6 +40,28 @@ def split_company_name(company_name: str):
     words = name.split()
    
     return words[0] if words else company_name
+
+
+
+def get_sentiment_label(text: str) -> str:
+    # preprocess the text using the onnx preprocessor
+    preproc_input = preproc_sess.get_inputs()[0].name
+    preproc_out = preproc_sess.run(None, {preproc_input: np.array([[text]], dtype=object)})
+    #  extract the features from the preprocessor output 
+    features = preproc_out[0]
+
+    # running the features through the onnx model to get the sentiment label
+    model_input = model_sess.get_inputs()[0].name
+    outputs = model_sess.run(None, {model_input: features})
+
+    # ouput is an array with the predicted label as the first element 
+    if isinstance(outputs[0], np.ndarray) and outputs[0].dtype == object and outputs[0].size == 1:
+        label = outputs[0].flat[0]
+        if isinstance(label, bytes):
+            return label.decode("utf-8")
+        if isinstance(label, str):
+            return label
+
 
 
 @router.post("/stock-news")
@@ -88,13 +111,18 @@ def fetch_news_by_names(request: StockRequest):
         
         if not name_in_article:
             continue
+
+        sentiment_label = get_sentiment_label(article.get("title", ""))
+        print("Sentiment label:", sentiment_label, "-", article.get("title", ""))
         
         # return the fromatted articles 
         formatted_articles.append({
             "image": image,
             "name": name_in_article,
             "headline": article.get("title"),
-            "source": article.get("source", {}).get("name")
+            "source": article.get("source", {}).get("name"),
+            "date": article.get("publishedAt"),
+            "sentiment": sentiment_label
         })
 
     return {
