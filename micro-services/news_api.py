@@ -126,6 +126,7 @@ def fetch_news_by_names(request: StockRequest):
             "name": name_in_article,
             "headline": article.get("title"),
             "source": article.get("source", {}).get("name"),
+            "url": article.get("url"),
             "date": format_date(article.get("publishedAt")),
             "sentiment": sentiment_label
         })

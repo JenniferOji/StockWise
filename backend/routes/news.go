@@ -22,6 +22,7 @@ type Article struct {
 	Name      string `json:"name"`
 	Headline  string `json:"headline"`
 	Source    string `json:"source"`
+	URL       string `json:"url"`
 	Date      string `json:"date"`
 	Sentiment string `json:"sentiment"`
 }

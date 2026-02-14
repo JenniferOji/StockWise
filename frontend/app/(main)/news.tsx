@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, Linking } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NAV_HEIGHT } from '@/constants/layout';
 import { storage } from '../../utils/storage';
@@ -16,6 +16,13 @@ export default function News() {
     if (value == 'positive') return '#00c853';
     if (value == 'negative') return '#ff1744';
     return '#ff9100';
+  };
+
+  // function to open the article in browser when the card is pressed
+  const openArticle = (url: string) => {
+    if (url) {
+      Linking.openURL(url);
+    }
   };
 
   // function to load news from the backend  
@@ -52,19 +59,21 @@ export default function News() {
         ]}
         // display each news item as a card
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <Pressable style={styles.card} onPress={() => openArticle(item.url)}>
             <View style={styles.cardBody}>
-              <Text style={styles.company}>{item.name}</Text>
-              <Text style={styles.headline}>{item.headline}</Text>
-              <View style={styles.metaRow}>
-                <Text style={styles.source}>{item.source}</Text>
-                <View style={styles.metaRight}>
-                  <Text style={[styles.sentiment, { color: getSentimentColor(item.sentiment) }]}>{item.sentiment}</Text>
-                  <Text style={styles.date}>{item.date}</Text>
+              <View style={styles.headerRow}>
+                <View style={styles.publisherRow}>
+                  <Text style={styles.source}>{item.source} :</Text>
+                  <Text style={styles.stockName}>{item.name}</Text>
                 </View>
               </View>
+              <Text style={styles.headline}>{item.headline}</Text>
+              <View style={styles.metaRow}>
+                <Text style={[styles.sentiment, { color: getSentimentColor(item.sentiment) }]}>{item.sentiment}</Text>
+                <Text style={styles.date}>{item.date}</Text>
+              </View>
             </View>
-          </View>
+          </Pressable>
         )}
       />
     </SafeAreaView>
@@ -87,13 +96,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 6,
   },
+
   image: { width: 56, height: 56, borderRadius: 8, marginRight: 12, resizeMode: 'contain' },
   cardBody: { flex: 1, minWidth: 0 },
-  company: { fontSize: 14, fontWeight: '700', marginBottom: 6 },
-  headline: { fontSize: 13, color: '#333', marginBottom: 8, fontWeight: '600' },
-  metaRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  metaRight: { alignItems: 'flex-end' },
-  source: { fontSize: 12, color: '#666' },
+  headline: { fontSize: 16, color: '#676767', marginTop: 6, fontWeight: '600' },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start'},
+  publisherRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  metaRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 },
+  source: { fontSize: 17, color: '#000', fontWeight: '600' },
+  stockName: { fontSize: 16, color: '#535353', fontWeight: '500' },
   date: { fontSize: 12, color: '#666' },
-  sentiment: { fontSize: 12, fontWeight: '700' },
+  sentiment: { fontSize: 14, fontWeight: '700' },
 });
