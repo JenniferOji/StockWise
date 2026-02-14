@@ -18,10 +18,12 @@ type NewsRequest struct {
 }
 
 type Article struct {
-	Image    string `json:"image"`
-	Name     string `json:"name"`
-	Headline string `json:"headline"`
-	Source   string `json:"source"`
+	Image     string `json:"image"`
+	Name      string `json:"name"`
+	Headline  string `json:"headline"`
+	Source    string `json:"source"`
+	Date      string `json:"date"`
+	Sentiment string `json:"sentiment"`
 }
 
 type NewsResponse struct {

@@ -51,6 +51,10 @@ export default function News() {
               <Text style={styles.headline}>{item.headline}</Text>
               <View style={styles.metaRow}>
                 <Text style={styles.source}>{item.source}</Text>
+                <View style={styles.metaRight}>
+                  <Text style={styles.sentiment}>{item.sentiment}</Text>
+                  <Text style={styles.date}>{item.date}</Text>
+                </View>
               </View>
             </View>
           </View>
@@ -81,6 +85,7 @@ const styles = StyleSheet.create({
   company: { fontSize: 14, fontWeight: '700', marginBottom: 6 },
   headline: { fontSize: 13, color: '#333', marginBottom: 8, fontWeight: '600' },
   metaRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  metaRight: { alignItems: 'flex-end' },
   source: { fontSize: 12, color: '#666' },
   date: { fontSize: 12, color: '#666' },
   sentiment: { fontSize: 12, fontWeight: '700' },
