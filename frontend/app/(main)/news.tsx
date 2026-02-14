@@ -11,6 +11,13 @@ export default function News() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const getSentimentColor = (sentiment: string) => {
+    const value = (sentiment || '').toLowerCase();
+    if (value == 'positive') return '#00c853';
+    if (value == 'negative') return '#ff1744';
+    return '#ff9100';
+  };
+
   // function to load news from the backend  
   const loadStockNews = async () => {
     try {
@@ -52,7 +59,7 @@ export default function News() {
               <View style={styles.metaRow}>
                 <Text style={styles.source}>{item.source}</Text>
                 <View style={styles.metaRight}>
-                  <Text style={styles.sentiment}>{item.sentiment}</Text>
+                  <Text style={[styles.sentiment, { color: getSentimentColor(item.sentiment) }]}>{item.sentiment}</Text>
                   <Text style={styles.date}>{item.date}</Text>
                 </View>
               </View>
