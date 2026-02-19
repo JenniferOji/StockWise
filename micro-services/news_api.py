@@ -60,12 +60,9 @@ def get_sentiment_label(text: str):
     outputs = model_sess.run(None, {model_input: features})
 
     # ouput is an array with the predicted label as the first element 
-    if isinstance(outputs[0], np.ndarray) and outputs[0].dtype == object and outputs[0].size == 1:
-        label = outputs[0].flat[0]
-        if isinstance(label, bytes):
-            return label.decode("utf-8")
-        if isinstance(label, str):
-            return label
+    label = outputs[0].flat[0]
+       
+    return label
 
 
 
