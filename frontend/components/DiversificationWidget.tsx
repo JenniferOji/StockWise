@@ -46,7 +46,11 @@ export default function DiversificationWidget() {
         if (response && response.success) {
           setSuggestions(response.suggestions);
           setRisk(response.risk_preference);
+          setCurrentPortfolio(response.comparison?.current_portfolio || []);
+          setWithSuggestions(response.comparison?.with_suggestions || []);
         } else {
+          setCurrentPortfolio(response?.comparison?.current_portfolio || []);
+          setWithSuggestions(response?.comparison?.with_suggestions || []);
           setError(response?.message || 'Failed to load suggestions');
         }
       } else {
@@ -88,7 +92,7 @@ export default function DiversificationWidget() {
       <Text style={styles.title}>Diversification Suggestions</Text>
       <Text style={styles.subtitle}>{risk} Preference</Text>
 
-    {(currentPortfolio.length > 0 || withSuggestions.length > 0) && (
+      {(currentPortfolio.length > 0 || withSuggestions.length > 0) && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sector Diversification</Text>
 
@@ -121,10 +125,8 @@ export default function DiversificationWidget() {
               ))}
             </>
           )}
-
         </View>
       )}
-
 
       <FlatList
         data={suggestions}

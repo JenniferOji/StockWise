@@ -58,10 +58,17 @@ def sector_breakdown(stocks: List[StockHolding]):
         })
 
 
+    # sortign the sectors from highest percentage to lowest
+    breakdown.sort(key=itemgetter("percentage"), reverse=True)
+    return breakdown
+
+
 @router.post("/api/diversification-suggestions")
 def get_diversification_suggestions(request: DiversificationRequest):
     try:
-        current_stock_symbols = [stock.symbol for stock in request.current_stocks]
+        current_stock_symbols = []
+        for stock in request.current_stocks:
+            current_stock_symbols.append(stock.symbol)
         
         current_stock_breakdown = sector_breakdown(request.current_stocks)
 
@@ -82,7 +89,11 @@ def get_diversification_suggestions(request: DiversificationRequest):
                 "success": False,
                 "message": "No stocks match your risk preference",
                 "suggestions": [],
-                "risk_preference": request.user_risk_preference
+                "risk_preference": request.user_risk_preference,
+                "comparison": {
+                    "current_portfolio": current_stock_breakdown,
+                    "with_suggestions": current_stock_breakdown,
+                },
             }
         
         # randomly selecting 5 stocks to send to the user 
