@@ -28,10 +28,16 @@ type StockSuggestion struct {
 	Reason      string `json:"reason"`
 }
 
+type DiversificationComparison struct {
+	CurrentPortfolio []SectorAllocation `json:"current_portfolio"`
+	WithSuggestions  []SectorAllocation `json:"with_suggestions"`
+}
+
 type DiversificationResponse struct {
 	Success        bool              `json:"success"`
 	Suggestions    []StockSuggestion `json:"suggestions"`
 	RiskPreference string            `json:"risk_preference"`
+	Comparison     DiversificationComparison `json:"comparison"`
 	Message        string            `json:"message,omitempty"`
 }
 
