@@ -5,6 +5,7 @@ import pandas as pd
 import pickle
 import os
 import json
+from operator import itemgetter
 
 router = APIRouter()
 
@@ -28,6 +29,34 @@ class StockHolding(BaseModel):
 class DiversificationRequest(BaseModel):
     current_stocks: List[StockHolding]
     user_risk_preference: str
+
+def sector_breakdown(stocks: List[StockHolding]):
+    if len(stocks) == 0:
+        return []
+
+    sector_counts = {}
+
+    for stock in stocks:
+        sector_name = stock.sector
+
+        # if the key already exists
+        if sector_name in sector_counts:
+            sector_counts[sector_name] += 1
+        # if it doesnt, add the key 
+        else:
+            sector_counts[sector_name] = 1
+
+    total_stocks = len(stocks)
+    breakdown = []
+
+    for sector_name, count in sector_counts.items():
+        # calculate the percentage of stocks in this sector 
+        percent = round((count / total_stocks) * 100, 1)
+        breakdown.append({
+            "sector": sector_name,
+            "percentage": percent,
+        })
+
 
 @router.post("/api/diversification-suggestions")
 def get_diversification_suggestions(request: DiversificationRequest):
