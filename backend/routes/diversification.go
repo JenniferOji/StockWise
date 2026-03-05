@@ -28,6 +28,12 @@ type StockSuggestion struct {
 	Reason      string `json:"reason"`
 }
 
+
+type SectorAllocation struct {
+	Sector     string  `json:"sector"`
+	Percentage float64 `json:"percentage"`
+}
+
 type DiversificationComparison struct {
 	CurrentPortfolio []SectorAllocation `json:"current_portfolio"`
 	WithSuggestions  []SectorAllocation `json:"with_suggestions"`
