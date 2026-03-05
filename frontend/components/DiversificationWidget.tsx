@@ -10,10 +10,19 @@ type StockSuggestion = {
   reason: string;
 };
 
+type SectorAllocation = {
+  sector: string;
+  percentage: number;
+};
+
 type DiversificationResponse = {
   success: boolean;
   suggestions: StockSuggestion[];
   risk_preference: string;
+  comparison?: {
+    current_portfolio: SectorAllocation[];
+    with_suggestions: SectorAllocation[];
+  };
   message?: string;
 };
 
@@ -22,6 +31,8 @@ export default function DiversificationWidget() {
   const [risk, setRisk] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+  const [currentPortfolio, setCurrentPortfolio] = useState<SectorAllocation[]>([]);
+  const [withSuggestions, setWithSuggestions] = useState<SectorAllocation[]>([]);
 
   useEffect(() => {
     async function fetchDiversificationSuggestions() {
