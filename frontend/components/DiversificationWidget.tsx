@@ -106,6 +106,22 @@ export default function DiversificationWidget() {
               ))}
             </>
           )}
+
+          {withSuggestions.length > 0 && (
+            <>
+              <Text style={styles.sectorSubtitle}>With Suggestions</Text>
+              {withSuggestions.map((item) => (
+                <View key={`suggested-${item.sector}`} style={styles.sectorItem}>
+                  <Text style={styles.sectorName}>{item.sector}</Text>
+                  <View style={styles.sectorBarContainer}>
+                    <View style={[styles.sectorBar, { width: `${item.percentage}%` }]} />
+                  </View>
+                  <Text style={styles.sectorPercentage}>{item.percentage.toFixed(1)}%</Text>
+                </View>
+              ))}
+            </>
+          )}
+
         </View>
       )}
 
