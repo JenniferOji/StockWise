@@ -1,7 +1,8 @@
 import { getRiskMetrics } from '@/services/user';
 import { Platform } from 'react-native';
 
-const serverUrl = Platform.OS === 'web' ? 'http://localhost:4000/api' : 'http://192.168.1.6:4000/api'; // a device accessible IP for mobile
+// const serverUrl = Platform.OS === 'web' ? 'http://localhost:4000/api' : 'http://10.0.4.109:4000/api'; // a device accessible IP for mobile
+const serverUrl = Platform.OS === 'web' ? 'https://ominous-doodle-pj7qx4vgg4qh944q-4000.app.github.dev/api' : 'https://ominous-doodle-pj7qx4vgg4qh944q-4000.app.github.dev/api'; // a device accessible URL for Codespaces
 const user = "/user";
 const services = "/services";
 

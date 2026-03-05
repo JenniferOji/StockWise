@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"os"
 
 	models "github.com/YourGitHubUser/StockWise/backend/schemas"
@@ -21,9 +22,13 @@ func connectToDatabase() *gorm.DB {
 
 	// first pass in the connection string then the gorm open function
 	dsn := os.Getenv("DB_CONNECTION_STRING")
+	if dsn == "" {
+		panic("DB_CONNECTION_STRING is not set")
+	}
+
 	db, dbError := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if dbError != nil {
-		panic("Failed to connect to database!")
+		panic(fmt.Sprintf("Failed to connect to database: %v", dbError))
 	}
 
 	DB = db

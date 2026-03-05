@@ -1,13 +1,12 @@
 package main
 
 import (
-	"github.com/YourGitHubUser/StockWise/backend/database"
 	"github.com/YourGitHubUser/StockWise/backend/routes"
 	"github.com/YourGitHubUser/StockWise/backend/storage"
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/middleware/cors"
+	// "github.com/kataras/iris/v12/middleware/cors"
 
 	_ "github.com/lib/pq"
 )
@@ -16,13 +15,32 @@ func main() {
 
 	godotenv.Load()
 	storage.InitialiseDatabase()
-	database.Connect()
 
 	app := iris.New()
 
-	app.UseRouter(cors.New().
-		AllowOrigin("*").
-		Handler())
+	// app.UseRouter(cors.New().
+	// 	AllowOrigin("*").
+	// 	Handler())
+
+	app.UseRouter(func(ctx iris.Context) {
+		origin := ctx.GetHeader("Origin")
+		if origin != "" {
+			ctx.Header("Access-Control-Allow-Origin", origin)
+			ctx.Header("Vary", "Origin")
+		} else {
+			ctx.Header("Access-Control-Allow-Origin", "*")
+		}
+
+		ctx.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		ctx.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
+
+		if ctx.Method() == iris.MethodOptions {
+			ctx.StatusCode(iris.StatusNoContent)
+			return
+		}
+
+		ctx.Next()
+	})
 
 	app.Validator = validator.New()
 
