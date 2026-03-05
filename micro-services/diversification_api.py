@@ -63,9 +63,13 @@ def get_diversification_suggestions(request: DiversificationRequest):
     try:
         current_stock_symbols = [stock.symbol for stock in request.current_stocks]
         
-        target_clusters = [idx for idx, risk in cluster_risk.items() 
-                          if risk == request.user_risk_preference]
-        
+        current_stock_breakdown = sector_breakdown(request.current_stocks)
+
+        target_clusters = []
+        for idx, risk in cluster_risk.items():
+            if risk == request.user_risk_preference:
+                target_clusters.append(idx)
+
         # only considers stocks the user doesnt currently hold 
         available_stocks = df2[~df2['Stock Symbols'].isin(current_stock_symbols)].copy()
 
@@ -103,13 +107,32 @@ def get_diversification_suggestions(request: DiversificationRequest):
             }
             
             suggestions.append(suggestion)
-        
-        
+    
+        projected_holdings = []
+        # addign the users current stocks to the projected holdings list
+        for stock in request.current_stocks:
+            projected_holdings.append(stock)
+
+        for suggestion in suggestions:
+            projected_holdings.append(
+                StockHolding(
+                    symbol=suggestion["symbol"],
+                    sector=suggestion["sector"],
+                )
+            )
+
+        projected_stock_breakdown = sector_breakdown(projected_holdings)
+    
         return {
             "success": True,
             "risk_preference": request.user_risk_preference,
-            "suggestions": suggestions
+            "suggestions": suggestions,
+            "comparison": {
+                "current_portfolio": current_stock_breakdown,
+                "with_suggestions": projected_stock_breakdown,
+            },
         }
+
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
