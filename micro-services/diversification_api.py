@@ -5,6 +5,7 @@ import pandas as pd
 import pickle
 import os
 import json
+import math
 from datetime import datetime, timedelta
 from operator import itemgetter
 from risk_metrics import (
@@ -40,20 +41,28 @@ class DiversificationRequest(BaseModel):
 
 def calculate_portfolio_volatility(stocks: List[StockHolding], lookback_days: int = 365):
     if not stocks:
-        raise ValueError("No stocks provided")
+        return None
 
     portfolio = {}
     for stock in stocks:
+        symbol = stock.symbol
         shares = stock.quantity if stock.quantity and stock.quantity > 0 else 1.0
-        portfolio[stock.symbol] = portfolio.get(stock.symbol, 0) + shares
+        if symbol in portfolio:
+            portfolio[symbol]["shares"] += shares
+        else:
+            portfolio[symbol] = {
+                "shares": shares,
+                "purchase_price": stock.purchase_price if stock.purchase_price else 0.0,
+            }
 
     start_date = (datetime.now() - timedelta(days=lookback_days)).strftime('%Y-%m-%d')
     end_date = datetime.now().strftime('%Y-%m-%d')
 
     price_data = get_portfolio_data(portfolio, start_date, end_date).dropna(how='all')
+    
     portfolio_value = calculate_portfolio_value(price_data, portfolio)
     daily_returns, _ = calculate_returns(portfolio_value)
-
+    
     volatility = calculate_volatility(daily_returns.dropna())
     return round(float(volatility), 1)
 

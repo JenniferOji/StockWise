@@ -93,10 +93,49 @@ export default function DiversificationWidget() {
     );
   }
 
+  let diff: number | 0;
+  let volatilityDifference: string | null = null;
+
+  if (currentVolatility !== null && withSuggestionsVolatility !== null) {
+    diff = currentVolatility - withSuggestionsVolatility;
+    volatilityDifference = diff.toFixed(1) + '%';
+  }
+
   return (
     <View style={styles.card}>
       <Text style={styles.title}>Diversification Suggestions</Text>
       <Text style={styles.subtitle}>{risk} Preference</Text>
+
+      {volatilityDifference != null && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Portfolio Volatility Comparison</Text>
+          <View style={styles.comparisonRow}>
+            <View style={styles.comparisonColumn}>
+              <Text style={styles.columnHeader}>Current</Text>
+              <View style={styles.metricBox}>
+                <Text style={styles.metricLabel}>Annualised Volatility</Text>
+                <Text style={styles.metricValue}>{(currentVolatility)}</Text>
+              </View>
+            </View>
+            <View style={styles.comparisonColumn}>
+              <Text style={styles.columnHeader}>With Suggestions</Text>
+              <View style={styles.metricBox}>
+                <Text style={styles.metricLabel}>Annualised Volatility</Text>
+                <Text style={styles.metricValue}>{(withSuggestionsVolatility)}</Text>
+              </View>
+            </View>
+          </View>
+          {volatilityDifference !== null && (
+            <Text style={styles.changeText}>
+              {volatilityDifference != null
+                ? `Volatility reduced by ${volatilityDifference}`
+                : `Volatility increased by ${volatilityDifference}`
+              }
+            </Text>
+          )}
+        </View>
+      )}
+
 
       {(currentPortfolio.length > 0 && withSuggestions.length > 0) && (
         <View style={styles.section}>
