@@ -5,7 +5,14 @@ import pandas as pd
 import pickle
 import os
 import json
+from datetime import datetime, timedelta
 from operator import itemgetter
+from risk_metrics import (
+    get_portfolio_data,
+    calculate_portfolio_value,
+    calculate_returns,
+    calculate_volatility,
+)
 
 router = APIRouter()
 
@@ -29,6 +36,27 @@ class StockHolding(BaseModel):
 class DiversificationRequest(BaseModel):
     current_stocks: List[StockHolding]
     user_risk_preference: str
+
+
+def calculate_portfolio_volatility(stocks: List[StockHolding], lookback_days: int = 365):
+    if not stocks:
+        raise ValueError("No stocks provided")
+
+    portfolio = {}
+    for stock in stocks:
+        shares = stock.quantity if stock.quantity and stock.quantity > 0 else 1.0
+        portfolio[stock.symbol] = portfolio.get(stock.symbol, 0) + shares
+
+    start_date = (datetime.now() - timedelta(days=lookback_days)).strftime('%Y-%m-%d')
+    end_date = datetime.now().strftime('%Y-%m-%d')
+
+    price_data = get_portfolio_data(portfolio, start_date, end_date).dropna(how='all')
+    portfolio_value = calculate_portfolio_value(price_data, portfolio)
+    daily_returns, _ = calculate_returns(portfolio_value)
+
+    volatility = calculate_volatility(daily_returns.dropna())
+    return round(float(volatility), 1)
+
 
 def sector_breakdown(stocks: List[StockHolding]):
     if len(stocks) == 0:

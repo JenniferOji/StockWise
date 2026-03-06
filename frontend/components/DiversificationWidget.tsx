@@ -86,48 +86,43 @@ export default function DiversificationWidget() {
       </View>
     );
   }
-
+  
   return (
     <View style={styles.card}>
       <Text style={styles.title}>Diversification Suggestions</Text>
       <Text style={styles.subtitle}>{risk} Preference</Text>
 
-      {(currentPortfolio.length > 0 || withSuggestions.length > 0) && (
+      {(currentPortfolio.length > 0 && withSuggestions.length > 0) && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Sector Diversification</Text>
 
-          {currentPortfolio.length > 0 && (
-            <>
-              <Text style={styles.sectorSubtitle}>Current Portfolio</Text>
-              {currentPortfolio.map((item) => (
-                <View key={`current-${item.sector}`} style={styles.sectorItem}>
-                  <Text style={styles.sectorName}>{item.sector}</Text>
-                  <View style={styles.sectorBarContainer}>
-                    <View style={[styles.sectorBar, { width: `${item.percentage}%` }]} />
-                  </View>
-                  <Text style={styles.sectorPercentage}>{item.percentage.toFixed(1)}%</Text>
+          <>
+            <Text style={styles.sectorSubtitle}>Current Portfolio</Text>
+            {currentPortfolio.map((item) => (
+              <View key={`current-${item.sector}`} style={styles.sectorItem}>
+                <Text style={styles.sectorName}>{item.sector}</Text>
+                <View style={styles.sectorBarContainer}>
+                  <View style={[styles.sectorBar, { width: `${item.percentage}%` }]} />
                 </View>
-              ))}
-            </>
-          )}
+                <Text style={styles.sectorPercentage}>{item.percentage.toFixed(1)}%</Text>
+              </View>
+            ))}
+          </>
 
-          {withSuggestions.length > 0 && (
-            <>
-              <Text style={styles.sectorSubtitle}>With Suggestions</Text>
-              {withSuggestions.map((item) => (
-                <View key={`suggested-${item.sector}`} style={styles.sectorItem}>
-                  <Text style={styles.sectorName}>{item.sector}</Text>
-                  <View style={styles.sectorBarContainer}>
-                    <View style={[styles.sectorBar, { width: `${item.percentage}%` }]} />
-                  </View>
-                  <Text style={styles.sectorPercentage}>{item.percentage.toFixed(1)}%</Text>
+          <>
+            <Text style={styles.sectorSubtitle}>With Suggestions</Text>
+            {withSuggestions.map((item) => (
+              <View key={`suggested-${item.sector}`} style={styles.sectorItem}>
+                <Text style={styles.sectorName}>{item.sector}</Text>
+                <View style={styles.sectorBarContainer}>
+                  <View style={[styles.sectorBar, { width: `${item.percentage}%` }]} />
                 </View>
-              ))}
-            </>
-          )}
+                <Text style={styles.sectorPercentage}>{item.percentage.toFixed(1)}%</Text>
+              </View>
+            ))}
+          </>
         </View>
       )}
-
       <FlatList
         data={suggestions}
         keyExtractor={(item, index) => index.toString()}
