@@ -59,13 +59,11 @@ def calculate_portfolio_volatility(stocks: List[StockHolding], lookback_days: in
     end_date = datetime.now().strftime('%Y-%m-%d')
 
     price_data = get_portfolio_data(portfolio, start_date, end_date).dropna(how='all')
-    
     portfolio_value = calculate_portfolio_value(price_data, portfolio)
     daily_returns, _ = calculate_returns(portfolio_value)
     
     volatility = calculate_volatility(daily_returns.dropna())
     return round(float(volatility), 1)
-
 
 def sector_breakdown(stocks: List[StockHolding]):
     if len(stocks) == 0:

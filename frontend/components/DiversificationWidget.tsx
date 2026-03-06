@@ -93,13 +93,38 @@ export default function DiversificationWidget() {
     );
   }
 
-  let diff: number | 0;
+  let volatilityDiff: number | null = null;
   let volatilityDifference: string | null = null;
 
   if (currentVolatility !== null && withSuggestionsVolatility !== null) {
-    diff = currentVolatility - withSuggestionsVolatility;
-    volatilityDifference = diff.toFixed(1) + '%';
+    volatilityDiff = withSuggestionsVolatility - currentVolatility;
+    volatilityDifference = `${Math.abs(volatilityDiff).toFixed(1)}%`;
   }
+
+  const volatilityChange = (() => {
+    if (volatilityDiff == null || volatilityDifference == null) {
+      return { text: '', color: '#64748b' };
+    }
+
+    if (volatilityDiff > 0) {
+      return {
+        text: `Volatility increased by ${volatilityDifference}`,
+        color: '#dc2626',
+      };
+    }
+
+    if (volatilityDiff < 0) {
+      return {
+        text: `Volatility reduced by ${volatilityDifference}`,
+        color: '#16a34a',
+      };
+    }
+
+    return {
+      text: `Volatility unchanged (${volatilityDifference})`,
+      color: '#64748b',
+    };
+  })();
 
   return (
     <View style={styles.card}>
@@ -126,11 +151,8 @@ export default function DiversificationWidget() {
             </View>
           </View>
           {volatilityDifference !== null && (
-            <Text style={styles.changeText}>
-              {volatilityDifference != null
-                ? `Volatility reduced by ${volatilityDifference}`
-                : `Volatility increased by ${volatilityDifference}`
-              }
+            <Text style={[styles.changeText, { color: volatilityChange.color }]}>
+              {volatilityChange.text}
             </Text>
           )}
         </View>
@@ -240,8 +262,8 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '500',
     color: '#0b3d91',
     marginBottom: 12,
   },
@@ -284,7 +306,6 @@ const styles = StyleSheet.create({
   },
   changeText: {
     fontSize: 11,
-    color: '#16a34a',
     marginTop: 2,
     fontWeight: '500',
   },
