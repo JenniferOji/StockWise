@@ -22,6 +22,8 @@ type DiversificationResponse = {
   comparison?: {
     current_portfolio: SectorAllocation[];
     with_suggestions: SectorAllocation[];
+    current_volatility: number | null;
+    with_suggestions_volatility: number | null;
   };
   message?: string;
 };
@@ -33,6 +35,8 @@ export default function DiversificationWidget() {
   const [error, setError] = useState<string>('');
   const [currentPortfolio, setCurrentPortfolio] = useState<SectorAllocation[]>([]);
   const [withSuggestions, setWithSuggestions] = useState<SectorAllocation[]>([]);
+  const [currentVolatility, setCurrentVolatility] = useState<number | null>(null);
+  const [withSuggestionsVolatility, setWithSuggestionsVolatility] = useState<number | null>(null);
 
   useEffect(() => {
     async function fetchDiversificationSuggestions() {
@@ -48,6 +52,8 @@ export default function DiversificationWidget() {
           setRisk(response.risk_preference);
           setCurrentPortfolio(response.comparison?.current_portfolio || []);
           setWithSuggestions(response.comparison?.with_suggestions || []);
+          setCurrentVolatility(response.comparison?.current_volatility || null);
+          setWithSuggestionsVolatility(response.comparison?.with_suggestions_volatility || null);
         } else {
           setCurrentPortfolio(response?.comparison?.current_portfolio || []);
           setWithSuggestions(response?.comparison?.with_suggestions || []);
@@ -86,7 +92,7 @@ export default function DiversificationWidget() {
       </View>
     );
   }
-  
+
   return (
     <View style={styles.card}>
       <Text style={styles.title}>Diversification Suggestions</Text>

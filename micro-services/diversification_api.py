@@ -99,6 +99,7 @@ def get_diversification_suggestions(request: DiversificationRequest):
             current_stock_symbols.append(stock.symbol)
         
         current_stock_breakdown = sector_breakdown(request.current_stocks)
+        current_portfolio_volatility = calculate_portfolio_volatility(request.current_stocks)
 
         target_clusters = []
         for idx, risk in cluster_risk.items():
@@ -121,6 +122,8 @@ def get_diversification_suggestions(request: DiversificationRequest):
                 "comparison": {
                     "current_portfolio": current_stock_breakdown,
                     "with_suggestions": current_stock_breakdown,
+                    "current_volatility": current_portfolio_volatility,
+                    "with_suggestions_volatility": current_portfolio_volatility,
                 },
             }
         
@@ -161,6 +164,7 @@ def get_diversification_suggestions(request: DiversificationRequest):
             )
 
         projected_stock_breakdown = sector_breakdown(projected_holdings)
+        projected_portfolio_volatility = calculate_portfolio_volatility(projected_holdings)
     
         return {
             "success": True,
@@ -169,6 +173,8 @@ def get_diversification_suggestions(request: DiversificationRequest):
             "comparison": {
                 "current_portfolio": current_stock_breakdown,
                 "with_suggestions": projected_stock_breakdown,
+                "current_volatility": current_portfolio_volatility,
+                "with_suggestions_volatility": projected_portfolio_volatility,
             },
         }
 

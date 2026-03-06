@@ -37,6 +37,8 @@ type SectorAllocation struct {
 type DiversificationComparison struct {
 	CurrentPortfolio []SectorAllocation `json:"current_portfolio"`
 	WithSuggestions  []SectorAllocation `json:"with_suggestions"`
+	CurrentVolatility *float64          `json:"current_volatility"`
+	WithSuggestionsVolatility *float64  `json:"with_suggestions_volatility"`
 }
 
 type DiversificationResponse struct {
