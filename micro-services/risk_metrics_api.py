@@ -8,6 +8,7 @@ import numpy as np
 import onnxruntime as ort
 
 from risk_metrics import (
+    get_stock_data,
     get_portfolio_data, 
     calculate_portfolio_value, 
     calculate_returns,
@@ -45,10 +46,21 @@ class StockRiskCategoryResponse(BaseModel):
 
 CLUSTER_CATEGORY = {
     # average variance from the trained KMeans clusters.
-    "0": "low",
-    "2": "moderate",
-    "1": "high",
+    0: "low",
+    2: "moderate",
+    1: "high",
 }
+
+
+def _predict_cluster_label(session, log_return: float, log_variance: float):
+    model_input = session.get_inputs()[0].name
+    outputs = session.run(
+        None,
+        {model_input: np.array([[log_return, log_variance]], dtype=np.float32)},
+    )
+
+    labels = outputs[0]
+    return int(np.ravel(labels)[0])
 
 @router.get("/")
 def root():
@@ -89,6 +101,62 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
         "success": True,
         "metrics": risk_metrics,
         "portfolio_value": current_portfolio_value
+    }
+
+
+@router.post("/api/stock-risk-categories", response_model=StockRiskCategoryResponse)
+def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
+    if len(portfolio_request.stocks) == 0:
+        raise HTTPException(status_code=400, detail="No stocks provided")
+
+    # building the ticker list for the yfinance query
+    tickers = []
+    for stock in portfolio_request.stocks:
+        ticker = stock.ticker:
+            tickers.append(ticker)
+
+    stock_features = get_stock_data(tickers, portfolio_request.days)
+
+    if len(stock_features) == 0:
+        raise HTTPException(status_code=404, detail="No price data found for the stocks")
+
+    categories: dict[str, List[StockRiskCategory]] = {
+        "low": [],
+        "moderate": [],
+        "high": [],
+    }
+
+    # predict the cluster label for each stock and assign the risk category
+    for stock in portfolio_request.stocks:
+        ticker = stock.ticker
+        # getting the variance and return features for the stock to predict the cluster label
+        features = stock_features.get(ticker)
+        if not features:
+            continue
+
+        # using the model to predict the cluster label 
+        cluster_label = _predict_cluster_label(
+            kmeans_session,
+            features["log_return"],
+            features["log_variance"],
+        )
+
+        category = CLUSTER_CATEGORY.get(cluster_label)
+
+        categories[category].append(
+            StockRiskCategory(
+                ticker=ticker,
+                risk_bucket=category,
+                risk_score=round(float(features["risk_score"]), 6),
+            )
+        )
+
+    total = len(categories["low"]) + len(categories["moderate"]) + len(categories["high"])
+
+    return {
+        "success": True,
+        "categories": categories,
+        "total": total,
     }
 
 
