@@ -63,6 +63,7 @@ func main() {
 	service := app.Party("/api/services")
 	{
 		service.Post("/risk-metrics", routes.GetRiskMetrics)
+		service.Post("/stock-risk-categories", routes.GetStockRiskCategories)
 	}
 
 	app.Listen(":4000")

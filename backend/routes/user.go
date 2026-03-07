@@ -36,6 +36,31 @@ func GetRiskMetrics(ctx iris.Context) {
 	ctx.JSON(result)
 }
 
+func GetStockRiskCategories(ctx iris.Context) {
+	log.Println("[StockRiskCategories] Incoming request to /api/services/stock-risk-categories")
+	var req services.StockRiskCategoriesRequest
+	if err := ctx.ReadJSON(&req); err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.JSON(iris.Map{"error": "Invalid request", "details": err.Error()})
+		return
+	}
+
+	if req.Stocks == nil || len(req.Stocks) == 0 {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.JSON(iris.Map{"error": "No stocks provided"})
+		return
+	}
+
+	result, err := services.CalculateStockRiskCategories(req.Stocks)
+	if err != nil {
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.JSON(iris.Map{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(result)
+}
+
 func GetRiskPreference(ctx iris.Context) {
 	userID := ctx.URLParam("user_id")
 	if userID == "" {
