@@ -11,3 +11,4 @@ micro-services/__pycache__
 ml/models/kmeans_stock_clustering.onnx
 micro-services/.env
 micro-services/.venv
+ml/models/.venv
