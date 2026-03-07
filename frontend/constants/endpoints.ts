@@ -18,6 +18,7 @@ export const endpoints = {
   deleteStock: userEndpoint + "/stock",
   updateRisk: userEndpoint + "/risk",
   getRiskMetrics: servicesEndpoint + "/risk-metrics",
+  getStockRiskCategories: servicesEndpoint + "/stock-risk-categories",
   getRiskPreference: userEndpoint + "/risk-preference",
   getDiversificationSuggestions: userEndpoint + "/diversification-suggestions",
   getStockNews: userEndpoint + "/stock-news"

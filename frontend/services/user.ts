@@ -149,6 +149,30 @@ export const getRiskMetrics = async (userId: number) => {
     }
 };
 
+export const getStockRiskCategories = async (userId: number) => {
+    try {
+        const stocks = await getUserStocks(userId);
+        if (!stocks || !Array.isArray(stocks) || stocks.length === 0) {
+            throw new Error("No stocks found");
+        }
+
+        const formattedStocks = stocks.map((s: any) => ({
+            ticker: s.symbol,
+            shares: s.quantity,
+            purchase_price: s.purchasePrice 
+        }));
+
+        const response = await axios.post(endpoints.getStockRiskCategories, {
+            stocks: formattedStocks
+        });
+
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+};
+
 export const getRiskPreference = async(userId: number) => {
     try {        
         const response = await axios.get(endpoints.getRiskPreference, {
