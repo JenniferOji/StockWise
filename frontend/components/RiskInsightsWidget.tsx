@@ -1,21 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import { getRiskMetrics } from '../services/user';
+import { getRiskMetrics, getStockRiskCategories } from '../services/user';
 import { storage } from '../utils/storage';
 
 type RiskMetrics = {
   success: boolean;
   metrics: {
-    volatility: number;
-    sharpe_ratio: number;
-    max_drawdown: number;
-    var_95: number;
+    volatility: string;
+    sharpe_ratio: string;
+    max_drawdown: string;
+    var_95: string;
   };
   portfolio_value: number;
 };
 
+type StockRiskItem = {
+  ticker: string;
+  risk_bucket: 'low' | 'moderate' | 'high';
+  risk_score: number;
+};
+
+type StockRiskCategories = {
+  success: boolean;
+  categories: {
+    low: StockRiskItem[];
+    moderate: StockRiskItem[];
+    high: StockRiskItem[];
+  };
+  total: number;
+};
+
 export default function RiskInsightsWidget() {
   const [riskData, setRiskData] = useState<RiskMetrics | null>(null);
+  const [stockRiskData, setStockRiskData] = useState<StockRiskCategories | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -26,11 +43,19 @@ export default function RiskInsightsWidget() {
       const userJson = await storage.getItem('user');
       if (userJson) {
         const user = JSON.parse(userJson);
-        const data = await getRiskMetrics(user.ID);
-        if (data && data.success) {
-          setRiskData(data);
+        const [metricsData, categoriesData] = await Promise.all([
+          getRiskMetrics(user.ID),
+          getStockRiskCategories(user.ID),
+        ]);
+
+        if (metricsData && metricsData.success) {
+          setRiskData(metricsData);
         } else {
           setError('Failed to load risk metrics');
+        }
+
+        if (categoriesData && categoriesData.success) {
+          setStockRiskData(categoriesData);
         }
       } else {
         setError('User not found');
@@ -92,6 +117,11 @@ export default function RiskInsightsWidget() {
           <Text style={styles.metricValue}>{riskData.metrics.var_95}</Text>
           <Text style={styles.desc}>Max loss with 95% confidence.</Text>
         </View>
+      </View>
+
+      <View style={styles.riskCategorySection}>
+        <Text style={styles.sectionTitle}>Stock Risk Categories</Text>
+        <Text style={styles.sectionSubtitle}>Grouped by historical annualised volatility.</Text>
       </View>
     </View>
   );
@@ -177,5 +207,19 @@ const styles = StyleSheet.create({
   error: {
     color: 'red',
     marginBottom: 8,
+  },
+  riskCategorySection: {
+    marginTop: 8,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0b3d91',
+    marginBottom: 4,
+  },
+  sectionSubtitle: {
+    fontSize: 12,
+    color: '#64748b',
+    marginBottom: 10,
   },
 });
