@@ -2,6 +2,11 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
 from datetime import datetime, timedelta
+from pathlib import Path
+import os
+import numpy as np
+import onnxruntime as ort
+
 from risk_metrics import (
     get_portfolio_data, 
     calculate_portfolio_value, 
@@ -10,6 +15,10 @@ from risk_metrics import (
 )
 
 router = APIRouter()
+
+BASE_DIR = Path(__file__).resolve().parents[1]
+KMEANS_MODEL_PATH = BASE_DIR / "ml" / "models" / "kmeans_stock_clustering.onnx"
+kmeans_session = ort.InferenceSession(KMEANS_MODEL_PATH, providers=["CPUExecutionProvider"])
 
 # pydantic models for request validation and type checking
 class Stock(BaseModel):
@@ -20,6 +29,27 @@ class Stock(BaseModel):
 class PortfolioRequest(BaseModel):
     stocks: List[Stock]  
     days: int = 365
+
+
+class StockRiskCategory(BaseModel):
+    ticker: str
+    risk_bucket: str
+    risk_score: float
+
+
+class StockRiskCategoryResponse(BaseModel):
+    success: bool
+    categories: dict[str, List[StockRiskCategory]]
+    total: int
+
+
+CLUSTER_CATEGORY = {
+    # average variance from the trained KMeans clusters.
+    "0": "low",
+    "2": "moderate",
+    "1": "high",
+}
+
 
 @router.get("/")
 def root():
@@ -61,4 +91,5 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
         "metrics": risk_metrics,
         "portfolio_value": current_portfolio_value
     }
+
 
