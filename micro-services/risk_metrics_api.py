@@ -18,7 +18,7 @@ router = APIRouter()
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 KMEANS_MODEL_PATH = BASE_DIR / "ml" / "models" / "kmeans_stock_clustering.onnx"
-kmeans_session = ort.InferenceSession(KMEANS_MODEL_PATH, providers=["CPUExecutionProvider"])
+kmeans_session = ort.InferenceSession(str(KMEANS_MODEL_PATH), providers=["CPUExecutionProvider"])
 
 # pydantic models for request validation and type checking
 class Stock(BaseModel):
@@ -49,7 +49,6 @@ CLUSTER_CATEGORY = {
     "2": "moderate",
     "1": "high",
 }
-
 
 @router.get("/")
 def root():

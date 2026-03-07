@@ -97,11 +97,11 @@ with open('cluster_risk_mapping.pkl', 'wb') as f:
     pickle.dump(cluster_risk, f)
 df2.to_csv('clustered_stocks.csv', index=False)
 
-# # https://onnx.ai/sklearn-onnx/introduction.html
-# initial_type = [('float_input', FloatTensorType([None, 2]))]
-# onnx_model = convert_sklearn(kmeans, initial_types=initial_type)
-# with open("kmeans_stock_clustering.onnx", "wb") as f:
-#     f.write(onnx_model.SerializeToString())
+# https://onnx.ai/sklearn-onnx/introduction.html
+initial_type = [('float_input', FloatTensorType([None, 2]))]
+onnx_model = convert_sklearn(kmeans, initial_types=initial_type)
+with open("kmeans_stock_clustering.onnx", "wb") as f:
+    f.write(onnx_model.SerializeToString())
 
 
 # Plotting the clusters

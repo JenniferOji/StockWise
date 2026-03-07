@@ -13,6 +13,51 @@ import pandas as pd
 #     'BND': {'shares': 200, 'purchase_price': 80}
 # }
 
+def get_stock_data(tickers, days):
+    start_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+    end_date = datetime.now().strftime("%Y-%m-%d")
+
+    price_data = yf.download(tickers, start=start_date, end=end_date, auto_adjust=True)["Close"]
+
+    # convert to DataFrame if one ticker is passed to maintain consitency
+    if isinstance(price_data, pd.Series):
+        price_data = price_data.to_frame(name=tickers[0])
+
+    price_data = price_data.ffill().bfill().dropna(how="all")
+    if price_data.empty:
+        return {}
+
+    # training used daily pct returns
+    returns = price_data.pct_change(fill_method=None).dropna(how="all")
+
+    features_by_ticker = {}
+
+    for ticker in returns.columns:
+        ticker_returns = returns[ticker].dropna()
+        if ticker_returns.empty:
+            continue
+
+        annual_return = float(ticker_returns.mean() * 252)
+        annual_variance = float(ticker_returns.var() * 252)
+
+        # log1p must be valid
+        if annual_return <= -1 or annual_variance <= -1:
+            continue
+
+        log_return = float(np.log1p(annual_return))
+        log_variance = float(np.log1p(annual_variance))
+
+        if np.isnan(log_return) or np.isnan(log_variance):
+            continue
+
+        # features that ONNX needs
+        features_by_ticker[ticker] = {
+            "log_return": log_return,
+            "log_variance": log_variance,
+            "risk_score": annual_variance,
+        }
+
+    return features_by_ticker
 
 def get_portfolio_data(portfolio, start_date, end_date):
     tickers = list(portfolio.keys())
