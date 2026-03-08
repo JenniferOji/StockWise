@@ -19,6 +19,7 @@ export default function StockHoldings() {
   // modal controls for the edit popup
   const [modalVisible, setModalVisible] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
+  const [formMode, setFormMode] = useState<'add' | 'edit'>('edit');
   // which stock is currently being edited in the modal
   const [selected, setSelected] = useState<typeof STOCKS[number] | null>(null);
   // editing shares value
@@ -27,6 +28,7 @@ export default function StockHoldings() {
 
   // colour for the search bar icon 
   const iconColor = Colors.light.icon;
+  const isFormValid = Number.isFinite(parseFloat(editShares)) && Number.isFinite(parseFloat(editPurchasePrice)) && parseFloat(editShares) > 0 && parseFloat(editPurchasePrice) > 0;
 
   // function to load the users stocks from the backend  
   const loadUserStocks = async () => {
@@ -39,10 +41,15 @@ export default function StockHoldings() {
         if (stocks && Array.isArray(stocks)) {
           const displayedStocks = stocks.map((stock: any) => {
             const foundStock = STOCKS.find(s => s.symbol === stock.symbol);
+            const shares = Number(stock.quantity ?? stock.shares ?? 0);
+            const purchasePrice = Number(stock.purchasePrice ?? stock.purchase_price ?? 0);
+
             return foundStock ? { 
               ...foundStock, 
               shares: stock.quantity,
               purchasePrice: stock.purchasePrice,
+              // shares: Number.isFinite(shares) ? shares : 0,
+              // purchasePrice: Number.isFinite(purchasePrice) ? purchasePrice : 0,
               dbId: stock.ID } : null;
           }).filter(Boolean);
           setDisplayed(displayedStocks as typeof STOCKS[number][]);
@@ -85,7 +92,7 @@ export default function StockHoldings() {
   }, [displayed, addQuery]);
 
   // Save a new stock to backend and refresh displayed holdings.
-  const saveStock = async (item: typeof STOCKS[number]) => {
+  const saveStock = async (item: typeof STOCKS[number], shares: number, purchasePrice: number) => {
     try {
       const userJson = await storage.getItem('user');
       if (!userJson) return;
@@ -95,8 +102,8 @@ export default function StockHoldings() {
         user.ID,
         item.symbol,
         item.companyName,
-        item.shares,
-        item.purchasePrice,
+        shares,
+        purchasePrice,
         item.sector
       );
 
@@ -157,7 +164,16 @@ export default function StockHoldings() {
             <View style={styles.cardRight}>
               {/* shares and edit button on the right side of the card */}
               <Text style={styles.shares}>{item.shares} shares</Text>
-              <TouchableOpacity style={styles.editButton} onPress={() => { setSelected(item); setEditShares(item.shares.toString()); setModalVisible(true); }}>
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => {
+                  setFormMode('edit');
+                  setSelected(item);
+                  setEditShares(String(item.shares ?? ''));
+                  setEditPurchasePrice(String(item.purchasePrice ?? ''));
+                  setModalVisible(true);
+                }}
+              >
                 <Text style={styles.editText}>edit</Text>
               </TouchableOpacity>
             </View>
@@ -192,10 +208,14 @@ export default function StockHoldings() {
               renderItem={({ item }) => (
                 <Pressable
                   style={styles.addListItem}
-                  onPress={async () => {
-                    await saveStock(item);
+                  onPress={() => {
+                    setFormMode('add');
+                    setSelected(item);
+                    setEditShares('');
+                    setEditPurchasePrice('');
                     Keyboard.dismiss();
                     setAddModalVisible(false);
+                    setModalVisible(true);
                   }}
                 >
                   <Text style={styles.ddSymbol}>{item.symbol}</Text>
@@ -239,37 +259,60 @@ export default function StockHoldings() {
             </View>
 
             <Pressable
-              style={styles.modalSave}
+              style={[styles.modalSave, !isFormValid && styles.modalSaveDisabled]}
+              disabled={!isFormValid}
               onPress={async () => {
-                if (selected && (selected as any).dbId) {
-                  const shares = parseFloat(editShares) || 0;
-                  const purchasePrice = parseFloat(editPurchasePrice) || 0;
+                const shares = parseFloat(editShares);
+                const purchasePrice = parseFloat(editPurchasePrice);
+
+                if (!selected || !Number.isFinite(shares) || !Number.isFinite(purchasePrice) || shares <= 0 || purchasePrice <= 0) {
+                  return;
+                }
+
+                if (formMode === 'add') {
+                  await saveStock(selected, shares, purchasePrice);
+                } else if ((selected as any).dbId) {
                   await updateStock((selected as any).dbId, shares, purchasePrice);
                   await loadUserStocks();
                 }
+
                 setModalVisible(false);
                 setSelected(null);
+                setEditShares('');
+                setEditPurchasePrice('');
               }}
             >
-              <Text style={styles.modalSaveText}>Save Changes</Text>
+              <Text style={styles.modalSaveText}>{formMode === 'add' ? 'Add Stock' : 'Save Changes'}</Text>
             </Pressable>
 
             {/* delete button removes the selected stock from the displayed list */}
+            {formMode === 'edit' && (
+              <Pressable
+                style={styles.modalDelete}
+                onPress={async () => {
+                  if (selected && (selected as any).dbId) {
+                    await deleteStock((selected as any).dbId);
+                    await loadUserStocks();
+                  }
+                  setModalVisible(false);
+                  setSelected(null);
+                  setEditShares('');
+                  setEditPurchasePrice('');
+                }}
+              >
+                <Text style={styles.modalDeleteText}>Delete stock</Text>
+              </Pressable>
+            )}
+
             <Pressable
-              style={styles.modalDelete}
-              onPress={async () => {
-                if (selected && (selected as any).dbId) {
-                  await deleteStock((selected as any).dbId);
-                  await loadUserStocks();
-                }
+              style={styles.modalClose}
+              onPress={() => {
                 setModalVisible(false);
                 setSelected(null);
+                setEditShares('');
+                setEditPurchasePrice('');
               }}
             >
-              <Text style={styles.modalDeleteText}>Delete stock</Text>
-            </Pressable>
-
-            <Pressable style={styles.modalClose} onPress={() => { setModalVisible(false); setSelected(null); }}>
               <Text style={styles.modalCloseText}>close</Text>
             </Pressable>
           </View>
@@ -312,6 +355,7 @@ const styles = StyleSheet.create({
   ddSymbol: { fontSize: 14, fontWeight: '700' },
   ddName: { fontSize: 12, color: '#6b7280' },
   modalSave: { width: '100%', marginTop: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#10b981', alignItems: 'center' },
+  modalSaveDisabled: { backgroundColor: '#9ca3af' },
   modalSaveText: { color: '#fff', fontWeight: '700' },
   modalClose: { width: '100%', marginTop: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#0b3d91', alignItems: 'center' },
   modalCloseText: { color: '#fff', fontWeight: '700' },
