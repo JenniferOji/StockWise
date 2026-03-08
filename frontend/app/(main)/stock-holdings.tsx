@@ -11,12 +11,14 @@ import { addStock, getUserStocks, updateStock, deleteStock } from '../../service
 export default function StockHoldings() {
   // query holds the current search text from the user 
   const [query, setQuery] = useState('');
+  const [addQuery, setAddQuery] = useState('');
   // displayed is the list of stocks the user has added to the page 
   const [displayed, setDisplayed] = useState<typeof STOCKS[number][]>([]);
   // this lives in component state only; consider persisting to AsyncStorage or backend later
 
   // modal controls for the edit popup
   const [modalVisible, setModalVisible] = useState(false);
+  const [addModalVisible, setAddModalVisible] = useState(false);
   // which stock is currently being edited in the modal
   const [selected, setSelected] = useState<typeof STOCKS[number] | null>(null);
   // editing shares value
@@ -67,6 +69,45 @@ export default function StockHoldings() {
     );
   }, [query, displayed]);
 
+  // Search list for stocks user does not currently hold.
+  const stocksToAdd = useMemo(() => {
+    const heldSymbols = new Set(displayed.map((s) => s.symbol));
+    const q = addQuery.trim().toLowerCase();
+
+    return STOCKS.filter((s) => {
+      if (heldSymbols.has(s.symbol)) return false;
+      if (!q) return true;
+      return (
+        s.symbol.toLowerCase().includes(q) ||
+        s.companyName.toLowerCase().includes(q)
+      );
+    });
+  }, [displayed, addQuery]);
+
+  // Save a new stock to backend and refresh displayed holdings.
+  const saveStock = async (item: typeof STOCKS[number]) => {
+    try {
+      const userJson = await storage.getItem('user');
+      if (!userJson) return;
+
+      const user = JSON.parse(userJson);
+      const result = await addStock(
+        user.ID,
+        item.symbol,
+        item.companyName,
+        item.shares,
+        item.purchasePrice,
+        item.sector
+      );
+
+      if (result) {
+        await loadUserStocks();
+      }
+    } catch (err) {
+      console.error('Error saving stock:', err);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* search input - typing shows matches below */}
@@ -86,6 +127,15 @@ export default function StockHoldings() {
               <IconSymbol name="magnifyingglass" size={18} color={iconColor} />
             </View>
           </View>
+          <Pressable
+            style={styles.addButton}
+            onPress={() => {
+              setAddQuery('');
+              setAddModalVisible(true);
+            }}
+          >
+            <Text style={styles.addButtonText}>+ Add</Text>
+          </Pressable>
         </View>
       </View>
       {/* loops through the list of stocks in the displayed list and adds them as cards to the page */}
@@ -114,6 +164,52 @@ export default function StockHoldings() {
           </View>
         )}
       />
+
+      {/* pop up for adding stocks user does not currently hold */}
+      <Modal
+        visible={addModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setAddModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalText}>Add Stock</Text>
+
+            <View style={styles.modalInputContainer}>
+              <TextInput
+                style={styles.modalInput}
+                value={addQuery}
+                onChangeText={setAddQuery}
+                placeholder="Search stocks to add"
+              />
+            </View>
+
+            <FlatList
+              data={stocksToAdd}
+              keyExtractor={(item) => item.symbol}
+              style={styles.addList}
+              renderItem={({ item }) => (
+                <Pressable
+                  style={styles.addListItem}
+                  onPress={async () => {
+                    await saveStock(item);
+                    Keyboard.dismiss();
+                    setAddModalVisible(false);
+                  }}
+                >
+                  <Text style={styles.ddSymbol}>{item.symbol}</Text>
+                  <Text style={styles.ddName}>{item.companyName}</Text>
+                </Pressable>
+              )}
+            />
+
+            <Pressable style={styles.modalClose} onPress={() => setAddModalVisible(false)}>
+              <Text style={styles.modalCloseText}>close</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
       {/* the pop up that displays when the edit button is clicked */}
       <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => { setModalVisible(false); setSelected(null); }}>
@@ -201,6 +297,8 @@ const styles = StyleSheet.create({
   searchRow: { position: 'relative', flexDirection: 'row', alignItems: 'center' },
   searchInputWithIcon: { paddingRight: 44 },
   searchIcon: { position: 'absolute', right: 12, top: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', padding: 8 },
+  addButton: { marginLeft: 8, backgroundColor: '#0b3d91', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, justifyContent: 'center', alignItems: 'center' },
+  addButtonText: { color: '#fff', fontWeight: '700', fontSize: 14 },
   editButton: { marginTop: 8, backgroundColor: '#eef2ff', paddingHorizontal: 8, paddingVertical: 6, borderRadius: 8 },
   editText: { color: '#0b3d91', fontWeight: '700', fontSize: 12 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
@@ -209,6 +307,10 @@ const styles = StyleSheet.create({
   modalInputContainer: { width: '100%', marginBottom: 12 },
   modalLabel: { fontSize: 14, fontWeight: '600', marginBottom: 6, color: '#333' },
   modalInput: { width: '100%', borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10, fontSize: 16, color: '#333' },
+  addList: { width: '100%', maxHeight: 240, marginBottom: 8 },
+  addListItem: { paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f0f0f0', width: '100%' },
+  ddSymbol: { fontSize: 14, fontWeight: '700' },
+  ddName: { fontSize: 12, color: '#6b7280' },
   modalSave: { width: '100%', marginTop: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#10b981', alignItems: 'center' },
   modalSaveText: { color: '#fff', fontWeight: '700' },
   modalClose: { width: '100%', marginTop: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#0b3d91', alignItems: 'center' },
