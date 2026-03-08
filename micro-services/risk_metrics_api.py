@@ -112,8 +112,8 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
     # building the ticker list for the yfinance query
     tickers = []
     for stock in portfolio_request.stocks:
-        ticker = stock.ticker:
-            tickers.append(ticker)
+        ticker = stock.ticker
+        tickers.append(ticker)
 
     stock_features = get_stock_data(tickers, portfolio_request.days)
 

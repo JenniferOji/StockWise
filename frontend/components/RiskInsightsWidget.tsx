@@ -16,7 +16,6 @@ type RiskMetrics = {
 
 type StockRiskItem = {
   ticker: string;
-  risk_bucket: 'low' | 'moderate' | 'high';
   risk_score: number;
 };
 
@@ -122,6 +121,48 @@ export default function RiskInsightsWidget() {
       <View style={styles.riskCategorySection}>
         <Text style={styles.sectionTitle}>Stock Risk Categories</Text>
         <Text style={styles.sectionSubtitle}>Grouped by historical annualised volatility.</Text>
+
+        <View style={styles.categoryCard}>
+          <Text style={styles.lowTitle}>Low Risk</Text>
+          {stockRiskData?.categories.low?.length ? (
+            stockRiskData.categories.low.map((stock) => (
+              <View key={`low-${stock.ticker}`} style={styles.stockRow}>
+                <Text style={styles.stockTicker}>{stock.ticker}</Text>
+                <Text style={styles.stockScore}>{stock.risk_score.toFixed(2)}%</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.emptyCategoryText}>No low risk stocks found.</Text>
+          )}
+        </View>
+
+        <View style={styles.categoryCard}>
+          <Text style={styles.moderateTitle}>Moderate Risk</Text>
+          {stockRiskData?.categories.moderate?.length ? (
+            stockRiskData.categories.moderate.map((stock) => (
+              <View key={`moderate-${stock.ticker}`} style={styles.stockRow}>
+                <Text style={styles.stockTicker}>{stock.ticker}</Text>
+                <Text style={styles.stockScore}>{stock.risk_score.toFixed(2)}%</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.emptyCategoryText}>No moderate risk stocks found.</Text>
+          )}
+        </View>
+
+        <View style={styles.categoryCard}>
+          <Text style={styles.highTitle}>High Risk</Text>
+          {stockRiskData?.categories.high?.length ? (
+            stockRiskData.categories.high.map((stock) => (
+              <View key={`high-${stock.ticker}`} style={styles.stockRow}>
+                <Text style={styles.stockTicker}>{stock.ticker}</Text>
+                <Text style={styles.stockScore}>{stock.risk_score.toFixed(2)}%</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.emptyCategoryText}>No high risk stocks found.</Text>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -221,5 +262,53 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748b',
     marginBottom: 10,
+  },
+  categoryCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e0e7ef',
+    padding: 12,
+    marginBottom: 10,
+  },
+  lowTitle: {
+    color: '#166534',
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  moderateTitle: {
+    color: '#a16207',
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  highTitle: {
+    color: '#b91c1c',
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  stockRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  stockTicker: {
+    color: '#0f172a',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  stockScore: {
+    color: '#334155',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  emptyCategoryText: {
+    color: '#64748b',
+    fontSize: 12,
   },
 });
