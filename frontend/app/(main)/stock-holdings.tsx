@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Image, Text, StyleSheet, View, FlatList, TextInput, Pressable, Keyboard, Modal, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { STOCKS } from '../../constants/stocks';
@@ -11,8 +11,6 @@ import { addStock, getUserStocks, updateStock, deleteStock } from '../../service
 export default function StockHoldings() {
   // query holds the current search text from the user 
   const [query, setQuery] = useState('');
-  // state holding whether the dropdown is visible
-  const [open, setOpen] = useState(false);
   // displayed is the list of stocks the user has added to the page 
   const [displayed, setDisplayed] = useState<typeof STOCKS[number][]>([]);
   // this lives in component state only; consider persisting to AsyncStorage or backend later
@@ -58,73 +56,41 @@ export default function StockHoldings() {
     loadUserStocks();
   }, []);
   
-  // compute matches from the stock list excluding already added items
-  const matches = useMemo(() => {
+  // Filter only stocks the user currently holds.
+  const filteredDisplayed = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return [];
-    // filter stocks by query and exclude ones already in the displayed list - if it type 'r' it will display stock containing r
-    return STOCKS.filter(s => !displayed.some(d => d.symbol === s.symbol) && (s.symbol.toLowerCase().includes(q) || s.companyName.toLowerCase().includes(q)));
+    if (!q) return displayed;
+    return displayed.filter(
+      (s) =>
+        s.symbol.toLowerCase().includes(q) ||
+        s.companyName.toLowerCase().includes(q)
+    );
   }, [query, displayed]);
-  // useMemo avoids recomputing the filtered list on every render unless query/displayed change
-
-  // saving a users stock to the backend
-  const saveStock = async (item: typeof STOCKS[number]) => {
-      try {
-        const userJson = await storage.getItem('user');
-        // if we have user data, parse and use it to save the stock
-        if (userJson) {
-          const user = JSON.parse(userJson);
-          const result = await addStock(user.ID, item.symbol, item.companyName, item.shares, item.purchasePrice, item.sector);
-          if (result) {
-            await loadUserStocks();
-          }
-        }
-      } catch (err) {
-        console.error('Error saving stock:', err);
-      }
-  };
 
   return (
     <SafeAreaView style={styles.container}>
       {/* search input - typing shows matches below */}
       <View style={styles.searchContainer}>
         <View style={styles.searchRow}>
-          <TextInput
-            placeholder="Search"
-            placeholderTextColor="#6B7280"
-            selectionColor="#0b3d91"
-            value={query}
-            onChangeText={(t) => { setQuery(t); setOpen(true); }} 
-            onFocus={() => setOpen(true)}
-            style={[styles.searchInput, styles.searchInputWithIcon]}
-          />          
-          {/* search icon is positioned absolutely inside the input field */}
-          <View 
-          style={styles.searchIcon} pointerEvents="box-none">
-            <IconSymbol name="magnifyingglass" size={18} color={iconColor} />
+          <View style={styles.searchInputContainer}>
+            <TextInput
+              placeholder="Search"
+              placeholderTextColor="#6B7280"
+              selectionColor="#0b3d91"
+              value={query}
+              onChangeText={setQuery}
+              style={[styles.searchInput, styles.searchInputWithIcon]}
+            />
+            {/* search icon is positioned absolutely inside only the input field */}
+            <View style={styles.searchIcon} pointerEvents="none">
+              <IconSymbol name="magnifyingglass" size={18} color={iconColor} />
+            </View>
           </View>
         </View>
-        {/* when the user starts typing it opens the dropdown menu to display stocks */}
-        {open && matches.length > 0 && (
-          <View style={styles.searchDropdown}>
-            <FlatList data={matches} keyExtractor={(i) => i.symbol} renderItem={({ item }) => (
-              // tapping a search result will add that stock as a card to the page - stores it in the displayed list
-              <Pressable style={styles.dropdownItem} onPress={async () => { 
-                setQuery(''); setOpen(false); 
-                await saveStock(item); Keyboard.dismiss();
-              }}>
-           <Text style={styles.ddSymbol}>{item.symbol}</Text>
-
-              {/* show the company name under the symbol in the dropdown */}
-           <Text style={styles.ddName}>{item.companyName}</Text>
-              </Pressable>
-            )} />
-          </View>
-        )}
       </View>
       {/* loops through the list of stocks in the displayed list and adds them as cards to the page */}
       <FlatList
-        data={displayed}
+        data={filteredDisplayed}
         keyExtractor={(item) => (item as any).dbId?.toString() || item.symbol}
         contentContainerStyle={styles.list}
         style={styles.listWrapper}
@@ -230,15 +196,11 @@ const styles = StyleSheet.create({
   cardRight: { marginLeft: 8, alignItems: 'flex-end' },
   shares: { fontSize: 14, fontWeight: '600', color: '#111' },
   searchContainer: { paddingHorizontal: 16, paddingTop: 12 , color: '#111' },
-  searchInput: { flex: 1, backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, elevation: 1, color: '#111' },
+  searchInputContainer: { flex: 1, position: 'relative' },
+  searchInput: { width: '100%', backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, elevation: 1, color: '#111' },
   searchRow: { position: 'relative', flexDirection: 'row', alignItems: 'center' },
   searchInputWithIcon: { paddingRight: 44 },
   searchIcon: { position: 'absolute', right: 12, top: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', padding: 8 },
-  searchIconText: { fontSize: 18, color: '#6B7280' },
-  searchDropdown: { backgroundColor: '#fff', marginTop: 8, borderRadius: 8, maxHeight: 220, elevation: 4, paddingVertical: 4 },
-  dropdownItem: { paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
-  ddSymbol: { fontSize: 14, fontWeight: '700' },
-  ddName: { fontSize: 12, color: '#6b7280' },
   editButton: { marginTop: 8, backgroundColor: '#eef2ff', paddingHorizontal: 8, paddingVertical: 6, borderRadius: 8 },
   editText: { color: '#0b3d91', fontWeight: '700', fontSize: 12 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
