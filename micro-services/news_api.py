@@ -42,7 +42,29 @@ def split_company_name(company_name: str):
     return words[0] if words else company_name
 
 
+def title_mentions_stock(title: str, company_name: str, search_term: str, symbol: str):
+    title_lower = title.lower()
+    company_base = company_name.split('(')[0].strip().lower()
+
+    if search_term and search_term.lower() in title_lower:
+        return True
+
+    if symbol and symbol.lower() in title_lower:
+        return True
+
+    if company_base and company_base in title_lower:
+        return True
+
+    return False
+
+
 def format_date(value: str):
+    if value is None:
+        return None
+
+    if isinstance(value, (int, float)):
+        return datetime.utcfromtimestamp(value).date().isoformat()
+
     fixed = value.replace("Z", "+00:00")
     dt = datetime.fromisoformat(fixed)
     return dt.date().isoformat()
@@ -61,72 +83,111 @@ def get_sentiment_label(text: str):
 
     # ouput is an array with the predicted label as the first element 
     label = outputs[0].flat[0]
-       
+
+    if hasattr(label, "item"):
+        return label.item()
+
     return label
 
 
 
 @router.post("/stock-news")
 def fetch_news_by_names(request: StockRequest):
-    api_key = os.getenv("NEWS_API_KEY") 
+    api_key = os.getenv("FINNHUB_API_KEY") 
     
     names = request.names
 
     if len(names) == 0:
         raise HTTPException(status_code=400, detail="No stock names provided")
+
+    if not api_key:
+        raise HTTPException(status_code=500, detail="Missing FINNHUB_API_KEY")
     
     # get the frist part of the company name 
     search_terms = [split_company_name(name) for name in names]
-    name_query = " OR ".join(search_terms)
+    to_date = datetime.utcnow().date()
+    from_date = to_date - timedelta(days=7)
 
-    params = {
-        "q": name_query,
-        "language": "en",
-        # "from": week,
-        "pageSize": 15,
-        "apiKey": api_key,
-    }
-
-    resp = requests.get("https://newsapi.org/v2/everything", params=params, timeout=10)
-    if resp.status_code != 200:
-        print("NewsAPI error:", resp.status_code, resp.text)
-        raise HTTPException(status_code=resp.status_code, detail=resp.text)
-
-    data = resp.json()
-    articles = data.get("articles", [])
-    
-    # clean articles to only return article image, headline, and the ticker 
+    # clean articles to only return article image, headline, and the ticker
     formatted_articles = []
-    for article in articles:
-        image = article.get("urlToImage")
-        
-        if not image:
-            continue
-        
-        # find the name from the article 
-        title = article.get("title", "").lower()
-        name_in_article = None
-        for i, search_term in enumerate(search_terms):
-            if search_term.lower() in title:
-                name_in_article = names[i]
-                break
-        
-        if not name_in_article:
+    seen_urls = set()
+
+    for i, search_term in enumerate(search_terms):
+        search_resp = requests.get(
+            "https://finnhub.io/api/v1/search",
+            params={"q": search_term, "token": api_key},
+            timeout=10,
+        )
+
+        if search_resp.status_code != 200:
+            print("Finnhub search error:", search_resp.status_code, search_resp.text)
             continue
 
-        sentiment_label = get_sentiment_label(article.get("title", ""))
-        print("Sentiment label:", sentiment_label, "-", article.get("title", ""))
-        
-        # return the fromatted articles 
-        formatted_articles.append({
-            "image": image,
-            "name": name_in_article,
-            "headline": article.get("title"),
-            "source": article.get("source", {}).get("name"),
-            "url": article.get("url"),
-            "date": format_date(article.get("publishedAt")),
-            "sentiment": sentiment_label
-        })
+        search_data = search_resp.json()
+        results = search_data.get("result", [])
+        symbol = results[0].get("symbol") if results else None
+
+        if not symbol:
+            continue
+
+        news_resp = requests.get(
+            "https://finnhub.io/api/v1/company-news",
+            params={
+                "symbol": symbol,
+                "from": from_date.isoformat(),
+                "to": to_date.isoformat(),
+                "token": api_key,
+            },
+            timeout=10,
+        )
+
+        if news_resp.status_code != 200:
+            print("Finnhub news error:", news_resp.status_code, news_resp.text)
+            continue
+
+        articles = news_resp.json()
+
+        if isinstance(articles, dict):
+            print("Finnhub company-news error payload:", articles)
+            continue
+
+        if not isinstance(articles, list):
+            continue
+
+        for article in articles:
+            if not isinstance(article, dict):
+                continue
+
+            image = article.get("image")
+            headline = article.get("headline", "")
+            url = article.get("url")
+
+            if not image or not headline or not url:
+                continue
+
+            if not title_mentions_stock(headline, names[i], search_term, symbol):
+                continue
+
+            if url in seen_urls:
+                continue
+            seen_urls.add(url)
+
+            sentiment = get_sentiment_label(headline)
+            print("Sentiment label:", sentiment, "-", headline)
+
+            formatted_articles.append(
+                {
+                    "image": image,
+                    "name": names[i],
+                    "headline": headline,
+                    "source": article.get("source"),
+                    "url": url,
+                    "date": format_date(article.get("datetime")),
+                    "sentiment": sentiment,
+                }
+            )
+
+    formatted_articles = formatted_articles[:15]
 
     return {
         "success": True,
