@@ -135,6 +135,45 @@ def get_sentiment_label(text: str):
 
     return label
 
+SENTIMENT_SCORE = {
+    "positive": 1,
+    "neutral": 0,
+    "negative": -1
+}
+
+def compute_stock_sentiment(articles):
+
+    stock_scores = {}
+    stock_counts = {}
+
+    for article in articles:
+        stock = article["name"]
+        sentiment = article["sentiment"]
+
+        score = SENTIMENT_SCORE.get(sentiment, 0)
+
+        stock_scores[stock] = stock_scores.get(stock, 0) + score
+        stock_counts[stock] = stock_counts.get(stock, 0) + 1
+
+    results = {}
+
+    for stock in stock_scores:
+        avg_score = stock_scores[stock] / stock_counts[stock]
+
+        if avg_score > 0.25:
+            label = "bullish"
+        elif avg_score < -0.25:
+            label = "bearish"
+        else:
+            label = "neutral"
+
+        results[stock] = {
+            "score": round(avg_score, 3),
+            "label": label,
+            "articles": stock_counts[stock]
+        }
+
+    return results
 
 @router.post("/stock-news")
 def fetch_news_by_names(request: StockRequest):
@@ -151,7 +190,7 @@ def fetch_news_by_names(request: StockRequest):
     # get the frist part of the company name 
     search_terms = [split_company_name(name) for name in names]
     to_date = datetime.utcnow().date()
-    from_date = to_date - timedelta(days=30)
+    from_date = to_date 
 
     # clean articles to only return article image, headline, and the ticker
     formatted_articles = []
@@ -228,7 +267,15 @@ def fetch_news_by_names(request: StockRequest):
         "success": True,
         "names": names,
         "count": len(formatted_articles),
+        # "stock_sentiments": stock_sentiments,
         "articles": formatted_articles
     }
 
-    
+@router.post("/stock-sentiment")
+def get_stock_sentiment(request: StockRequest):
+
+    news = fetch_news_by_names(request)
+
+    sentiment_summary = compute_stock_sentiment(news["articles"])
+
+    return sentiment_summary

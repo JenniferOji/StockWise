@@ -63,8 +63,8 @@ export default function News() {
             <View style={styles.cardBody}>
               <View style={styles.headerRow}>
                 <View style={styles.publisherRow}>
-                  <Text style={styles.source}>{item.source} :</Text>
-                  <Text style={styles.stockName}>{item.name}</Text>
+                  <Text style={styles.source}>{item.name} :</Text>
+                  <Text style={styles.stockName}>{item.source}</Text>
                 </View>
               </View>
               <Text style={styles.headline}>{item.headline}</Text>

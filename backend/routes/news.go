@@ -27,6 +27,11 @@ type Article struct {
 	Sentiment string `json:"sentiment"`
 }
 
+type StockSentiment struct {
+	Score    float64 `json:"score"`
+	Label    string  `json:"label"`
+	Articles int     `json:"articles"`
+}
 type NewsResponse struct {
 	Success  bool      `json:"success"`
 	Names    []string  `json:"names"`
