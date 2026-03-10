@@ -141,7 +141,7 @@ SENTIMENT_SCORE = {
     "negative": -1
 }
 
-def compute_stock_sentiment(articles):
+def compute_stock_sentiment(articles, names: List[str] | None = None):
 
     stock_scores = {}
     stock_counts = {}
@@ -173,10 +173,19 @@ def compute_stock_sentiment(articles):
             "articles": stock_counts[stock]
         }
 
+    if names:
+        for stock_name in names:
+            if stock_name not in results:
+                results[stock_name] = {
+                    "score": 0.0,
+                    "label": "neutral",
+                    "articles": 0,
+                }
+
     return results
 
 @router.post("/stock-news")
-def fetch_news_by_names(request: StockRequest):
+def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
     api_key = os.getenv("FINNHUB_API_KEY") 
     
     names = request.names
@@ -190,7 +199,10 @@ def fetch_news_by_names(request: StockRequest):
     # get the frist part of the company name 
     search_terms = [split_company_name(name) for name in names]
     to_date = datetime.utcnow().date()
-    from_date = to_date 
+    if look_back_days <= 1:
+        from_date = to_date
+    else:
+        from_date = to_date - timedelta(days=look_back_days - 1)
 
     # clean articles to only return article image, headline, and the ticker
     formatted_articles = []
@@ -235,7 +247,7 @@ def fetch_news_by_names(request: StockRequest):
             summary = article.get("summary", "")
             url = article.get("url")
 
-            if not image or not headline or not url:
+            if not headline or not url:
                 continue
 
             if not title_mentions_stock(headline, names[i], search_term, symbol):
@@ -274,8 +286,8 @@ def fetch_news_by_names(request: StockRequest):
 @router.post("/stock-sentiment")
 def get_stock_sentiment(request: StockRequest):
 
-    news = fetch_news_by_names(request)
+    news = fetch_news_by_names(request, look_back_days=7)
 
-    sentiment_summary = compute_stock_sentiment(news["articles"])
+    sentiment_summary = compute_stock_sentiment(news["articles"], request.names)
 
     return sentiment_summary

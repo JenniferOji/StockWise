@@ -237,3 +237,23 @@ export const getStockNews = async (userID: number) => {
     }
 };
 
+export const getStockSentiment = async (userID: number) => {
+    try {
+        const stocks = await getUserStocks(userID);
+        if (!stocks || !Array.isArray(stocks) || stocks.length === 0) {
+            return {};
+        }
+
+        const currentStocks = stocks.map((stock: any) => ({
+            name: stock.company_name,
+        }));
+
+        const response = await axios.post(endpoints.getStockSentiment, {
+            current_stocks: currentStocks,
+        });
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        return {};
+    }
+};

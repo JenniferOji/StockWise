@@ -6,7 +6,7 @@ import { NAV_HEIGHT } from '@/constants/layout';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { storage } from '../../utils/storage';
-import { addStock, getUserStocks, updateStock, deleteStock } from '../../services/user';
+import { addStock, getUserStocks, updateStock, deleteStock, getStockSentiment } from '../../services/user';
 
 export default function StockHoldings() {
   // query holds the current search text from the user 
@@ -14,7 +14,9 @@ export default function StockHoldings() {
   const [addQuery, setAddQuery] = useState('');
   // displayed is the list of stocks the user has added to the page 
   const [displayed, setDisplayed] = useState<typeof STOCKS[number][]>([]);
-  // this lives in component state only; consider persisting to AsyncStorage or backend later
+  // aggregated sentiment for each stock   
+  const [sentiment, setSentiment] = useState<any>({});
+
 
   // modal controls for the edit popup
   const [modalVisible, setModalVisible] = useState(false);
@@ -38,6 +40,10 @@ export default function StockHoldings() {
       if (userJson) {
         const user = JSON.parse(userJson);
         const stocks = await getUserStocks(user.ID);
+        const sentimentData = await getStockSentiment(user.ID);
+
+        setSentiment(sentimentData || {});
+
         if (stocks && Array.isArray(stocks)) {
           const displayedStocks = stocks.map((stock: any) => {
             const foundStock = STOCKS.find(s => s.symbol === stock.symbol);
@@ -65,6 +71,13 @@ export default function StockHoldings() {
     loadUserStocks();
   }, []);
   
+  // colour label for sentiment 
+  const getSentimentColor = (label?: string) => {
+    if (label === 'bullish') return '#00c853';
+    if (label === 'bearish') return '#ff1744';
+    return '#ff9100';
+  };
+
   // Filter only stocks the user currently holds.
   const filteredDisplayed = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -151,14 +164,32 @@ export default function StockHoldings() {
         keyExtractor={(item) => (item as any).dbId?.toString() || item.symbol}
         contentContainerStyle={styles.list}
         style={styles.listWrapper}
-        renderItem={({ item }) => (
+        renderItem={({ item }) => {
+          // find sentiment for this stock using the symbol key
+          const sentimentData = sentiment[item.symbol] || sentiment[item.companyName];
+
+          return (
           <View style={styles.card}>
               <View style={styles.cardLeft}>
               <Image source={{ uri: item.imageUrl }} style={styles.logo} resizeMode="contain" />
             </View>
             <View style={styles.cardBody}>
-              {/* symbol and company name shown in the card body */}
-              <Text style={styles.symbol}>{item.symbol}</Text>
+              {/* symbol and sentiment indicator shown in the card body */}
+              <View style={styles.symbolRow}>
+                <Text style={styles.symbol}>{item.symbol}</Text>
+
+                {/* display sentiment indicator if its available */}
+                {sentimentData && (
+                  <View
+                    style={[
+                      styles.sentimentDot,
+                      { backgroundColor: getSentimentColor(sentimentData.label) }
+                    ]}
+                  />
+                )}
+              </View>
+
+              {/* company name */}
               <Text style={styles.name}>{item.companyName}</Text>
             </View>
             <View style={styles.cardRight}>
@@ -178,7 +209,8 @@ export default function StockHoldings() {
               </TouchableOpacity>
             </View>
           </View>
-        )}
+        );
+        }}
       />
 
       {/* pop up for adding stocks user does not currently hold */}
@@ -361,4 +393,7 @@ const styles = StyleSheet.create({
   modalCloseText: { color: '#fff', fontWeight: '700' },
   modalDelete: { width: '100%', marginTop: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#ef4444', alignItems: 'center' },
   modalDeleteText: { color: '#fff', fontWeight: '700' },
+  sentiment: {fontSize: 12,fontWeight: '700', marginTop: 4, textTransform: 'capitalize'},
+  symbolRow: {flexDirection: 'row',alignItems: 'center',gap: 6},
+  sentimentDot: {width: 10,height: 10,borderRadius: 5},
 });
