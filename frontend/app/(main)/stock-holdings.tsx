@@ -6,7 +6,14 @@ import { NAV_HEIGHT } from '@/constants/layout';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { storage } from '../../utils/storage';
-import { addStock, getUserStocks, updateStock, deleteStock, getStockSentiment } from '../../services/user';
+import { addStock, getUserStocks, updateStock, deleteStock, getStockSentiment, getSingleStockSentiment } from '../../services/user';
+
+type SentimentMap = {
+  [symbol: string]: {
+    label: string;
+    score?: number;
+  };
+};
 
 export default function StockHoldings() {
   // query holds the current search text from the user 
@@ -15,7 +22,7 @@ export default function StockHoldings() {
   // displayed is the list of stocks the user has added to the page 
   const [displayed, setDisplayed] = useState<typeof STOCKS[number][]>([]);
   // aggregated sentiment for each stock   
-  const [sentiment, setSentiment] = useState<any>({});
+  const [sentiment, setSentiment] = useState<SentimentMap>({});
 
 
   // modal controls for the edit popup
@@ -122,6 +129,13 @@ export default function StockHoldings() {
 
       if (result) {
         await loadUserStocks();
+
+        const newSentiment = await getSingleStockSentiment([item.symbol]);
+
+        setSentiment(prev => ({
+          ...prev,
+          ...newSentiment
+        }));
       }
     } catch (err) {
       console.error('Error saving stock:', err);

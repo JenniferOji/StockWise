@@ -257,3 +257,20 @@ export const getStockSentiment = async (userID: number) => {
         return {};
     }
 };
+
+export const getSingleStockSentiment = async (symbols: string[]) => {
+    try {
+        if (!symbols || symbols.length == 0) {
+            return {};
+        }
+
+        const response = await axios.post(endpoints.getStockSentiment, {
+            symbols: symbols,
+        });
+
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        return {};
+    }
+};
