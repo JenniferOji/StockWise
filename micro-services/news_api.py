@@ -193,6 +193,7 @@ def fetch_news_by_names(request: StockRequest):
         for article in articles:
             image = article.get("image")
             headline = article.get("headline", "")
+            summary = article.get("summary", "")
             url = article.get("url")
 
             if not image or not headline or not url:
@@ -205,7 +206,9 @@ def fetch_news_by_names(request: StockRequest):
                 continue
             seen_urls.add(url)
 
-            sentiment = get_sentiment_label(headline)
+            # sentiment = get_sentiment_label(headline)
+            text = headline + " " + summary
+            sentiment = get_sentiment_label(text)
 
             formatted_articles.append(
                 {
