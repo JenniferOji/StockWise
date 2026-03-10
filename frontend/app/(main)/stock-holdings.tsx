@@ -158,6 +158,23 @@ export default function StockHoldings() {
           </Pressable>
         </View>
       </View>
+      {/* sentiment legend bar to eplain indicators  */}
+      <View style={styles.sentimentLegend}>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, { backgroundColor: '#00c853' }]} />
+          <Text style={styles.legendText}>Bullish</Text>
+        </View>
+
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, { backgroundColor: '#ff9100' }]} />
+          <Text style={styles.legendText}>Neutral</Text>
+        </View>
+
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, { backgroundColor: '#ff1744' }]} />
+          <Text style={styles.legendText}>Bearish</Text>
+        </View>
+      </View>
       {/* loops through the list of stocks in the displayed list and adds them as cards to the page */}
       <FlatList
         data={filteredDisplayed}
@@ -396,4 +413,8 @@ const styles = StyleSheet.create({
   sentiment: {fontSize: 12,fontWeight: '700', marginTop: 4, textTransform: 'capitalize'},
   symbolRow: {flexDirection: 'row',alignItems: 'center',gap: 6},
   sentimentDot: {width: 10,height: 10,borderRadius: 5},
+  sentimentLegend: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: 16, marginTop: 8, marginBottom: 4, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: '#edeaea', borderRadius: 10, elevation: 1 },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  legendDot: { width: 10, height: 10, borderRadius: 5 },
+  legendText: { fontSize: 12, fontWeight: '600', color: '#444' },
 });
