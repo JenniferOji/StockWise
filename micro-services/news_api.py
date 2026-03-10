@@ -10,8 +10,17 @@ from pydantic import BaseModel
 from typing import List
 
 from dotenv import load_dotenv
-load_dotenv()
+import re
+import nltk
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
 
+nltk.download("punkt")
+nltk.download("punkt_tab")
+nltk.download("wordnet")
+
+load_dotenv()
+lemm = WordNetLemmatizer()
 router = APIRouter()
 
 # load the onnx models from the file path
@@ -69,26 +78,62 @@ def format_date(value: str):
     dt = datetime.fromisoformat(fixed)
     return dt.date().isoformat()
 
+def reduce_lengthening(text):
+    pattern = re.compile(r"(.)\1{2,}")
+    return pattern.sub(r"\1\1", text)
+
+
+def text_preprocess(doc: str):
+
+    temp = doc.lower()
+
+    temp = re.sub("@[A-Za-z0-9_]+", "", temp)
+    temp = re.sub("#[A-Za-z0-9_]+", "", temp)
+
+    temp = re.sub(r"http\S+", "", temp)
+    temp = re.sub(r"www.\S+", "", temp)
+
+    temp = re.sub("[0-9]", "", temp)
+    temp = re.sub("'", " ", temp)
+
+    temp = word_tokenize(temp)
+
+    temp = [reduce_lengthening(w) for w in temp]
+
+    temp = [lemm.lemmatize(w) for w in temp]
+
+    temp = [w for w in temp if len(w) > 1]
+
+    temp = " ".join(temp)
+
+    return temp
 
 def get_sentiment_label(text: str):
-    # preprocess the text using the onnx preprocessor
+
+    clean_text = text_preprocess(text)
+
     preproc_input = preproc_sess.get_inputs()[0].name
-    preproc_out = preproc_sess.run(None, {preproc_input: np.array([[text]], dtype=object)})
-    #  extract the features from the preprocessor output 
+
+    preproc_out = preproc_sess.run(
+        None,
+        {preproc_input: np.array([[clean_text]], dtype=object)}
+    )
+
     features = preproc_out[0]
 
-    # running the features through the onnx model to get the sentiment label
     model_input = model_sess.get_inputs()[0].name
-    outputs = model_sess.run(None, {model_input: features})
 
-    # ouput is an array with the predicted label as the first element 
+    outputs = model_sess.run(
+        None,
+        {model_input: features}
+    )
+
     label = outputs[0].flat[0]
 
     if hasattr(label, "item"):
-        return label.item()
+        label = label.item()
 
     return label
-
 
 
 @router.post("/stock-news")
@@ -106,58 +151,46 @@ def fetch_news_by_names(request: StockRequest):
     # get the frist part of the company name 
     search_terms = [split_company_name(name) for name in names]
     to_date = datetime.utcnow().date()
-    from_date = to_date - timedelta(days=7)
+    from_date = to_date - timedelta(days=30)
 
     # clean articles to only return article image, headline, and the ticker
     formatted_articles = []
     seen_urls = set()
 
     for i, search_term in enumerate(search_terms):
-        search_resp = requests.get(
-            "https://finnhub.io/api/v1/search",
-            params={"q": search_term, "token": api_key},
-            timeout=10,
-        )
+        try:
+            search_resp = requests.get(
+                "https://finnhub.io/api/v1/search",
+                params={"q": search_term, "token": api_key},
+                timeout=10,
+            )
+            search_resp.raise_for_status()
+            search_data = search_resp.json()
 
-        if search_resp.status_code != 200:
-            print("Finnhub search error:", search_resp.status_code, search_resp.text)
-            continue
+            results = search_data.get("result", [])
+            symbol = results[0].get("symbol") if results else None
+            if not symbol:
+                continue
 
-        search_data = search_resp.json()
-        results = search_data.get("result", [])
-        symbol = results[0].get("symbol") if results else None
-
-        if not symbol:
-            continue
-
-        news_resp = requests.get(
-            "https://finnhub.io/api/v1/company-news",
-            params={
-                "symbol": symbol,
-                "from": from_date.isoformat(),
-                "to": to_date.isoformat(),
-                "token": api_key,
-            },
-            timeout=10,
-        )
-
-        if news_resp.status_code != 200:
-            print("Finnhub news error:", news_resp.status_code, news_resp.text)
-            continue
-
-        articles = news_resp.json()
-
-        if isinstance(articles, dict):
-            print("Finnhub company-news error payload:", articles)
+            news_resp = requests.get(
+                "https://finnhub.io/api/v1/company-news",
+                params={
+                    "symbol": symbol,
+                    "from": from_date.isoformat(),
+                    "to": to_date.isoformat(),
+                    "token": api_key,
+                },
+                timeout=10,
+            )
+            news_resp.raise_for_status()
+            articles = news_resp.json()
+        except requests.RequestException:
             continue
 
         if not isinstance(articles, list):
             continue
 
         for article in articles:
-            if not isinstance(article, dict):
-                continue
-
             image = article.get("image")
             headline = article.get("headline", "")
             url = article.get("url")
@@ -173,7 +206,6 @@ def fetch_news_by_names(request: StockRequest):
             seen_urls.add(url)
 
             sentiment = get_sentiment_label(headline)
-            print("Sentiment label:", sentiment, "-", headline)
 
             formatted_articles.append(
                 {
@@ -187,7 +219,7 @@ def fetch_news_by_names(request: StockRequest):
                 }
             )
 
-    formatted_articles = formatted_articles[:15]
+    # formatted_articles = formatted_articles[:15]
 
     return {
         "success": True,
