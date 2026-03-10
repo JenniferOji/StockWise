@@ -13,6 +13,7 @@ import StockHoldings from './stock-holdings';
 import News from './news';
 import PortfolioInsights from './portfolio-insights';
 import Insights from './insights';
+import SentimentPage from './sentiment';
 import Settings from './settings';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -31,7 +32,7 @@ export default function RootLayout() {
           <Drawer.Navigator drawerContent={(props) => <DrawerContent {...props} />} screenOptions={{ header: ({ navigation }: { navigation?: any }) => React.createElement(TopNavBar as any, { navigation }), headerShown: true }}>
             <Drawer.Screen name="stock-holdings" component={StockHoldings} />
             <Drawer.Screen name="news" component={News} />
-            {/* <Drawer.Screen name="portfolio-insights" component={PortfolioInsights} /> */}
+            <Drawer.Screen name="sentiment" component={SentimentPage} />
             <Drawer.Screen name="insights" component={Insights} />
             <Drawer.Screen name="settings" component={Settings} />
           </Drawer.Navigator>

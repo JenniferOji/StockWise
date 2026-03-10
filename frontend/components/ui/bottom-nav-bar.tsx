@@ -12,19 +12,19 @@ export default function BottomNavBar() {
 
   return (
     <View style={[styles.container, { backgroundColor: Colors[scheme ?? 'light'].background, borderTopColor: '#e6e6e6' }]}>
-      <Pressable style={styles.tab} onPress={() => router.push('../../(main)/news' as any)}>
+      <Pressable style={styles.tab} onPress={() => router.push('/(main)/news' as any)}>
         <IconSymbol name="newspaper.fill" size={22} color={tint} />
         <Text style={[styles.label, { color: tint }]}>News</Text>
       </Pressable>
-      <Pressable style={styles.tab} onPress={() => router.push('../../(main)/stock-holdings' as any)}>
+      <Pressable style={styles.tab} onPress={() => router.push('/(main)/stock-holdings' as any)}>
         <IconSymbol name="house.fill" size={24} color={tint} />
         <Text style={[styles.label, { color: tint }]}>Home</Text>
       </Pressable>
-      {/* <Pressable style={styles.tab} onPress={() => router.push('../../(main)/portfolio-insights' as any)}>
+      <Pressable style={styles.tab} onPress={() => router.push('/(main)/sentiment' as any)}>
         <IconSymbol name="chart.bar.fill" size={22} color={tint} />
-        <Text style={[styles.label, { color: tint }]}>Insights</Text>
-      </Pressable> */}
-      <Pressable style={styles.tab} onPress={() => router.push('../../(main)/insights' as any)}>
+        <Text style={[styles.label, { color: tint }]}>Sentiment</Text>
+      </Pressable>
+      <Pressable style={styles.tab} onPress={() => router.push('/(main)/insights' as any)}>
         <IconSymbol name="chart.bar.fill" size={22} color={tint} />
         <Text style={[styles.label, { color: tint }]}>Insights</Text>
       </Pressable>

@@ -6,14 +6,7 @@ import { NAV_HEIGHT } from '@/constants/layout';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { storage } from '../../utils/storage';
-import { addStock, getUserStocks, updateStock, deleteStock, getStockSentiment, getSingleStockSentiment } from '../../services/user';
-
-type SentimentMap = {
-  [symbol: string]: {
-    label: string;
-    score?: number;
-  };
-};
+import { addStock, getUserStocks, updateStock, deleteStock } from '../../services/user';
 
 export default function StockHoldings() {
   // query holds the current search text from the user 
@@ -21,8 +14,6 @@ export default function StockHoldings() {
   const [addQuery, setAddQuery] = useState('');
   // displayed is the list of stocks the user has added to the page 
   const [displayed, setDisplayed] = useState<typeof STOCKS[number][]>([]);
-  // aggregated sentiment for each stock   
-  const [sentiment, setSentiment] = useState<SentimentMap>({});
 
 
   // modal controls for the edit popup
@@ -47,9 +38,6 @@ export default function StockHoldings() {
       if (userJson) {
         const user = JSON.parse(userJson);
         const stocks = await getUserStocks(user.ID);
-        const sentimentData = await getStockSentiment(user.ID);
-
-        setSentiment(sentimentData || {});
 
         if (stocks && Array.isArray(stocks)) {
           const displayedStocks = stocks.map((stock: any) => {
@@ -77,13 +65,6 @@ export default function StockHoldings() {
   useEffect(() => {
     loadUserStocks();
   }, []);
-  
-  // colour label for sentiment 
-  const getSentimentColor = (label?: string) => {
-    if (label === 'bullish') return '#00c853';
-    if (label === 'bearish') return '#ff1744';
-    return '#ff9100';
-  };
 
   // Filter only stocks the user currently holds.
   const filteredDisplayed = useMemo(() => {
@@ -129,13 +110,6 @@ export default function StockHoldings() {
 
       if (result) {
         await loadUserStocks();
-
-        const newSentiment = await getSingleStockSentiment([item.symbol]);
-
-        setSentiment(prev => ({
-          ...prev,
-          ...newSentiment
-        }));
       }
     } catch (err) {
       console.error('Error saving stock:', err);
@@ -172,23 +146,6 @@ export default function StockHoldings() {
           </Pressable>
         </View>
       </View>
-      {/* sentiment legend bar to eplain indicators  */}
-      <View style={styles.sentimentLegend}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#00c853' }]} />
-          <Text style={styles.legendText}>Bullish</Text>
-        </View>
-
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#ff9100' }]} />
-          <Text style={styles.legendText}>Neutral</Text>
-        </View>
-
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#ff1744' }]} />
-          <Text style={styles.legendText}>Bearish</Text>
-        </View>
-      </View>
       {/* loops through the list of stocks in the displayed list and adds them as cards to the page */}
       <FlatList
         data={filteredDisplayed}
@@ -196,28 +153,14 @@ export default function StockHoldings() {
         contentContainerStyle={styles.list}
         style={styles.listWrapper}
         renderItem={({ item }) => {
-          // find sentiment for this stock using the symbol key
-          const sentimentData = sentiment[item.symbol] || sentiment[item.companyName];
-
           return (
           <View style={styles.card}>
               <View style={styles.cardLeft}>
               <Image source={{ uri: item.imageUrl }} style={styles.logo} resizeMode="contain" />
             </View>
             <View style={styles.cardBody}>
-              {/* symbol and sentiment indicator shown in the card body */}
-              <View style={styles.symbolRow}>
+              <View>
                 <Text style={styles.symbol}>{item.symbol}</Text>
-
-                {/* display sentiment indicator if its available */}
-                {sentimentData && (
-                  <View
-                    style={[
-                      styles.sentimentDot,
-                      { backgroundColor: getSentimentColor(sentimentData.label) }
-                    ]}
-                  />
-                )}
               </View>
 
               {/* company name */}
@@ -424,11 +367,4 @@ const styles = StyleSheet.create({
   modalCloseText: { color: '#fff', fontWeight: '700' },
   modalDelete: { width: '100%', marginTop: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#ef4444', alignItems: 'center' },
   modalDeleteText: { color: '#fff', fontWeight: '700' },
-  sentiment: {fontSize: 12,fontWeight: '700', marginTop: 4, textTransform: 'capitalize'},
-  symbolRow: {flexDirection: 'row',alignItems: 'center',gap: 6},
-  sentimentDot: {width: 10,height: 10,borderRadius: 5},
-  sentimentLegend: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: 16, marginTop: 8, marginBottom: 4, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: '#edeaea', borderRadius: 10, elevation: 1 },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  legendDot: { width: 10, height: 10, borderRadius: 5 },
-  legendText: { fontSize: 12, fontWeight: '600', color: '#444' },
 });
