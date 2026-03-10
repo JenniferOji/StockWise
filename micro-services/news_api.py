@@ -84,9 +84,7 @@ def reduce_lengthening(text):
 
 
 def text_preprocess(doc: str):
-
     temp = doc.lower()
-
     temp = re.sub("@[A-Za-z0-9_]+", "", temp)
     temp = re.sub("#[A-Za-z0-9_]+", "", temp)
 
@@ -99,24 +97,21 @@ def text_preprocess(doc: str):
     temp = word_tokenize(temp)
 
     temp = [reduce_lengthening(w) for w in temp]
-
     temp = [lemm.lemmatize(w) for w in temp]
-
     temp = [w for w in temp if len(w) > 1]
-
     temp = " ".join(temp)
 
     return temp
 
-def get_sentiment_label(text: str):
+def get_sentiment_labels(texts: List[str]):
 
-    clean_text = text_preprocess(text)
+    clean_texts = [text_preprocess(t) for t in texts]
 
     preproc_input = preproc_sess.get_inputs()[0].name
 
     preproc_out = preproc_sess.run(
         None,
-        {preproc_input: np.array([[clean_text]], dtype=object)}
+        {preproc_input: np.array([[t] for t in clean_texts], dtype=object)}
     )
 
     features = preproc_out[0]
@@ -128,12 +123,12 @@ def get_sentiment_label(text: str):
         {model_input: features}
     )
 
-    label = outputs[0].flat[0]
+    labels = outputs[0].flatten()
 
-    if hasattr(label, "item"):
-        label = label.item()
-
-    return label
+    return [
+        label.item() if hasattr(label, "item") else label
+        for label in labels
+    ]
 
 SENTIMENT_SCORE = {
     "positive": 1,
@@ -208,6 +203,9 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
     formatted_articles = []
     seen_urls = set()
 
+    article_texts = []
+    article_refs = []
+
     for i, search_term in enumerate(search_terms):
         try:
             search_resp = requests.get(
@@ -259,21 +257,25 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
 
             # sentiment = get_sentiment_label(headline)
             text = headline + " " + summary
-            sentiment = get_sentiment_label(text)
 
-            formatted_articles.append(
-                {
-                    "image": image,
-                    "name": names[i],
-                    "headline": headline,
-                    "source": article.get("source"),
-                    "url": url,
-                    "date": format_date(article.get("datetime")),
-                    "sentiment": sentiment,
-                }
-            )
+            article_texts.append(text)
+
+            article_refs.append({
+                "image": image,
+                "name": names[i],
+                "headline": headline,
+                "source": article.get("source"),
+                "url": url,
+                "date": format_date(article.get("datetime")),
+            })
 
     # formatted_articles = formatted_articles[:15]
+
+    sentiments = get_sentiment_labels(article_texts) if article_texts else []
+
+    for article, sentiment in zip(article_refs, sentiments):
+        article["sentiment"] = sentiment
+        formatted_articles.append(article)
 
     return {
         "success": True,
