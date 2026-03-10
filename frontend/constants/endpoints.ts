@@ -21,7 +21,6 @@ export const endpoints = {
   getStockRiskCategories: servicesEndpoint + "/stock-risk-categories",
   getRiskPreference: userEndpoint + "/risk-preference",
   getDiversificationSuggestions: userEndpoint + "/diversification-suggestions",
-  getStockNews: userEndpoint + "/stock-news"
-
-
+  getStockNews: userEndpoint + "/stock-news",
+  getStockSentiment: userEndpoint + "/stock-sentiment"
 };

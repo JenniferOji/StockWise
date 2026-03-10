@@ -104,3 +104,61 @@ func GetStockNews(ctx iris.Context) {
 
 	ctx.JSON(newsResp)
 }
+
+func GetStockSentiment(ctx iris.Context) {
+
+	var req NewsRequest
+	if err := ctx.ReadJSON(&req); err != nil {
+		ctx.StatusCode(400)
+		return
+	}
+
+	names := make([]string, len(req.CurrentStocks))
+	for i, stock := range req.CurrentStocks {
+		names[i] = stock.Name
+	}
+
+	if len(names) == 0 {
+		ctx.StatusCode(400)
+		ctx.JSON(map[string]string{"error": "No stock names provided"})
+		return
+	}
+
+	apiReq := NewsAPIRequest{Names: names}
+	reqBody, _ := json.Marshal(apiReq)
+
+	resp, err := http.Post(
+		"http://localhost:8000/stock-sentiment",
+		"application/json",
+		bytes.NewBuffer(reqBody),
+	)
+
+	if err != nil {
+		ctx.StatusCode(500)
+		ctx.JSON(map[string]string{"error": "Failed to call sentiment api"})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		ctx.StatusCode(500)
+		ctx.JSON(map[string]string{"error": "Failed to read resp"})
+		return
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		ctx.StatusCode(resp.StatusCode)
+		ctx.Write(body)
+		return
+	}
+
+	var sentimentResp map[string]StockSentiment
+	if err := json.Unmarshal(body, &sentimentResp); err != nil {
+		ctx.StatusCode(500)
+		ctx.JSON(map[string]string{"error": "Failed to parse res"})
+		return
+	}
+
+	ctx.JSON(sentimentResp)
+}

@@ -57,6 +57,7 @@ func main() {
 		// user.Get("/news", routes.GetNews)
 		user.Post("/diversification-suggestions", routes.GetDiversificationSuggestions)
 		user.Post("/stock-news", routes.GetStockNews)
+		user.Post("/stock-sentiment", routes.GetStockSentiment)
 
 	}
 
