@@ -21,6 +21,18 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 KMEANS_MODEL_PATH = BASE_DIR / "ml" / "models" / "kmeans_stock_clustering.onnx"
 kmeans_session = ort.InferenceSession(str(KMEANS_MODEL_PATH), providers=["CPUExecutionProvider"])
 
+# the scaler is needed to scale the input features for the kmeans model to predict the cluster labels for the stocks 
+SCALER_PATH = BASE_DIR / "ml" / "models" / "stock_scaler.pkl"
+with open(SCALER_PATH, "rb") as f:
+    scaler = pickle.load(f)
+
+# The cluster risk mapping is needed to assign the risk category to the stocks based on the predicted cluster label from the kmeans model
+CLUSTER_RISK_PATH = BASE_DIR / "ml" / "models" / "cluster_risk_mapping.pkl"
+with open(CLUSTER_RISK_PATH, "rb") as f:
+    cluster_risk_mapping = pickle.load(f)
+
+CLUSTER_CATEGORY = cluster_risk_mapping
+
 # pydantic models for request validation and type checking
 class Stock(BaseModel):
     ticker: str  
@@ -29,7 +41,7 @@ class Stock(BaseModel):
 
 class PortfolioRequest(BaseModel):
     stocks: List[Stock]  
-    days: int = 365
+    days: int = 730
 
 
 class StockRiskCategory(BaseModel):
@@ -43,23 +55,20 @@ class StockRiskCategoryResponse(BaseModel):
     categories: dict[str, List[StockRiskCategory]]
     total: int
 
+def predict_cluster_label(session, log_return: float, log_variance: float):
 
-CLUSTER_CATEGORY = {
-    # average variance from the trained KMeans clusters.
-    0: "low",
-    2: "moderate",
-    1: "high",
-}
+    features = np.array([[log_return, log_variance]])
+    scaled_features = scaler.transform(features)
 
-
-def _predict_cluster_label(session, log_return: float, log_variance: float):
     model_input = session.get_inputs()[0].name
+
     outputs = session.run(
         None,
-        {model_input: np.array([[log_return, log_variance]], dtype=np.float32)},
+        {model_input: scaled_features.astype(np.float32)}
     )
 
     labels = outputs[0]
+
     return int(np.ravel(labels)[0])
 
 @router.get("/")
@@ -135,13 +144,13 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
             continue
 
         # using the model to predict the cluster label 
-        cluster_label = _predict_cluster_label(
+        cluster_label = predict_cluster_label(
             kmeans_session,
             features["log_return"],
             features["log_variance"],
         )
 
-        category = CLUSTER_CATEGORY.get(cluster_label)
+        category = CLUSTER_CATEGORY.get(cluster_label, "moderate")
 
         categories[category].append(
             StockRiskCategory(

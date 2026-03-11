@@ -11,32 +11,52 @@ from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
 import pickle
 
-# List of stock tickers
-tickers = [
-    "AAPL", "MSFT", "AMZN", "GOOGL", "GOOG", "META", "NVDA", "TSLA", "BRK-B", "JPM",
-    "V", "UNH", "JNJ", "WMT", "PG", "MA", "HD", "BAC", "PFE", "DIS", "ADBE", "CMCSA",
-    "NFLX", "KO", "XOM", "MRK", "PEP", "INTC", "T", "ABBV", "COST", "CRM", "AVGO",
-    "NKE", "MCD", "TMO", "TXN", "ORCL", "CSCO", "LLY", "QCOM", "C", "NEE", "PM",
-    "BMY", "AMAT", "LOW", "SBUX", "RTX", "AXP", "INTU", "GILD", "MDT", "BLK", "HON",
-    "UPS", "GS", "MS", "PLD", "ISRG", "LMT", "BKNG", "ZM", "SNY", "ADP", "DUK",
-    "GE", "CVX", "SPGI", "NOW", "AMGN", "CAT", "SYK", "CB", "TGT", "DE",
-    "PNC", "USB", "BDX", "ADSK", "MO", "ELV", "CL", "FIS", "TJX", "CI", "SCHW",
-    "MDLZ", "MMC", "ETN", "VRTX", "AON", "ICE", "COF", "BSX", "NOC", "KMB",
-    "AEP", "EOG", "HUM", "KMI", "CME", "CSX", "SHW", "MCO", "LRCX", "BIIB", "ZTS",
-    "WM", "TFC", "EQIX", "APD", "SO", "ECL", "ROP", "DHR", "MU", "LULU", "ILMN", "EA",
-    "PNR", "CLX", "KLAC", "MAR", "PAYX", "ADM", "OXY", "STZ", "AIG", "DLR", "SLB",
-    "EXC", "BBY", "HCA", "EXPE", "NVR", "ALGN", "MSI", "VZ", "ESS", "PLTR", "SYF",
-    "ORLY", "PGR", "AKAM", "KR", "F", "HPE", "EW", "HSY", "TFX", "NEM",
-    "CPRT", "CTAS", "FTNT", "DG", "DOW", "APH", "ANET", "FTV", "RMD", "URI", "A",
-    "PNW", "VFC", "GLW", "ABT", "AFL", "AEE", "PEG", "DLTR", "NCLH", "MKTX", "CPB",
-    "NRG", "KHC", "AES", "CFG", "CNP", "MET", "ETR", "VRSK", "PPL",
-    "ARE", "BB", "AMC", "GME", "NIO", "XPEV", "LI", "WKHS", "RIVN", "FUBO", "PLTR",
-      "AFRM", "HOOD", "COIN", "DKNG", "CLOV", "PYPL", "ZM", "SNOW",
-    "MDB", "CRWD", "NET", "ZS", "OKTA", "ROKU", "TWLO", "UBER", "LYFT", "DASH"
+# List of stock tickers grouped by different sectors/ types to ensure diversification in the the dataset 
+sp500_large_cap = [
+    "AAPL","MSFT","AMZN","GOOGL","GOOG","META","NVDA","TSLA","BRK-B","JPM",
+    "V","UNH","JNJ","WMT","PG","MA","HD","BAC","PFE","DIS",
+    "ADBE","CMCSA","NFLX","KO","XOM","MRK","PEP","INTC","ABBV","COST",
+    "CRM","AVGO","NKE","MCD","TMO","TXN","ORCL","CSCO","LLY","QCOM",
+    "C","NEE","PM","BMY","AMAT","LOW","SBUX","RTX","INTU","GILD"
 ]
 
+nasdaq_growth = [
+    "NVDA","TSLA","AMD","ADBE","CRM","ORCL","INTC","QCOM","TXN","AVGO",
+    "AMZN","GOOGL","META","NFLX","SHOP","SQ","PYPL","SNOW","MDB","CRWD",
+    "NET","ZS","OKTA","ROKU","TWLO","UBER","LYFT","DASH","PLTR","COIN"
+]
+
+nasdaq_growth = [
+    "NVDA","TSLA","AMD","ADBE","CRM","ORCL","INTC","QCOM","TXN","AVGO",
+    "AMZN","GOOGL","META","NFLX","SHOP","XYZ","PYPL","SNOW","MDB","CRWD",
+    "NET","ZS","OKTA","ROKU","TWLO","UBER","LYFT","DASH","PLTR","COIN"
+]
+
+defensive_stocks = [
+    "KO","PEP","PG","WMT","COST",
+    "CL","KMB","MDLZ","HSY","KHC",
+    "DUK","SO","NEE","AEP","ED",
+    "EXC","XEL","D","WEC","SRE"
+]
+
+speculative_stocks = [
+    "GME","AMC","CVNA","UPST","SOFI",
+    "MARA","RIOT","BITF","HUT","BTBT",
+    "SPCE","RKLB","ASTS","ACHR","JOBY",
+    "NKLA","LCID","RIVN","IONQ","AI", "FRM","BBBYQ","BYND","CLOV","CVNA","ENVX","FUBO",
+    "GNS","HIMS","LCID","MULN","NVAX","OPEN","QS",
+    "RBLX","SAVA","SEDG","UPST","WISH","ZIM"
+]
+
+tickers = list(set(
+    sp500_large_cap +
+    nasdaq_growth +
+    defensive_stocks +
+    speculative_stocks
+))
+
 # Download stock histories from Yahoo Finance
-stocks_histories = yf.download(tickers, period="5y", auto_adjust=True)['Close']
+stocks_histories = yf.download(tickers, period="2y", auto_adjust=True)['Close']
 stocks_histories = stocks_histories.dropna(axis=1, how='all')
 stocks_histories = stocks_histories.ffill().bfill()
 
@@ -56,59 +76,106 @@ df2 = pd.DataFrame({
 })
 
 # log scaling to compress extreme values
-df2['Log_Returns'] = np.log1p(df2['Returns'])
-df2['Log_Variances'] = np.log1p(df2['Variances'])
+df2['Log_Returns'] = np.log1p(np.clip(df2['Returns'], -0.999, None))
+
+# clipping extreme variances so outliers do not dominate clustering
+df2['Log_Variances'] = np.log1p(np.clip(df2['Variances'], 0, 2))
+
+# adding features to capture risk adjusted returns 
+df2['Volatility'] = np.sqrt(df2['Variances'])
+df2['Sharpe'] = df2['Returns'] / df2['Volatility']
 
 # Dropping rows with NaN values before scaling to avoid errors
 df2 = df2.dropna()
-X = df2[['Log_Returns', 'Log_Variances']].values
+
+# features for clustering
+X = df2[['Log_Returns', 'Log_Variances', 'Sharpe']].values
 
 # Scale the data
 scaler = StandardScaler()
 Xs = scaler.fit_transform(X)
 
-optimal_k = 3  # Based on the elbow method
+# number of clusters determined by elbow method 
+optimal_k = 5  
 kmeans = KMeans(n_clusters=optimal_k, n_init=50, random_state=42)
+
 labels = kmeans.fit_predict(Xs)
 df2['Cluster_labels'] = labels
 
-# assign the risk leveles to each of the clusters 
-cluster_risk = {}
+
+# assign the risk levels to each of the clusters
+cluster_volatility = {}
+
+# computing the volatility for each cluster
 for cluster_idx in range(optimal_k):
+
     cluster_data = df2[df2['Cluster_labels'] == cluster_idx]
+
+    avg_variance = cluster_data['Variances'].mean()
+    volatility = np.sqrt(avg_variance)
+
+    cluster_volatility[cluster_idx] = volatility
+
+
+# sorting the clusters by volatility
+sorted_clusters = sorted(cluster_volatility.items(), key=lambda x: x[1])
+
+
+# assigning risk labels based on ranking
+cluster_risk = {}
+
+risk_labels = [
+    "Very Low Risk",
+    "Low Risk",
+    "Moderate Risk",
+    "High Risk",
+    "Very High Risk"
+]
+
+for i, (cluster_idx, _) in enumerate(sorted_clusters):
+    cluster_risk[cluster_idx] = risk_labels[i]
+
+
+# printing the cluster information for visualisation of groups
+for cluster_idx in range(optimal_k):
+
+    cluster_data = df2[df2['Cluster_labels'] == cluster_idx]
+
     avg_return = cluster_data['Returns'].mean()
     avg_variance = cluster_data['Variances'].mean()
-    
-    if avg_return < 0:
-        risk_level = 'Moderate Risk' if avg_variance < 0.30 else 'High Risk'
-    else:
-        if avg_variance < 0.20:
-            risk_level = 'Low Risk'  
-        elif avg_variance < 0.70:
-            risk_level = 'Moderate Risk'  
-        else:
-            risk_level = 'High Risk'  
-    
-    cluster_risk[cluster_idx] = risk_level
-    print(f"Cluster {cluster_idx}: Avg Return={avg_return:.4f}, Avg Variance={avg_variance:.4f} - {risk_level}")
+    volatility = np.sqrt(avg_variance)
+
+    risk_level = cluster_risk[cluster_idx]
+
+    print(
+        f"Cluster {cluster_idx}: Avg Return={avg_return:.4f}, "
+        f"Volatility={volatility:.4f} - {risk_level}"
+    )
 
 # save the cluster risk mapping to use in the api microservice 
 with open('cluster_risk_mapping.pkl', 'wb') as f:
     pickle.dump(cluster_risk, f)
+
 df2.to_csv('clustered_stocks.csv', index=False)
+
+with open("stock_scaler.pkl", "wb") as f:
+    pickle.dump(scaler, f)
 
 # https://onnx.ai/sklearn-onnx/introduction.html
 initial_type = [('float_input', FloatTensorType([None, 2]))]
 onnx_model = convert_sklearn(kmeans, initial_types=initial_type)
+
 with open("kmeans_stock_clustering.onnx", "wb") as f:
     f.write(onnx_model.SerializeToString())
 
-
 # Plotting the clusters
 colors = cm.rainbow(np.linspace(0, 1, optimal_k))
+
 plt.figure(figsize=(10, 8))
+
 for cluster_idx in range(optimal_k):
     cluster_data = df2[df2['Cluster_labels'] == cluster_idx]
+
     plt.scatter(
         cluster_data['Log_Returns'],
         cluster_data['Log_Variances'],
@@ -126,6 +193,7 @@ plt.show()
 # Displays stocks associated with each cluster
 for cluster_idx in range(optimal_k):
     cluster_group = df2[df2['Cluster_labels'] == cluster_idx]
+
     print(f"Cluster {cluster_idx} ({len(cluster_group)} stocks):")
     print(cluster_group['Stock Symbols'].tolist())
     print()
