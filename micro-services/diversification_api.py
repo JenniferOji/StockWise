@@ -101,17 +101,33 @@ def sector_breakdown(stocks: List[StockHolding]):
 @router.post("/api/diversification-suggestions")
 def get_diversification_suggestions(request: DiversificationRequest):
     try:
-        current_stock_symbols = []
-        for stock in request.current_stocks:
-            current_stock_symbols.append(stock.symbol)
+        current_stock_symbols = [stock.symbol for stock in request.current_stocks]
         
         current_stock_breakdown = sector_breakdown(request.current_stocks)
         current_portfolio_volatility = calculate_portfolio_volatility(request.current_stocks)
+                
+        risk_levels = [
+            "Very Low Risk",
+            "Low Risk",
+            "Moderate Risk",
+            "High Risk",
+            "Very High Risk",
+        ]
+
+        if request.user_risk_preference not in risk_levels:
+            raise HTTPException(status_code=400, detail="Invalid risk preference")
+
+        user_index = risk_levels.index(request.user_risk_preference)
 
         target_clusters = []
-        for idx, risk in cluster_risk.items():
-            if risk == request.user_risk_preference:
-                target_clusters.append(idx)
+
+        for cluster_idx, risk_label in cluster_risk.items():
+            cluster_index = risk_levels.index(risk_label)
+
+            # allowing stock suggestions within a +/- 1 risk band
+            if abs(cluster_index - user_index) <= 1:
+                target_clusters.append(cluster_idx)
+
 
         # only considers stocks the user doesnt currently hold 
         available_stocks = df2[~df2['Stock Symbols'].isin(current_stock_symbols)].copy()
@@ -136,15 +152,22 @@ def get_diversification_suggestions(request: DiversificationRequest):
         
         # randomly selecting 5 stocks to send to the user 
         num_suggestions = min(5, len(suggested_stocks))
-        selected_stocks = suggested_stocks.sample(n=num_suggestions)
-        
+        selected_stocks = suggested_stocks.sample(
+            n=num_suggestions,
+            weights=suggested_stocks["Returns"].abs()
+        )
+
         # a list of dictionaries of suggestions to return to the user
         suggestions = []
         
         for index, stock_row in selected_stocks.iterrows():
             stock_symbol = stock_row['Stock Symbols']
             
-            company_info = STOCK_DATA[stock_symbol]
+            company_info = STOCK_DATA.get(stock_symbol)
+            # skipping the stock if theres no data available 
+            if not company_info:
+                continue
+
             company_name = company_info["name"]
             company_sector = company_info["sector"]
             
