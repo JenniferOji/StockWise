@@ -150,12 +150,37 @@ def get_diversification_suggestions(request: DiversificationRequest):
                 },
             }
         
-        # randomly selecting 5 stocks to send to the user 
+        # selecting the up to 5 suggestions to return to the user depending on their risk preference
         num_suggestions = min(5, len(suggested_stocks))
-        selected_stocks = suggested_stocks.sample(
-            n=num_suggestions,
-            weights=suggested_stocks["Returns"].abs()
-        )
+
+        # suggesting stock with the lowest variance for low risk users
+        if request.user_risk_preference == "Low Risk":
+            suggested_stocks = suggested_stocks.sort_values(
+                by="Variances",
+                ascending=True
+            )
+
+        # suggesting stock with the highest variance for high risk users
+        elif request.user_risk_preference == "High Risk":
+            suggested_stocks = suggested_stocks.sort_values(
+                by="Variances",
+                ascending=False
+            )
+
+        # suggesting stocks with variance closest to the median for moderate risk users
+        else:  
+            median_variance = suggested_stocks["Variances"].median()
+
+            suggested_stocks["variance_distance"] = (
+                suggested_stocks["Variances"] - median_variance
+            ).abs()
+
+            suggested_stocks = suggested_stocks.sort_values(
+                by="variance_distance"
+            )
+
+        # selecting the top suggestions to return to the user
+        selected_stocks = suggested_stocks.head(num_suggestions)
 
         # a list of dictionaries of suggestions to return to the user
         suggestions = []
