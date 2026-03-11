@@ -22,13 +22,7 @@ sp500_large_cap = [
 
 nasdaq_growth = [
     "NVDA","TSLA","AMD","ADBE","CRM","ORCL","INTC","QCOM","TXN","AVGO",
-    "AMZN","GOOGL","META","NFLX","SHOP","SQ","PYPL","SNOW","MDB","CRWD",
-    "NET","ZS","OKTA","ROKU","TWLO","UBER","LYFT","DASH","PLTR","COIN"
-]
-
-nasdaq_growth = [
-    "NVDA","TSLA","AMD","ADBE","CRM","ORCL","INTC","QCOM","TXN","AVGO",
-    "AMZN","GOOGL","META","NFLX","SHOP","XYZ","PYPL","SNOW","MDB","CRWD",
+    "AMZN","GOOGL","META","NFLX","SHOP","PYPL","SNOW","MDB","CRWD",
     "NET","ZS","OKTA","ROKU","TWLO","UBER","LYFT","DASH","PLTR","COIN"
 ]
 
@@ -65,6 +59,18 @@ print("Prices shape after cleanup:", stocks_histories.shape)
 # Calculate daily returns
 daily_returns = stocks_histories.pct_change(fill_method=None).dropna()
 
+# caculating max drawdown fro each stock 
+max_drawdowns = {}
+for ticker in daily_returns.columns:
+
+    r = daily_returns[ticker].dropna()
+
+    cumulative = (1 + r).cumprod()
+    running_max = cumulative.cummax()
+    drawdown = (cumulative - running_max) / running_max
+
+    max_drawdowns[ticker] = abs(drawdown.min())
+
 # Calculate annual means and annual variances
 annual_means_returns = daily_returns.mean() * 252
 annual_return_variances = daily_returns.var() * 252
@@ -72,7 +78,8 @@ annual_return_variances = daily_returns.var() * 252
 df2 = pd.DataFrame({
     'Stock Symbols': annual_return_variances.index,
     'Variances': annual_return_variances.values,
-    'Returns': annual_means_returns.values
+    'Returns': annual_means_returns.values,
+    'Max_Drawdown': [max_drawdowns.get(t, np.nan) for t in annual_return_variances.index]
 })
 
 # log scaling to compress extreme values
@@ -89,8 +96,8 @@ df2['Sharpe'] = df2['Returns'] / df2['Volatility']
 df2 = df2.dropna()
 
 # features for clustering
-X = df2[['Log_Returns', 'Log_Variances', 'Sharpe']].values
-
+# X = df2[['Log_Returns', 'Log_Variances', 'Sharpe']].values
+X = df2[['Log_Returns', 'Log_Variances', 'Volatility', 'Max_Drawdown']].values
 # Scale the data
 scaler = StandardScaler()
 Xs = scaler.fit_transform(X)
@@ -162,7 +169,7 @@ with open("stock_scaler.pkl", "wb") as f:
     pickle.dump(scaler, f)
 
 # https://onnx.ai/sklearn-onnx/introduction.html
-initial_type = [('float_input', FloatTensorType([None, 2]))]
+initial_type = [('float_input', FloatTensorType([None, 4]))]
 onnx_model = convert_sklearn(kmeans, initial_types=initial_type)
 
 with open("kmeans_stock_clustering.onnx", "wb") as f:

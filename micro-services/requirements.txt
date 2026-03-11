@@ -9,3 +9,5 @@ yfinance
 onnxruntime
 redis
 types-redis
+scikit-learn 
+sklearn

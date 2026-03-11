@@ -10,3 +10,4 @@ yfinance
 textblob
 vaderSentiment
 newsapi-python
+sklearn

@@ -13,36 +13,52 @@ import pandas as pd
 #     'BND': {'shares': 200, 'purchase_price': 80}
 # }
 
+TRADING_DAYS = 252
+
 def get_stock_data(tickers, days):
+
     start_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
     end_date = datetime.now().strftime("%Y-%m-%d")
 
     price_data = yf.download(tickers, start=start_date, end=end_date, auto_adjust=True)["Close"]
 
-    # convert to DataFrame if one ticker is passed to maintain consitency
+    # convert to DataFrame if one ticker is passed
     if isinstance(price_data, pd.Series):
         price_data = price_data.to_frame(name=tickers[0])
 
     price_data = price_data.ffill().bfill().dropna(how="all")
+
     if price_data.empty:
         return {}
 
-    # training used daily pct returns
-    returns = price_data.pct_change(fill_method=None).dropna(how="all")
+    returns = price_data.pct_change(fill_method=None).dropna()
 
     features_by_ticker = {}
 
     for ticker in returns.columns:
+
         ticker_returns = returns[ticker].dropna()
+
         if ticker_returns.empty:
             continue
 
-        annual_return = float(ticker_returns.mean() * 252)
-        annual_variance = float(ticker_returns.var() * 252)
+        # annualised metrics
+        annual_return = ticker_returns.mean() * TRADING_DAYS
+        annual_variance = ticker_returns.var() * TRADING_DAYS
 
-        # log1p must be valid
-        if annual_return <= -1 or annual_variance <= -1:
+        volatility = np.sqrt(annual_variance)
+
+        if volatility <= 1e-8:
             continue
+            
+        cumulative = (1 + ticker_returns).cumprod()
+        running_max = cumulative.cummax()
+        drawdown = (cumulative - running_max) / running_max
+        max_drawdown = abs(drawdown.min())
+
+        # clip values (same preprocessing used in training)
+        annual_return = np.clip(annual_return, -0.999, None)
+        annual_variance = np.clip(annual_variance, 0, 2)
 
         log_return = float(np.log1p(annual_return))
         log_variance = float(np.log1p(annual_variance))
@@ -50,11 +66,12 @@ def get_stock_data(tickers, days):
         if np.isnan(log_return) or np.isnan(log_variance):
             continue
 
-        # features that ONNX needs
         features_by_ticker[ticker] = {
             "log_return": log_return,
             "log_variance": log_variance,
-            "risk_score": annual_variance,
+            "volatility": float(volatility),
+            "max_drawdown": float(max_drawdown),
+            "risk_score": float(volatility * 100)  # UI display
         }
 
     return features_by_ticker
@@ -87,12 +104,12 @@ def calculate_returns(portfolio_value):
 def calculate_volatility(returns):
     returns = returns.dropna()
     # Annualised volatility - standard deviation of returns multiplied by sqrt
-    return returns.std() * np.sqrt(252) * 100
+    return returns.std() * np.sqrt(TRADING_DAYS) * 100
 
 # sharpe ratio calculation - how much the stock costs rn vs. how much return it has 
 def calculate_sharpe_ratio(returns):
-    excess_returns = returns.mean() * 252
-    return excess_returns / (returns.std() * np.sqrt(252))
+    excess_returns = returns.mean() * TRADING_DAYS
+    return excess_returns / (returns.std() * np.sqrt(TRADING_DAYS))
 
 # max drawdown calculates the maximum observed loss from a peak to a trough of a portfolio, before a new peak is attained
 def calculate_max_drawdown(returns):

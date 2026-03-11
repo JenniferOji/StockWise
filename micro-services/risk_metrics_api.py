@@ -6,6 +6,7 @@ from pathlib import Path
 import os
 import numpy as np
 import onnxruntime as ort
+import pickle
 
 from risk_metrics import (
     get_stock_data,
@@ -55,9 +56,10 @@ class StockRiskCategoryResponse(BaseModel):
     categories: dict[str, List[StockRiskCategory]]
     total: int
 
-def predict_cluster_label(session, log_return: float, log_variance: float):
+def predict_cluster_label(session, log_return, log_variance, volatility, max_drawdown):
 
-    features = np.array([[log_return, log_variance]])
+    features = np.array([[log_return, log_variance, volatility, max_drawdown]])
+
     scaled_features = scaler.transform(features)
 
     model_input = session.get_inputs()[0].name
@@ -112,17 +114,13 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
         "portfolio_value": current_portfolio_value
     }
 
-
 @router.post("/api/stock-risk-categories", response_model=StockRiskCategoryResponse)
 def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
+
     if len(portfolio_request.stocks) == 0:
         raise HTTPException(status_code=400, detail="No stocks provided")
 
-    # building the ticker list for the yfinance query
-    tickers = []
-    for stock in portfolio_request.stocks:
-        ticker = stock.ticker
-        tickers.append(ticker)
+    tickers = list({stock.ticker for stock in portfolio_request.stocks})
 
     stock_features = get_stock_data(tickers, portfolio_request.days)
 
@@ -130,27 +128,32 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
         raise HTTPException(status_code=404, detail="No price data found for the stocks")
 
     categories: dict[str, List[StockRiskCategory]] = {
-        "low": [],
-        "moderate": [],
-        "high": [],
+        "very_low_risk": [],
+        "low_risk": [],
+        "moderate_risk": [],
+        "high_risk": [],
+        "very_high_risk": [],
     }
 
     # predict the cluster label for each stock and assign the risk category
-    for stock in portfolio_request.stocks:
-        ticker = stock.ticker
-        # getting the variance and return features for the stock to predict the cluster label
+    for ticker in tickers:
+
         features = stock_features.get(ticker)
+
         if not features:
             continue
 
-        # using the model to predict the cluster label 
         cluster_label = predict_cluster_label(
             kmeans_session,
             features["log_return"],
             features["log_variance"],
+            features["volatility"],
+            features["max_drawdown"],
         )
 
-        category = CLUSTER_CATEGORY.get(cluster_label, "moderate")
+        risk_label = CLUSTER_CATEGORY.get(cluster_label, "Moderate Risk")
+
+        category = risk_label.lower().replace(" ", "_")
 
         categories[category].append(
             StockRiskCategory(
@@ -160,12 +163,10 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
             )
         )
 
-    total = len(categories["low"]) + len(categories["moderate"]) + len(categories["high"])
+    total = sum(len(v) for v in categories.values())
 
     return {
         "success": True,
         "categories": categories,
         "total": total,
     }
-
-
