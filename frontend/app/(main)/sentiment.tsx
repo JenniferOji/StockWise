@@ -1,66 +1,68 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { NAV_HEIGHT } from '@/constants/layout';
-import { getStockSentiment, getUserStocks } from '@/services/user';
-import { storage } from '@/utils/storage';
-import { STOCKS } from '@/constants/stocks';
+import React, { useEffect, useMemo, useState } from "react";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { NAV_HEIGHT } from "@/constants/layout";
+import { getStockSentiment, getUserStocks } from "@/services/user";
+import { storage } from "@/utils/storage";
+import { STOCKS } from "@/constants/stocks";
 
-type SentimentMap = {
-  [symbol: string]: {
-    label: string;
-    score?: number;
-  };
-};
-
-type HoldingRow = (typeof STOCKS)[number] & {
-  dbId?: number;
-};
+type SentimentMap = Record<string, { label: string; score?: number }>;
 
 export default function SentimentPage() {
-
-  const [holdings, setHoldings] = useState<HoldingRow[]>([]);
+  const [holdings, setHoldings] = useState<any[]>([]);
   const [sentiment, setSentiment] = useState<SentimentMap>({});
+  const [loading, setLoading] = useState(true);
+  const [userHasStocks, setUserHasStocks] = useState(false);
 
   const getSentimentColor = (label?: string) => {
-    if (label === 'bullish') return '#00c853';
-    if (label === 'bearish') return '#ff1744';
-    return '#ff9100';
+    if (label === "bullish") return "#00c853";
+    if (label === "bearish") return "#ff1744";
+    return "#ff9100";
   };
 
   const loadData = async () => {
     try {
-      const userJson = await storage.getItem('user');
-      if (!userJson) return;
+      setLoading(true);
+      const userJson = await storage.getItem("user");
+      if (!userJson) {
+        setUserHasStocks(false);
+        return;
+      }
 
       const user = JSON.parse(userJson);
 
-      const [stocks, sentimentData] = await Promise.all([
-        getUserStocks(user.ID),
-        getStockSentiment(user.ID),
-      ]);
+      const stocks = await getUserStocks(user.ID);
+      const sentimentData = await getStockSentiment(user.ID);
 
       setSentiment(sentimentData || {});
 
-      if (stocks && Array.isArray(stocks)) {
-        const mapped = stocks
-          .map((stock: any) => {
-            const found = STOCKS.find((s) => s.symbol === stock.symbol);
-            if (!found) return null;
-
-            return {
-              ...found,
-              shares: stock.quantity,
-              purchasePrice: stock.purchasePrice,
-              dbId: stock.ID,
-            };
-          })
-          .filter(Boolean) as HoldingRow[];
-
-        setHoldings(mapped);
+      if (!stocks || stocks.length === 0) {
+        setUserHasStocks(false);
+        setHoldings([]);
+        return;
       }
-    } catch (err) {
-      console.error('Error loading sentiment page data:', err);
+
+      setUserHasStocks(true);
+
+      const mappedStocks = stocks
+        .map((stock: any) => {
+          const found = STOCKS.find((s) => s.symbol === stock.symbol);
+          if (!found) return null;
+
+          return {
+            ...found,
+            shares: stock.quantity,
+            purchasePrice: stock.purchasePrice,
+            dbId: stock.ID,
+          };
+        })
+        .filter(Boolean);
+
+      setHoldings(mappedStocks);
+    } catch (error) {
+      console.error("Failed to load sentiment data", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,114 +70,206 @@ export default function SentimentPage() {
     loadData();
   }, []);
 
-  const rows = useMemo(() => holdings, [holdings]);
+  const groupedStocks = useMemo(() => {
+    const groups: any = {
+      bullish: [],
+      neutral: [],
+      bearish: [],
+    };
 
-  const sentimentCounts = useMemo(() => {
-    let bullish = 0;
-    let neutral = 0;
-    let bearish = 0;
+    holdings.forEach((stock) => {
+      const data = sentiment[stock.symbol] || sentiment[stock.companyName];
 
-    rows.forEach((stock) => {
-      const s = sentiment[stock.symbol] || sentiment[stock.companyName];
+      let label = "neutral";
 
-      if (s?.label === 'bullish') bullish++;
-      else if (s?.label === 'bearish') bearish++;
-      else neutral++;
+      if (data?.label === "bullish") label = "bullish";
+      if (data?.label === "bearish") label = "bearish";
+
+      groups[label].push(stock);
     });
 
-    return { bullish, neutral, bearish };
-  }, [rows, sentiment]);
+    return groups;
+  }, [holdings, sentiment]);
+
+  const sections = [
+    {
+      key: "bullish",
+      title: "Bullish",
+      subtitle: "Positive momentum signals",
+      color: "#00c853",
+      data: groupedStocks.bullish,
+    },
+    {
+      key: "neutral",
+      title: "Neutral",
+      subtitle: "Mixed sentiment",
+      color: "#ff9100",
+      data: groupedStocks.neutral,
+    },
+    {
+      key: "bearish",
+      title: "Bearish",
+      subtitle: "Negative sentiment",
+      color: "#ff1744",
+      data: groupedStocks.bearish,
+    },
+  ];
+
+  const totalStocks = holdings.length;
 
   return (
     <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.title}>Sentiment Overview</Text>
+        <Text style={styles.subtitle}>
+          Your holdings grouped by market mood
+        </Text>
 
-      <Text style={styles.title}>Stock Sentiment</Text>
+        <View style={styles.summaryCard}>
+          <View style={styles.summaryRow}>
+            <Text style={styles.summaryLabel}>Tracked Stocks</Text>
+            <Text style={styles.summaryValue}>{totalStocks}</Text>
+          </View>
 
-      <View style={styles.summaryRow}>
-        <Text style={styles.summaryText}>Bullish: {sentimentCounts.bullish}</Text>
-        <Text style={styles.summaryText}>Neutral: {sentimentCounts.neutral}</Text>
-        <Text style={styles.summaryText}>Bearish: {sentimentCounts.bearish}</Text>
-      </View>
-
-      <View style={styles.sentimentLegend}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#00c853' }]} />
-          <Text style={styles.legendText}>Bullish</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#ff9100' }]} />
-          <Text style={styles.legendText}>Neutral</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, { backgroundColor: '#ff1744' }]} />
-          <Text style={styles.legendText}>Bearish</Text>
-        </View>
-      </View>
-
-      <FlatList
-        data={rows}
-        keyExtractor={(item) => item.dbId?.toString() || item.symbol}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => {
-          const sentimentData = sentiment[item.symbol] || sentiment[item.companyName];
-
-          return (
-            <View style={styles.card}>
-              <View style={styles.cardLeft}>
-                <Image
-                  source={{ uri: item.imageUrl }}
-                  style={styles.logo}
-                  resizeMode="contain"
-                />
-              </View>
-
-              <View style={styles.cardBody}>
-                <View style={styles.symbolRow}>
-                  <Text style={styles.symbol}>{item.symbol}</Text>
-                  {sentimentData && (
-                    <View
-                      style={[
-                        styles.sentimentDot,
-                        { backgroundColor: getSentimentColor(sentimentData.label) },
-                      ]}
-                    />
-                  )}
-                </View>
-                <Text style={styles.name}>{item.companyName}</Text>
-              </View>
+          <View style={styles.summaryBreakdown}>
+            <View style={styles.breakdownItem}>
+              <View
+                style={[styles.breakdownDot, { backgroundColor: "#00c853" }]}
+              />
+              <Text style={styles.breakdownText}>
+                {groupedStocks.bullish.length} Bullish
+              </Text>
             </View>
-          );
-        }}
-        ListEmptyComponent={
+
+            <View style={styles.breakdownItem}>
+              <View
+                style={[styles.breakdownDot, { backgroundColor: "#ff9100" }]}
+              />
+              <Text style={styles.breakdownText}>
+                {groupedStocks.neutral.length} Neutral
+              </Text>
+            </View>
+
+            <View style={styles.breakdownItem}>
+              <View
+                style={[styles.breakdownDot, { backgroundColor: "#ff1744" }]}
+              />
+              <Text style={styles.breakdownText}>
+                {groupedStocks.bearish.length} Bearish
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {loading || (userHasStocks && totalStocks === 0) ? (
+          <View style={styles.emptyWrap}>
+            <Text style={styles.emptyText}>Loading stock sentiment...</Text>
+          </View>
+        ) : totalStocks === 0 ? (
           <View style={styles.emptyWrap}>
             <Text style={styles.emptyText}>
               No stocks found yet. Add stocks in Stock Holdings.
             </Text>
           </View>
-        }
-      />
+        ) : (
+          sections.map((section) => {
+            if (section.data.length === 0) return null;
+
+            return (
+              <View key={section.key} style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <View
+                    style={[
+                      styles.sectionMarker,
+                      { backgroundColor: section.color },
+                    ]}
+                  />
+
+                  <View style={styles.sectionTextWrap}>
+                    <Text style={styles.sectionTitle}>{section.title}</Text>
+                    <Text style={styles.sectionSubtitle}>
+                      {section.subtitle}
+                    </Text>
+                  </View>
+
+                  <Text style={styles.sectionCount}>
+                    {section.data.length}
+                  </Text>
+                </View>
+
+                {section.data.map((item: any) => {
+                  const sentimentData =
+                    sentiment[item.symbol] || sentiment[item.companyName];
+
+                  return (
+                    <View
+                      key={item.dbId?.toString() || item.symbol}
+                      style={styles.card}
+                    >
+                      <View style={styles.cardLeft}>
+                        <Image
+                          source={{ uri: item.imageUrl }}
+                          style={styles.logo}
+                          resizeMode="contain"
+                        />
+                      </View>
+
+                      <View style={styles.cardBody}>
+                        <View style={styles.symbolRow}>
+                          <Text style={styles.symbol}>{item.symbol}</Text>
+                          <View
+                            style={[
+                              styles.sentimentDot,
+                              {
+                                backgroundColor: getSentimentColor(
+                                  sentimentData?.label
+                                ),
+                              },
+                            ]}
+                          />
+                        </View>
+                        <Text style={styles.name}>{item.companyName}</Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            );
+          })
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-container: { flex: 1, backgroundColor: '#f3f6fb', paddingTop: NAV_HEIGHT },
-title: { fontSize: 22, fontWeight: '800', color: '#0b3d91', paddingHorizontal: 16, marginTop: 8, marginBottom: 8 },
-summaryRow: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 6 },
-summaryText: { fontSize: 13, fontWeight: '600', color: '#444' },
-list: { paddingHorizontal: 16, paddingVertical: 12, paddingBottom: 24 },
-card: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 3 },
-cardLeft: { width: 52, height: 52, marginRight: 12, justifyContent: 'center', alignItems: 'center' },
+container: { flex: 1, backgroundColor: "#f5f7fa", paddingTop: NAV_HEIGHT },
+scrollContent: { padding: 12, paddingBottom: 100 },
+title: { fontSize: 24, fontWeight: "800", color: "#0b3d91" },
+subtitle: { fontSize: 14, color: "#6b7280", marginTop: 4, marginBottom: 12 },
+summaryCard: { backgroundColor: "#ffffff", borderRadius: 10, padding: 12, marginBottom: 12, elevation: 3 },
+summaryRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+summaryLabel: { fontSize: 14, color: "#4b5563", fontWeight: "600" },
+summaryValue: { fontSize: 20, color: "#0b3d91", fontWeight: "800" },
+summaryBreakdown: { marginTop: 10, flexDirection: "row", justifyContent: "space-between" },
+breakdownItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+breakdownDot: { width: 9, height: 9, borderRadius: 5 },
+breakdownText: { fontSize: 12, color: "#4b5563", fontWeight: "600" },
+section: { marginBottom: 14 },
+sectionHeader: { flexDirection: "row", alignItems: "center", backgroundColor: "#eaf0ff", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8, marginBottom: 8 },
+sectionMarker: { width: 10, height: 10, borderRadius: 5, marginRight: 8 },
+sectionTextWrap: { flex: 1 },
+sectionTitle: { fontSize: 15, fontWeight: "800", color: "#1f2937" },
+sectionSubtitle: { fontSize: 12, color: "#6b7280", marginTop: 1 },
+sectionCount: { fontSize: 13, fontWeight: "700", color: "#374151", backgroundColor: "#fff", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
+card: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", borderRadius: 10, padding: 12, marginBottom: 8, elevation: 2 },
+cardLeft: { width: 52, height: 52, marginRight: 12, justifyContent: "center", alignItems: "center" },
 logo: { width: 44, height: 44, borderRadius: 8 },
 cardBody: { flex: 1 },
-symbolRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-symbol: { fontSize: 16, fontWeight: '700', color: '#0b3d91' },
-name: { fontSize: 13, color: '#6b7280', marginTop: 2 },
+symbolRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+symbol: { fontSize: 16, fontWeight: "700", color: "#0b3d91" },
+name: { fontSize: 13, color: "#6b7280", marginTop: 2, fontWeight: "500" },
 sentimentDot: { width: 10, height: 10, borderRadius: 5 },
-sentimentLegend: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: 16, marginBottom: 4, paddingVertical: 6, paddingHorizontal: 12, backgroundColor: '#edeaea', borderRadius: 10, elevation: 1 },
-legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-legendDot: { width: 10, height: 10, borderRadius: 5 },
-legendText: { fontSize: 12, fontWeight: '600', color: '#444' },
-emptyWrap: { paddingVertical: 28, alignItems: 'center' },
-emptyText: { color: '#6b7280', fontSize: 14 },
+emptyWrap: { backgroundColor: "#ffffff", borderRadius: 10, paddingVertical: 28, paddingHorizontal: 12, alignItems: "center", elevation: 2 },
+emptyText: { color: "#6b7280", fontSize: 14 },
 });
