@@ -22,9 +22,11 @@ type StockRiskItem = {
 type StockRiskCategories = {
   success: boolean;
   categories: {
-    low: StockRiskItem[];
-    moderate: StockRiskItem[];
-    high: StockRiskItem[];
+    very_low_risk: StockRiskItem[];
+    low_risk: StockRiskItem[];
+    moderate_risk: StockRiskItem[];
+    high_risk: StockRiskItem[];
+    very_high_risk: StockRiskItem[];
   };
   total: number;
 };
@@ -123,9 +125,23 @@ export default function RiskInsightsWidget() {
         <Text style={styles.sectionSubtitle}>Grouped by historical annualised volatility.</Text>
 
         <View style={styles.categoryCard}>
+          <Text style={styles.veryLowTitle}>Very Low Risk</Text>
+          {stockRiskData?.categories.very_low_risk?.length ? (
+            stockRiskData.categories.very_low_risk.map((stock) => (
+              <View key={`very-low-${stock.ticker}`} style={styles.stockRow}>
+                <Text style={styles.stockTicker}>{stock.ticker}</Text>
+                <Text style={styles.stockScore}>{stock.risk_score.toFixed(2)}%</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.emptyCategoryText}>No very low risk stocks found.</Text>
+          )}
+        </View>
+
+        <View style={styles.categoryCard}>
           <Text style={styles.lowTitle}>Low Risk</Text>
-          {stockRiskData?.categories.low?.length ? (
-            stockRiskData.categories.low.map((stock) => (
+          {stockRiskData?.categories.low_risk?.length ? (
+            stockRiskData.categories.low_risk.map((stock) => (
               <View key={`low-${stock.ticker}`} style={styles.stockRow}>
                 <Text style={styles.stockTicker}>{stock.ticker}</Text>
                 <Text style={styles.stockScore}>{stock.risk_score.toFixed(2)}%</Text>
@@ -138,8 +154,8 @@ export default function RiskInsightsWidget() {
 
         <View style={styles.categoryCard}>
           <Text style={styles.moderateTitle}>Moderate Risk</Text>
-          {stockRiskData?.categories.moderate?.length ? (
-            stockRiskData.categories.moderate.map((stock) => (
+          {stockRiskData?.categories.moderate_risk?.length ? (
+            stockRiskData.categories.moderate_risk.map((stock) => (
               <View key={`moderate-${stock.ticker}`} style={styles.stockRow}>
                 <Text style={styles.stockTicker}>{stock.ticker}</Text>
                 <Text style={styles.stockScore}>{stock.risk_score.toFixed(2)}%</Text>
@@ -152,8 +168,8 @@ export default function RiskInsightsWidget() {
 
         <View style={styles.categoryCard}>
           <Text style={styles.highTitle}>High Risk</Text>
-          {stockRiskData?.categories.high?.length ? (
-            stockRiskData.categories.high.map((stock) => (
+          {stockRiskData?.categories.high_risk?.length ? (
+            stockRiskData.categories.high_risk.map((stock) => (
               <View key={`high-${stock.ticker}`} style={styles.stockRow}>
                 <Text style={styles.stockTicker}>{stock.ticker}</Text>
                 <Text style={styles.stockScore}>{stock.risk_score.toFixed(2)}%</Text>
@@ -163,6 +179,21 @@ export default function RiskInsightsWidget() {
             <Text style={styles.emptyCategoryText}>No high risk stocks found.</Text>
           )}
         </View>
+
+         <View style={styles.categoryCard}>
+            <Text style={styles.veryHighTitle}>Very High Risk</Text>
+            {stockRiskData?.categories.very_high_risk?.length ? (
+              stockRiskData.categories.very_high_risk.map((stock) => (
+                <View key={`very-high-${stock.ticker}`} style={styles.stockRow}>
+                  <Text style={styles.stockTicker}>{stock.ticker}</Text>
+                  <Text style={styles.stockScore}>{stock.risk_score.toFixed(2)}%</Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.emptyCategoryText}>No very high risk stocks found.</Text>
+            )}
+          </View>
+          
       </View>
     </View>
   );
@@ -272,7 +303,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   lowTitle: {
-    color: '#166534',
+    color: '#287b48',
     fontSize: 14,
     fontWeight: '700',
     marginBottom: 8,
@@ -310,5 +341,18 @@ const styles = StyleSheet.create({
   emptyCategoryText: {
     color: '#64748b',
     fontSize: 12,
+  },
+  veryLowTitle: {
+    color: '#14532d',
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+
+  veryHighTitle: {
+    color: '#7f1d1d',
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 8,
   },
 });

@@ -5,8 +5,9 @@ import { SymbolWeight, SymbolViewProps } from 'expo-symbols';
 import { ComponentProps } from 'react';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
 
-type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
-type IconSymbolName = SymbolViewProps['name'];
+type IconSymbolName = Extract<SymbolViewProps['name'], string>;
+type MaterialIconName = ComponentProps<typeof MaterialIcons>['name'];
+type IconMapping = Partial<Record<IconSymbolName, MaterialIconName>>;
 
 /**
  * Add your SF Symbols to Material Icons mappings here.
@@ -27,6 +28,7 @@ const MAPPING = {
   'menubar.rectangle': 'menu',
   'gearshape.fill': 'settings',
   'chart.bar': 'insert-chart',
+  'face.smiling': 'sentiment-satisfied',
 } as IconMapping;
 
 /**

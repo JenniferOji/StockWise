@@ -120,10 +120,10 @@ export default function SentimentPage() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Sentiment Overview</Text>
+        {/* <Text style={styles.title}>Sentiment Overview</Text>
         <Text style={styles.subtitle}>
           Your holdings grouped by market mood
-        </Text>
+        </Text> */}
 
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>

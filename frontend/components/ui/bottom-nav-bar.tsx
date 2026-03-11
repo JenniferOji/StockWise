@@ -21,7 +21,7 @@ export default function BottomNavBar() {
         <Text style={[styles.label, { color: tint }]}>Home</Text>
       </Pressable>
       <Pressable style={styles.tab} onPress={() => router.push('/(main)/sentiment' as any)}>
-        <IconSymbol name="chart.bar.fill" size={22} color={tint} />
+        <IconSymbol name="face.smiling" size={22} color={tint} />
         <Text style={[styles.label, { color: tint }]}>Sentiment</Text>
       </Pressable>
       <Pressable style={styles.tab} onPress={() => router.push('/(main)/insights' as any)}>
