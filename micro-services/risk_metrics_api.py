@@ -19,10 +19,12 @@ from risk_metrics import (
 router = APIRouter()
 
 BASE_DIR = Path(__file__).resolve().parents[1]
+
+# load the kmeans model for stock clustering 
 KMEANS_MODEL_PATH = BASE_DIR / "ml" / "models" / "kmeans_stock_clustering.onnx"
 kmeans_session = ort.InferenceSession(str(KMEANS_MODEL_PATH), providers=["CPUExecutionProvider"])
 
-# the scaler is needed to scale the input features for the kmeans model to predict the cluster labels for the stocks 
+# loads the trained scaler - the featues have very different numeric ranges so scalign makes them contribute equally to clustering distance calculations
 SCALER_PATH = BASE_DIR / "ml" / "models" / "stock_scaler.pkl"
 with open(SCALER_PATH, "rb") as f:
     scaler = pickle.load(f)
@@ -48,7 +50,9 @@ class PortfolioRequest(BaseModel):
 class StockRiskCategory(BaseModel):
     ticker: str
     risk_bucket: str
-    risk_score: float
+    volatility: float
+    max_drawdown: float
+    annual_return: float
 
 
 class StockRiskCategoryResponse(BaseModel):
@@ -114,6 +118,7 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
         "portfolio_value": current_portfolio_value
     }
 
+# this endpoint gets the risk category for each stock in the portfolio based on the model
 @router.post("/api/stock-risk-categories", response_model=StockRiskCategoryResponse)
 def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
 
@@ -122,17 +127,18 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
 
     tickers = list({stock.ticker for stock in portfolio_request.stocks})
 
+    # gets the stock data for each ticker 
     stock_features = get_stock_data(tickers, portfolio_request.days)
 
     if len(stock_features) == 0:
         raise HTTPException(status_code=404, detail="No price data found for the stocks")
 
     categories: dict[str, List[StockRiskCategory]] = {
-        "very_low_risk": [],
-        "low_risk": [],
-        "moderate_risk": [],
-        "high_risk": [],
-        "very_high_risk": [],
+        "Very Low Risk": [],
+        "Low Risk": [],
+        "Moderate Risk": [],
+        "High Risk": [],
+        "Very High Risk": [],
     }
 
     # predict the cluster label for each stock and assign the risk category
@@ -143,6 +149,7 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
         if not features:
             continue
 
+        # passes into the model the required features to get the cluster label 
         cluster_label = predict_cluster_label(
             kmeans_session,
             features["log_return"],
@@ -151,19 +158,22 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
             features["max_drawdown"],
         )
 
-        risk_label = CLUSTER_CATEGORY.get(cluster_label, "Moderate Risk")
-
-        category = risk_label.lower().replace(" ", "_")
+        # mapping the cluster label (0,1,2...) to the label mapping (low/moderate risk...)
+        category = CLUSTER_CATEGORY.get(cluster_label, "Moderate Risk")
 
         categories[category].append(
             StockRiskCategory(
                 ticker=ticker,
                 risk_bucket=category,
-                risk_score=round(float(features["risk_score"]), 6),
+                volatility=round(features["volatility"] * 100, 2),
+                max_drawdown=round(features["max_drawdown"] * 100, 2),
+                annual_return=round(np.expm1(features["log_return"]) * 100, 2),
             )
         )
-
+        
     total = sum(len(v) for v in categories.values())
+
+    print("API returning categories:", categories)
 
     return {
         "success": True,

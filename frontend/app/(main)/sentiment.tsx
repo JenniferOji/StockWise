@@ -82,8 +82,8 @@ export default function SentimentPage() {
 
       let label = "neutral";
 
-      if (data?.label === "bullish") label = "bullish";
-      if (data?.label === "bearish") label = "bearish";
+      if (data?.label === "positive") label = "positive";
+      if (data?.label === "negative") label = "negative";
 
       groups[label].push(stock);
     });
@@ -137,7 +137,7 @@ export default function SentimentPage() {
                 style={[styles.breakdownDot, { backgroundColor: "#00c853" }]}
               />
               <Text style={styles.breakdownText}>
-                {groupedStocks.bullish.length} Bullish
+                {groupedStocks.bullish.length} Postivie
               </Text>
             </View>
 
@@ -155,7 +155,7 @@ export default function SentimentPage() {
                 style={[styles.breakdownDot, { backgroundColor: "#ff1744" }]}
               />
               <Text style={styles.breakdownText}>
-                {groupedStocks.bearish.length} Bearish
+                {groupedStocks.bearish.length} Negative
               </Text>
             </View>
           </View>

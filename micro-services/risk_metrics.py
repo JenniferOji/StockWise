@@ -15,6 +15,7 @@ import pandas as pd
 
 TRADING_DAYS = 252
 
+# this function gets the stock data for a list of tickers and calculates the risk metrics for each stock
 def get_stock_data(tickers, days):
 
     start_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
@@ -60,19 +61,23 @@ def get_stock_data(tickers, days):
         annual_return = np.clip(annual_return, -0.999, None)
         annual_variance = np.clip(annual_variance, 0, 2)
 
+        # log1p transforms skewness and stabilises variance : https://numpy.org/devdocs/reference/generated/numpy.log1p.html
         log_return = float(np.log1p(annual_return))
         log_variance = float(np.log1p(annual_variance))
 
         if np.isnan(log_return) or np.isnan(log_variance):
             continue
 
+        
         features_by_ticker[ticker] = {
             "log_return": log_return,
             "log_variance": log_variance,
             "volatility": float(volatility),
             "max_drawdown": float(max_drawdown),
-            "risk_score": float(volatility * 100)  # UI display
+            "annual_return": float(annual_return)
         }
+
+    # print("Stock features:", features_by_ticker)
 
     return features_by_ticker
 

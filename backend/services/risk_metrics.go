@@ -27,11 +27,12 @@ type RiskMetricsResponse struct {
 type StockRiskCategoriesRequest struct {
 	Stocks []Stock `json:"stocks"`
 }
-
 type StockRiskCategory struct {
-	Ticker     string  `json:"ticker"`
-	RiskBucket string  `json:"risk_bucket"`
-	RiskScore  float64 `json:"risk_score"`
+    Ticker        string  `json:"ticker"`
+    RiskBucket    string  `json:"risk_bucket"`
+    Volatility    float64 `json:"volatility"`
+    MaxDrawdown   float64 `json:"max_drawdown"`
+    AnnualReturn  float64 `json:"annual_return"`
 }
 
 type StockRiskCategoriesResponse struct {

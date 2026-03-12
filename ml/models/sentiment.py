@@ -23,9 +23,6 @@ nltk.download("wordnet")
 BASE_DIR = Path(__file__).resolve().parents[1]
 news_sentiment_path = BASE_DIR / "training_data" / "news_sentiment_data.csv"
 
-if not news_sentiment_path.exists():
-    raise FileNotFoundError(f"Dataset not found at: {news_sentiment_path}")
-
 df = pd.read_csv(news_sentiment_path, encoding="ISO-8859-1", low_memory=False)
 
 # Inputs and labels
@@ -114,7 +111,7 @@ onnx_preprocessor = convert_sklearn(
 with open("sentiment_preprocessor.onnx", "wb") as f:
     f.write(onnx_preprocessor.SerializeToString())
 
-# Export CatBoost model to ONNX
+# exporting the model to ONNX
 cat_classifier.save_model(
     "sentiment_catboost_model.onnx",
     format="onnx",

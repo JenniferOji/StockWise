@@ -152,6 +152,7 @@ export const getRiskMetrics = async (userId: number) => {
 export const getStockRiskCategories = async (userId: number) => {
     try {
         const stocks = await getUserStocks(userId);
+
         if (!stocks || !Array.isArray(stocks) || stocks.length === 0) {
             throw new Error("No stocks found");
         }
@@ -159,12 +160,15 @@ export const getStockRiskCategories = async (userId: number) => {
         const formattedStocks = stocks.map((s: any) => ({
             ticker: s.symbol,
             shares: s.quantity,
-            purchase_price: s.purchasePrice 
+            purchase_price: s.purchasePrice
         }));
 
-        const response = await axios.post(endpoints.getStockRiskCategories, {
-            stocks: formattedStocks
-        });
+        console.log("Calling endpoint:", endpoints.getStockRiskCategories);
+        const response = await axios.post(
+            endpoints.getStockRiskCategories,
+            { stocks: formattedStocks }
+        );
+        console.log("RAW AXIOS RESPONSE:", response.data);
 
         return response.data;
     } catch (error) {
