@@ -176,10 +176,10 @@ def compute_stock_sentiment(articles, names: List[str] | None = None):
     for stock in stock_scores:
         avg_score = stock_scores[stock] / stock_counts[stock]
 
-        # the 0.25 threshold means at least 25% more positive articles than negative articles
-        if avg_score > 0.25:
+        # the 0.33 threshold means at least 33% more positive articles than negative articles
+        if avg_score > 0.33:
             label = "positive"
-        elif avg_score < -0.25:
+        elif avg_score < -0.33:
             label = "negative"
         else:
             label = "neutral"

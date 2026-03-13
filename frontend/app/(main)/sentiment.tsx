@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NAV_HEIGHT } from "@/constants/layout";
 import { getStockSentiment, getUserStocks } from "@/services/user";
@@ -120,10 +121,27 @@ export default function SentimentPage() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* <Text style={styles.title}>Sentiment Overview</Text>
-        <Text style={styles.subtitle}>
-          Your holdings grouped by market mood
-        </Text> */}
+        <View style={styles.purposeBox}>
+          <Text style={styles.purposeTitle}>Stock Sentiment Overview</Text>
+          <Text style={styles.purposeText}>
+            This page helps you understand the current mood of the market for your portfolio. Your stocks are grouped by sentiment: positive, neutral, or negative - so you can quickly see which holdings are viewed positively or negatively. Use this insight to make more informed investment decisions.
+          </Text>
+        </View>
+
+        {/* Sentiment Gradient bar for the user to visually gather the sentiment towards their stock */}
+        <View style={styles.heatmapBox}>
+          <LinearGradient
+            colors={["#ff1744", "#ff9100", "#00c853"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.heatmapBar}
+          />
+          <View style={styles.heatmapScaleRow}>
+            <Text style={styles.heatmapScaleText}>-1</Text>
+            <Text style={styles.heatmapScaleText}>0</Text>
+            <Text style={styles.heatmapScaleText}>1</Text>
+          </View>
+        </View>
 
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
@@ -133,30 +151,16 @@ export default function SentimentPage() {
 
           <View style={styles.summaryBreakdown}>
             <View style={styles.breakdownItem}>
-              <View
-                style={[styles.breakdownDot, { backgroundColor: "#00c853" }]}
-              />
-              <Text style={styles.breakdownText}>
-                {groupedStocks.bullish.length} Postivie
-              </Text>
+              <View style={[styles.breakdownDot, { backgroundColor: "#00c853" }]} />
+              <Text style={styles.breakdownText}>{groupedStocks.bullish.length} Positive</Text>
             </View>
-
             <View style={styles.breakdownItem}>
-              <View
-                style={[styles.breakdownDot, { backgroundColor: "#ff9100" }]}
-              />
-              <Text style={styles.breakdownText}>
-                {groupedStocks.neutral.length} Neutral
-              </Text>
+              <View style={[styles.breakdownDot, { backgroundColor: "#ff9100" }]} />
+              <Text style={styles.breakdownText}>{groupedStocks.neutral.length} Neutral</Text>
             </View>
-
             <View style={styles.breakdownItem}>
-              <View
-                style={[styles.breakdownDot, { backgroundColor: "#ff1744" }]}
-              />
-              <Text style={styles.breakdownText}>
-                {groupedStocks.bearish.length} Negative
-              </Text>
+              <View style={[styles.breakdownDot, { backgroundColor: "#ff1744" }]} />
+              <Text style={styles.breakdownText}>{groupedStocks.bearish.length} Negative</Text>
             </View>
           </View>
         </View>
@@ -167,66 +171,32 @@ export default function SentimentPage() {
           </View>
         ) : totalStocks === 0 ? (
           <View style={styles.emptyWrap}>
-            <Text style={styles.emptyText}>
-              No stocks found yet. Add stocks in Stock Holdings.
-            </Text>
+            <Text style={styles.emptyText}>No stocks found yet. Add stocks in Stock Holdings.</Text>
           </View>
         ) : (
           sections.map((section) => {
             if (section.data.length === 0) return null;
-
             return (
               <View key={section.key} style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <View
-                    style={[
-                      styles.sectionMarker,
-                      { backgroundColor: section.color },
-                    ]}
-                  />
-
+                  <View style={[styles.sectionMarker, { backgroundColor: section.color }]} />
                   <View style={styles.sectionTextWrap}>
                     <Text style={styles.sectionTitle}>{section.title}</Text>
-                    <Text style={styles.sectionSubtitle}>
-                      {section.subtitle}
-                    </Text>
+                    <Text style={styles.sectionSubtitle}>{section.subtitle}</Text>
                   </View>
-
-                  <Text style={styles.sectionCount}>
-                    {section.data.length}
-                  </Text>
+                  <Text style={styles.sectionCount}>{section.data.length}</Text>
                 </View>
-
                 {section.data.map((item: any) => {
-                  const sentimentData =
-                    sentiment[item.symbol] || sentiment[item.companyName];
-
+                  const sentimentData = sentiment[item.symbol] || sentiment[item.companyName];
                   return (
-                    <View
-                      key={item.dbId?.toString() || item.symbol}
-                      style={styles.card}
-                    >
+                    <View key={item.dbId?.toString() || item.symbol} style={styles.card}>
                       <View style={styles.cardLeft}>
-                        <Image
-                          source={{ uri: item.imageUrl }}
-                          style={styles.logo}
-                          resizeMode="contain"
-                        />
+                        <Image source={{ uri: item.imageUrl }} style={styles.logo} resizeMode="contain" />
                       </View>
-
                       <View style={styles.cardBody}>
                         <View style={styles.symbolRow}>
                           <Text style={styles.symbol}>{item.symbol}</Text>
-                          <View
-                            style={[
-                              styles.sentimentDot,
-                              {
-                                backgroundColor: getSentimentColor(
-                                  sentimentData?.label
-                                ),
-                              },
-                            ]}
-                          />
+                          <View style={[styles.sentimentDot, { backgroundColor: getSentimentColor(sentimentData?.label) }]} />
                         </View>
                         <Text style={styles.name}>{item.companyName}</Text>
                       </View>
@@ -243,33 +213,75 @@ export default function SentimentPage() {
 }
 
 const styles = StyleSheet.create({
-container: { flex: 1, backgroundColor: "#f5f7fa", paddingTop: NAV_HEIGHT },
-scrollContent: { padding: 12, paddingBottom: 100 },
-title: { fontSize: 24, fontWeight: "800", color: "#0b3d91" },
-subtitle: { fontSize: 14, color: "#6b7280", marginTop: 4, marginBottom: 12 },
-summaryCard: { backgroundColor: "#ffffff", borderRadius: 10, padding: 12, marginBottom: 12, elevation: 3 },
-summaryRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-summaryLabel: { fontSize: 14, color: "#4b5563", fontWeight: "600" },
-summaryValue: { fontSize: 20, color: "#0b3d91", fontWeight: "800" },
-summaryBreakdown: { marginTop: 10, flexDirection: "row", justifyContent: "space-between" },
-breakdownItem: { flexDirection: "row", alignItems: "center", gap: 6 },
-breakdownDot: { width: 9, height: 9, borderRadius: 5 },
-breakdownText: { fontSize: 12, color: "#4b5563", fontWeight: "600" },
-section: { marginBottom: 14 },
-sectionHeader: { flexDirection: "row", alignItems: "center", backgroundColor: "#eaf0ff", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8, marginBottom: 8 },
-sectionMarker: { width: 10, height: 10, borderRadius: 5, marginRight: 8 },
-sectionTextWrap: { flex: 1 },
-sectionTitle: { fontSize: 15, fontWeight: "800", color: "#1f2937" },
-sectionSubtitle: { fontSize: 12, color: "#6b7280", marginTop: 1 },
-sectionCount: { fontSize: 13, fontWeight: "700", color: "#374151", backgroundColor: "#fff", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
-card: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", borderRadius: 10, padding: 12, marginBottom: 8, elevation: 2 },
-cardLeft: { width: 52, height: 52, marginRight: 12, justifyContent: "center", alignItems: "center" },
-logo: { width: 44, height: 44, borderRadius: 8 },
-cardBody: { flex: 1 },
-symbolRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-symbol: { fontSize: 16, fontWeight: "700", color: "#0b3d91" },
-name: { fontSize: 13, color: "#6b7280", marginTop: 2, fontWeight: "500" },
-sentimentDot: { width: 10, height: 10, borderRadius: 5 },
-emptyWrap: { backgroundColor: "#ffffff", borderRadius: 10, paddingVertical: 28, paddingHorizontal: 12, alignItems: "center", elevation: 2 },
-emptyText: { color: "#6b7280", fontSize: 14 },
+  container: { flex: 1, backgroundColor: "#f5f7fa", paddingTop: NAV_HEIGHT },
+  scrollContent: { padding: 12, paddingBottom: 100 },
+  purposeBox: {
+    backgroundColor: '#eaf0ff',
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 2,
+  },
+  purposeTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0b3d91',
+    marginBottom: 6,
+  },
+  purposeText: {
+    fontSize: 14,
+    color: '#374151',
+    lineHeight: 20,
+  },
+  heatmapBox: {
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  heatmapBar: {
+    width: '100%',
+    maxWidth: 320,
+    height: 18,
+    borderRadius: 9,
+    overflow: 'hidden',
+    marginBottom: 4,
+    backgroundColor: '#eee',
+  },
+  heatmapScaleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    maxWidth: 320,
+  },
+  heatmapScaleText: {
+    fontSize: 12,
+    color: '#6b7280',
+    fontWeight: '600',
+  },
+  title: { fontSize: 24, fontWeight: "800", color: "#0b3d91" },
+  subtitle: { fontSize: 14, color: "#6b7280", marginTop: 4, marginBottom: 12 },
+  summaryCard: { backgroundColor: "#ffffff", borderRadius: 10, padding: 12, marginBottom: 12, elevation: 3 },
+  summaryRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  summaryLabel: { fontSize: 14, color: "#4b5563", fontWeight: "600" },
+  summaryValue: { fontSize: 20, color: "#0b3d91", fontWeight: "800" },
+  summaryBreakdown: { marginTop: 10, flexDirection: "row", justifyContent: "space-between" },
+  breakdownItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+  breakdownDot: { width: 9, height: 9, borderRadius: 5 },
+  breakdownText: { fontSize: 12, color: "#4b5563", fontWeight: "600" },
+  section: { marginBottom: 14 },
+  sectionHeader: { flexDirection: "row", alignItems: "center", backgroundColor: "#eaf0ff", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8, marginBottom: 8 },
+  sectionMarker: { width: 10, height: 10, borderRadius: 5, marginRight: 8 },
+  sectionTextWrap: { flex: 1 },
+  sectionTitle: { fontSize: 15, fontWeight: "800", color: "#1f2937" },
+  sectionSubtitle: { fontSize: 12, color: "#6b7280", marginTop: 1 },
+  sectionCount: { fontSize: 13, fontWeight: "700", color: "#374151", backgroundColor: "#fff", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
+  card: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", borderRadius: 10, padding: 12, marginBottom: 8, elevation: 2 },
+  cardLeft: { width: 52, height: 52, marginRight: 12, justifyContent: "center", alignItems: "center" },
+  logo: { width: 44, height: 44, borderRadius: 8 },
+  cardBody: { flex: 1 },
+  symbolRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  symbol: { fontSize: 16, fontWeight: "700", color: "#0b3d91" },
+  name: { fontSize: 13, color: "#6b7280", marginTop: 2, fontWeight: "500" },
+  sentimentDot: { width: 10, height: 10, borderRadius: 5 },
+  emptyWrap: { backgroundColor: "#ffffff", borderRadius: 10, paddingVertical: 28, paddingHorizontal: 12, alignItems: "center", elevation: 2 },
+  emptyText: { color: "#6b7280", fontSize: 14 },
 });

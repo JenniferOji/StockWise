@@ -25,7 +25,7 @@ export default function TopNavBar() {
   const pageTitles: { [key: string]: string } = {
     'stock-holdings': 'Stock Holdings',
     'news': 'News',
-    'sentiment': 'Sentiment',
+    'sentiment': 'Stock Sentiment',
     'insights': 'Insights',
     'settings': 'Settings',
   };
