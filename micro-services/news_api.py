@@ -311,7 +311,7 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
 @router.post("/stock-sentiment")
 def get_stock_sentiment(request: StockRequest):
 
-    news = fetch_news_by_names(request, look_back_days=7)
+    news = fetch_news_by_names(request, look_back_days=1)
     sentiment_summary = compute_stock_sentiment(news["articles"], request.names)
 
     return sentiment_summary

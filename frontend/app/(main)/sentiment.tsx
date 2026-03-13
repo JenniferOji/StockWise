@@ -73,19 +73,15 @@ export default function SentimentPage() {
 
   const groupedStocks = useMemo(() => {
     const groups: any = {
-      bullish: [],
+      positive: [],
       neutral: [],
-      bearish: [],
+      negative: [],
     };
 
     holdings.forEach((stock) => {
       const data = sentiment[stock.symbol] || sentiment[stock.companyName];
 
-      let label = "neutral";
-
-      if (data?.label === "positive") label = "positive";
-      if (data?.label === "negative") label = "negative";
-
+      const label = data?.label || "neutral";
       groups[label].push(stock);
     });
 
@@ -94,11 +90,11 @@ export default function SentimentPage() {
 
   const sections = [
     {
-      key: "bullish",
-      title: "Bullish",
+      key: "positive",
+      title: "Positive",
       subtitle: "Positive momentum signals",
       color: "#00c853",
-      data: groupedStocks.bullish,
+      data: groupedStocks.positive,
     },
     {
       key: "neutral",
@@ -108,11 +104,11 @@ export default function SentimentPage() {
       data: groupedStocks.neutral,
     },
     {
-      key: "bearish",
-      title: "Bearish",
+      key: "negative",
+      title: "Negative",
       subtitle: "Negative sentiment",
       color: "#ff1744",
-      data: groupedStocks.bearish,
+      data: groupedStocks.negative,
     },
   ];
 
@@ -152,7 +148,7 @@ export default function SentimentPage() {
           <View style={styles.summaryBreakdown}>
             <View style={styles.breakdownItem}>
               <View style={[styles.breakdownDot, { backgroundColor: "#00c853" }]} />
-              <Text style={styles.breakdownText}>{groupedStocks.bullish.length} Positive</Text>
+              <Text style={styles.breakdownText}>{groupedStocks.positive.length} Positive</Text>
             </View>
             <View style={styles.breakdownItem}>
               <View style={[styles.breakdownDot, { backgroundColor: "#ff9100" }]} />
@@ -160,7 +156,7 @@ export default function SentimentPage() {
             </View>
             <View style={styles.breakdownItem}>
               <View style={[styles.breakdownDot, { backgroundColor: "#ff1744" }]} />
-              <Text style={styles.breakdownText}>{groupedStocks.bearish.length} Negative</Text>
+              <Text style={styles.breakdownText}>{groupedStocks.negative.length} Negative</Text>
             </View>
           </View>
         </View>
@@ -199,6 +195,23 @@ export default function SentimentPage() {
                           <View style={[styles.sentimentDot, { backgroundColor: getSentimentColor(sentimentData?.label) }]} />
                         </View>
                         <Text style={styles.name}>{item.companyName}</Text>
+                        {sentimentData?.score !== undefined && (
+                          <Text style={styles.scoreText}>Sentiment Score: {sentimentData.score.toFixed(2)}</Text>
+                        )}
+                        <View style={styles.sentimentBar}>
+                          <LinearGradient
+                            colors={["#ff1744", "#ff9100", "#00c853"]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.sentimentGradient}
+                          />
+                          <View
+                            style={[
+                              styles.sentimentMarker,
+                              { left: `${((sentimentData?.score ?? 0) + 1) / 2 * 100}%` }
+                            ]}
+                          />
+                        </View>
                       </View>
                     </View>
                   );
@@ -282,6 +295,40 @@ const styles = StyleSheet.create({
   symbol: { fontSize: 16, fontWeight: "700", color: "#0b3d91" },
   name: { fontSize: 13, color: "#6b7280", marginTop: 2, fontWeight: "500" },
   sentimentDot: { width: 10, height: 10, borderRadius: 5 },
+  scoreText: {
+    fontSize: 12,
+    color: '#374151',
+    marginTop: 2,
+    fontWeight: '600',
+  },
   emptyWrap: { backgroundColor: "#ffffff", borderRadius: 10, paddingVertical: 28, paddingHorizontal: 12, alignItems: "center", elevation: 2 },
   emptyText: { color: "#6b7280", fontSize: 14 },
+  sentimentBar: {
+  width: '100%',
+  height: 6,
+  borderRadius: 3,
+  overflow: 'hidden',
+  marginTop: 6,
+  marginBottom: 4,
+  position: 'relative',
+  backgroundColor: '#e5e7eb',
+  },
+
+  sentimentGradient: {
+    width: '100%',
+    height: '100%',
+  },
+
+  sentimentMarker: {
+    position: 'absolute',
+    top: -3,
+    width: 10,
+    height: 10,
+    borderRadius: 10,
+    backgroundColor: '#1f2937',
+    borderWidth: 2,
+    borderColor: '#fff',
+    transform: [{ translateX: -6 }],
+    elevation: 2,
+  }
 });
