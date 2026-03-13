@@ -1,15 +1,19 @@
+
 import { View, Text, StyleSheet, FlatList, Pressable, Linking } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NAV_HEIGHT } from '@/constants/layout';
 import { storage } from '../../utils/storage';
 import {getStockNews} from '../../services/user';
 import React, { useEffect, useState } from 'react';
+import { Picker } from '@react-native-picker/picker';
 
 export default function News() {
-  
+
   const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [holdings, setHoldings] = useState<string[]>([]);
+  const [selectedStock, setSelectedStock] = useState<string>('all');
 
   const getSentimentColor = (sentiment: string) => {
     const value = (sentiment || '').toLowerCase();
@@ -34,12 +38,17 @@ export default function News() {
         const user = JSON.parse(userJson);
         const res = await getStockNews(user.ID);
         setNews(res?.articles ?? []);
+        // unique stock names from news articles
+        const uniqueStocks = Array.from(new Set((res?.articles ?? []).map((a: any) => String(a.name)))) as string[];
+        setHoldings(uniqueStocks);
       } else {
         setNews([]);
+        setHoldings([]);
       }
     } catch (err) {
       setError('Failed to load news');
       setNews([]);
+      setHoldings([]);
     } finally {
       setLoading(false);
     }
@@ -49,10 +58,26 @@ export default function News() {
     loadStockNews();
   }, []);
 
+  // filtering the news by the selected stock
+  const filteredNews = selectedStock === 'all' ? news : news.filter((item) => item.name === selectedStock);
+
   return (
     <SafeAreaView style={styles.container}>
+      {/* the filter dropdown */}
+      <View style={{ marginHorizontal: 12, marginBottom: 8, marginTop: 4 }}>
+        <Picker
+          selectedValue={selectedStock}
+          onValueChange={(itemValue) => setSelectedStock(itemValue)}
+          style={{ backgroundColor: '#fff', borderRadius: 8 }}
+        >
+          <Picker.Item label="All Holdings" value="all" />
+          {holdings.map((stock) => (
+            <Picker.Item key={stock} label={stock} value={stock} />
+          ))}
+        </Picker>
+      </View>
       <FlatList
-        data={news}
+        data={filteredNews}
         keyExtractor={(item) => item.name + item.headline}
         contentContainerStyle={[
           styles.list
