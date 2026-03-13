@@ -1,7 +1,8 @@
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { DrawerActions, useNavigation } from '@react-navigation/native';
+import { DrawerActions, useNavigation, useNavigationState } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { Text } from 'react-native';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { IconSymbol } from './icon-symbol';
@@ -11,12 +12,31 @@ export default function TopNavBar() {
   const scheme = useColorScheme();
   const tint = Colors[scheme ?? 'light'].tint;
   const navigation = useNavigation();
+  const state = useNavigationState(state => state);
+
+  // Getting the current route name
+  let pageName = '';
+  if (state && state.routes && state.index !== undefined) {
+    const route = state.routes[state.index];
+    pageName = route?.name || '';
+  }
+
+  // mapping the route names to different titles to be displayed 
+  const pageTitles: { [key: string]: string } = {
+    'stock-holdings': 'Stock Holdings',
+    'news': 'News',
+    'sentiment': 'Sentiment',
+    'insights': 'Insights',
+    'settings': 'Settings',
+  };
+  const displayTitle = pageTitles[pageName] || pageName;
 
   return (
     <View style={[styles.container, { backgroundColor: Colors[scheme ?? 'medium'].background, borderBottomColor: '#e6e6e6'}]}>
       <Pressable style={styles.tab} onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
         <IconSymbol name="menubar.rectangle" size={30} color={tint} />
       </Pressable>
+      <Text style={{ fontSize: 22, fontWeight: 'bold', color: tint, marginLeft: 16 }}>{displayTitle}</Text>
     </View>
   );
 }
