@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NAV_HEIGHT } from "@/constants/layout";
@@ -9,7 +10,12 @@ import { STOCKS } from "@/constants/stocks";
 
 type SentimentMap = Record<string, { label: string; score?: number }>;
 
+type RootStackParamList = {
+  news: { selectedStock: string };
+};
+
 export default function SentimentPage() {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [holdings, setHoldings] = useState<any[]>([]);
   const [sentiment, setSentiment] = useState<SentimentMap>({});
   const [loading, setLoading] = useState(true);
@@ -185,7 +191,13 @@ export default function SentimentPage() {
                 {section.data.map((item: any) => {
                   const sentimentData = sentiment[item.symbol] || sentiment[item.companyName];
                   return (
-                    <View key={item.dbId?.toString() || item.symbol} style={styles.card}>
+                    <Pressable
+                      key={item.dbId?.toString() || item.symbol}
+                      style={styles.card}
+                      onPress={() => {
+                        navigation.navigate('news', { selectedStock: item.symbol });
+                      }}
+                    >
                       <View style={styles.cardLeft}>
                         <Image source={{ uri: item.imageUrl }} style={styles.logo} resizeMode="contain" />
                       </View>
@@ -213,7 +225,7 @@ export default function SentimentPage() {
                           />
                         </View>
                       </View>
-                    </View>
+                    </Pressable>
                   );
                 })}
               </View>
