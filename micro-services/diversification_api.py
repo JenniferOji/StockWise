@@ -5,9 +5,10 @@ import pandas as pd
 import pickle
 import os
 import json
-import math
 from datetime import datetime, timedelta
 from operator import itemgetter
+from itertools import combinations
+
 from risk_metrics import (
     get_portfolio_data,
     calculate_portfolio_value,
@@ -38,7 +39,7 @@ class DiversificationRequest(BaseModel):
     current_stocks: List[StockHolding]
     user_risk_preference: str
 
-
+# calculates the annualised portfolio volatility for a list of stocks
 def calculate_portfolio_volatility(stocks: List[StockHolding], lookback_days: int = 365):
     if not stocks:
         return None
@@ -61,10 +62,10 @@ def calculate_portfolio_volatility(stocks: List[StockHolding], lookback_days: in
     price_data = get_portfolio_data(portfolio, start_date, end_date).dropna(how='all')
     portfolio_value = calculate_portfolio_value(price_data, portfolio)
     daily_returns, _ = calculate_returns(portfolio_value)
-    
     volatility = calculate_volatility(daily_returns.dropna())
-    return round(float(volatility), 1)
+    return round(float(volatility), 2)
 
+# calculates the percentage sector allocation of the portfolio
 def sector_breakdown(stocks: List[StockHolding]):
     if len(stocks) == 0:
         return []
@@ -74,26 +75,23 @@ def sector_breakdown(stocks: List[StockHolding]):
     for stock in stocks:
         sector_name = stock.sector
 
-        # if the key already exists
         if sector_name in sector_counts:
             sector_counts[sector_name] += 1
-        # if it doesnt, add the key 
         else:
             sector_counts[sector_name] = 1
 
     total_stocks = len(stocks)
     breakdown = []
 
+    # convert counts to percentages
     for sector_name, count in sector_counts.items():
-        # calculate the percentage of stocks in this sector 
         percent = round((count / total_stocks) * 100, 1)
         breakdown.append({
             "sector": sector_name,
             "percentage": percent,
         })
 
-
-    # sortign the sectors from highest percentage to lowest
+    # sort sectors from highest allocation to lowest
     breakdown.sort(key=itemgetter("percentage"), reverse=True)
     return breakdown
 
@@ -102,10 +100,8 @@ def sector_breakdown(stocks: List[StockHolding]):
 def get_diversification_suggestions(request: DiversificationRequest):
     try:
         current_stock_symbols = [stock.symbol for stock in request.current_stocks]
-        
         current_stock_breakdown = sector_breakdown(request.current_stocks)
         current_portfolio_volatility = calculate_portfolio_volatility(request.current_stocks)
-                
         risk_levels = [
             "Very Low Risk",
             "Low Risk",
@@ -121,17 +117,17 @@ def get_diversification_suggestions(request: DiversificationRequest):
 
         target_clusters = []
 
+        # determine which clusters match the user's risk preference
         for cluster_idx, risk_label in cluster_risk.items():
             cluster_index = risk_levels.index(risk_label)
 
             # allowing stock suggestions within a +/- 1 risk band
             if abs(cluster_index - user_index) <= 1:
                 target_clusters.append(cluster_idx)
-
-
         # only considers stocks the user doesnt currently hold 
         available_stocks = df2[~df2['Stock Symbols'].isin(current_stock_symbols)].copy()
 
+        # keep only stocks belonging to the selected clusters
         suggested_stocks = available_stocks[
             available_stocks['Cluster_labels'].isin(target_clusters)
         ]
@@ -149,78 +145,99 @@ def get_diversification_suggestions(request: DiversificationRequest):
                     "with_suggestions_volatility": current_portfolio_volatility,
                 },
             }
-        
-        # selecting the up to 5 suggestions to return to the user depending on their risk preference
-        num_suggestions = min(5, len(suggested_stocks))
 
-        # suggesting stock with the lowest variance for low risk users
+        # limit the candidate pool so the optimisation remains fast
+        candidate_pool = suggested_stocks.sort_values(by="Volatility").head(10)
+
+        candidate_symbols = candidate_pool["Stock Symbols"].tolist()
+
+        combos = []
+
+        # generating combinations of 1 to 3 stocks
+        for r in range(1, 4):
+            combos.extend(combinations(candidate_symbols, r))
+
+        results = []
+
+        # evaluate each combination by computing the resulting portfolio volatility
+        for combo in combos:
+            projected = list(request.current_stocks)
+
+            for symbol in combo:
+                company = STOCK_DATA.get(symbol)
+                if not company:
+                    continue
+
+                projected.append(
+                    StockHolding(
+                        symbol=symbol,
+                        sector=company["sector"]
+                    )
+                )
+
+            vol = calculate_portfolio_volatility(projected)
+
+            if vol is not None:
+
+                results.append({
+                    "symbols": combo,
+                    "volatility": vol
+                })
+
+        if not results:
+            raise HTTPException(status_code=500, detail="Could not compute volatility")
+
+        # choose the best combination depending on the user's risk preference
         if request.user_risk_preference == "Low Risk":
-            suggested_stocks = suggested_stocks.sort_values(
-                by="Variances",
-                ascending=True
-            )
+            best = min(results, key=lambda x: x["volatility"])
 
-        # suggesting stock with the highest variance for high risk users
         elif request.user_risk_preference == "High Risk":
-            suggested_stocks = suggested_stocks.sort_values(
-                by="Variances",
-                ascending=False
-            )
+            best = max(results, key=lambda x: x["volatility"])
 
-        # suggesting stocks with variance closest to the median for moderate risk users
-        else:  
-            median_variance = suggested_stocks["Variances"].median()
+        else:
+            # for moderate risk choose a volatility near the median
+            vols = sorted(r["volatility"] for r in results)
+            median_vol = vols[len(vols)//2]
+            best = min(results, key=lambda x: abs(x["volatility"] - median_vol))
 
-            suggested_stocks["variance_distance"] = (
-                suggested_stocks["Variances"] - median_variance
-            ).abs()
-
-            suggested_stocks = suggested_stocks.sort_values(
-                by="variance_distance"
-            )
-
-        # selecting the top suggestions to return to the user
-        selected_stocks = suggested_stocks.head(num_suggestions)
-
-        # a list of dictionaries of suggestions to return to the user
+        best_symbols = best["symbols"]
         suggestions = []
-        
-        for index, stock_row in selected_stocks.iterrows():
-            stock_symbol = stock_row['Stock Symbols']
-            
-            company_info = STOCK_DATA.get(stock_symbol)
-            # skipping the stock if theres no data available 
-            if not company_info:
+
+        # build suggestion objects to return to the user
+        for symbol in best_symbols:
+            company = STOCK_DATA.get(symbol)
+
+            if not company:
                 continue
 
-            company_name = company_info["name"]
-            company_sector = company_info["sector"]
-            
-            suggestion = {
-                "symbol": stock_symbol,
-                "company_name": company_name,
-                "sector": company_sector,
-                "reason": f"Aligns with your {request.user_risk_preference} risk preference",
-            }
-            
-            suggestions.append(suggestion)
-    
-        projected_holdings = []
-        # addign the users current stocks to the projected holdings list
-        for stock in request.current_stocks:
-            projected_holdings.append(stock)
+            suggestions.append({
+                "symbol": symbol,
+                "company_name": company["name"],
+                "sector": company["sector"],
+                "reason": f"Optimises portfolio volatility for your {request.user_risk_preference} risk preference",
+            })
 
-        for suggestion in suggestions:
-            projected_holdings.append(
-                StockHolding(
-                    symbol=suggestion["symbol"],
-                    sector=suggestion["sector"],
+        projected_holdings = list(request.current_stocks)
+
+        # add suggested stocks to simulate the new portfolio
+        for symbol in best_symbols:
+
+            company = STOCK_DATA.get(symbol)
+
+            if company:
+
+                projected_holdings.append(
+                    StockHolding(
+                        symbol=symbol,
+                        sector=company["sector"]
+                    )
                 )
-            )
 
+        # compute sector allocation and volatility after adding suggestions
         projected_stock_breakdown = sector_breakdown(projected_holdings)
+
         projected_portfolio_volatility = calculate_portfolio_volatility(projected_holdings)
-    
+
         return {
             "success": True,
             "risk_preference": request.user_risk_preference,
@@ -232,7 +249,5 @@ def get_diversification_suggestions(request: DiversificationRequest):
                 "with_suggestions_volatility": projected_portfolio_volatility,
             },
         }
-
-    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

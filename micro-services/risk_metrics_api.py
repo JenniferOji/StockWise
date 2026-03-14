@@ -44,7 +44,7 @@ class Stock(BaseModel):
 
 class PortfolioRequest(BaseModel):
     stocks: List[Stock]  
-    days: int = 730
+    days: int = 365
 
 
 class StockRiskCategory(BaseModel):
