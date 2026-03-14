@@ -63,18 +63,29 @@ export default function News() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* the filter dropdown */}
-      <View style={{ marginHorizontal: 12, marginBottom: 8, marginTop: 4 }}>
-        <Picker
-          selectedValue={selectedStock}
-          onValueChange={(itemValue) => setSelectedStock(itemValue)}
-          style={{ backgroundColor: '#fff', borderRadius: 8 }}
-        >
-          <Picker.Item label="All Holdings" value="all" />
-          {holdings.map((stock) => (
-            <Picker.Item key={stock} label={stock} value={stock} />
-          ))}
-        </Picker>
+      {/* Purpose Box */}
+      <View style={styles.purposeBox}>
+        <Text style={styles.purposeTitle}>Stock Sentiment Overview</Text>
+        <Text style={styles.purposeText}>
+          News headlines can quickly move stock prices - staying informed helps you react to market changes. Here, you'll find the latest news affecting your holdings, each with a sentiment label so you can instantly gauge the tone of an article without reading it. Use this page to spot opportunities and risks as they emerge and keep your portfolio decisions up to date with current events.
+        </Text>
+      </View>
+      {/* Enhanced filter box */}
+      <View style={styles.filterBox}>
+        <Text style={styles.filterLabel}>Filter by Stock:</Text>
+        <View style={styles.pickerWrapper}>
+          <Picker
+            selectedValue={selectedStock}
+            onValueChange={(itemValue) => setSelectedStock(itemValue)}
+            style={styles.picker}
+            dropdownIconColor="#0b3d91"
+          >
+            <Picker.Item label="All Holdings" value="all" />
+            {holdings.map((stock) => (
+              <Picker.Item key={stock} label={stock} value={stock} />
+            ))}
+          </Picker>
+        </View>
       </View>
       <FlatList
         data={filteredNews}
@@ -107,6 +118,60 @@ export default function News() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f7fa', paddingTop: + NAV_HEIGHT + 5 },
+  purposeBox: {
+    backgroundColor: '#eaf0ff',
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 2,
+  },
+  purposeTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0b3d91',
+    marginBottom: 6,
+  },
+  purposeText: {
+    fontSize: 14,
+    color: '#374151',
+    lineHeight: 20,
+  },
+  filterBox: {
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    padding: 12,
+    marginHorizontal: 12,
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+  },
+  filterLabel: {
+    fontSize: 15,
+    color: '#0b3d91',
+    fontWeight: '700',
+    marginRight: 8,
+  },
+  pickerWrapper: {
+    flex: 1,
+    backgroundColor: '#eaf0ff',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  picker: {
+    width: '100%',
+    backgroundColor: 'transparent',
+    color: '#0b3d91',
+    fontWeight: '600',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
   list: { padding: 12, paddingBottom: 96 },
   card: {
     backgroundColor: '#ffffff',
