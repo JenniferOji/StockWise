@@ -41,18 +41,16 @@ export default function StockHoldings() {
 
         if (stocks && Array.isArray(stocks)) {
           const displayedStocks = stocks.map((stock: any) => {
-            const foundStock = STOCKS.find(s => s.symbol === stock.symbol);
-            const shares = Number(stock.quantity ?? stock.shares ?? 0);
-            const purchasePrice = Number(stock.purchasePrice ?? stock.purchase_price ?? 0);
+          const symbol = stock.symbol || stock.ticker;
+          const foundStock = STOCKS.find(s => s.symbol === symbol);
 
-            return foundStock ? { 
-              ...foundStock, 
-              shares: stock.quantity,
-              purchasePrice: stock.purchasePrice,
-              // shares: Number.isFinite(shares) ? shares : 0,
-              // purchasePrice: Number.isFinite(purchasePrice) ? purchasePrice : 0,
-              dbId: stock.ID } : null;
-          }).filter(Boolean);
+          return {
+            ...foundStock,
+            shares: Number(stock.shares ?? stock.quantity ?? 0),
+            purchasePrice: Number(stock.purchasePrice ?? stock.purchase_price ?? 0),
+            dbId: stock.ID
+          };
+        }).filter(Boolean);
           setDisplayed(displayedStocks as typeof STOCKS[number][]);
         }
       }

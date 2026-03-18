@@ -41,9 +41,15 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 	end_date = datetime.now().strftime('%Y-%m-%d')
 
 	tickers = list(portfolio.keys())
-	price_data = yf.download(tickers, start=start_date, end=end_date, auto_adjust=True)["Close"]
-	if isinstance(price_data, np.ndarray) or price_data.empty:
+	price_data = yf.download(tickers, start=start_date, end=end_date, auto_adjust=True)
+
+	if price_data.empty:
 		raise HTTPException(status_code=404, detail="No data for the tickers")
+
+	if len(tickers) == 1:
+		price_data = price_data["Close"].to_frame(name=tickers[0])
+	else:
+		price_data = price_data["Close"]
 
 	price_data = price_data.ffill().bfill().dropna(how="all")
 
@@ -53,7 +59,7 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 	returns = {}
 
 	for ticker, holding in portfolio.items():
-		if ticker not in price_data:
+		if ticker not in price_data.columns:
 			continue
 
 		shares = holding['shares']
@@ -69,7 +75,7 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 
 	if not returns:
 		raise HTTPException(status_code=404, detail="No valid tickers in data")
-
+			
 	# calculating best and worst performer
 	best_performer = max(returns, key=returns.get)
 	worst_performer = min(returns, key=returns.get)
@@ -97,7 +103,7 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 	return PerformanceMetricsResponse(
 		success=True,
 		metrics=metrics,
-		portfolio_value=total_value,
+    	portfolio_value=round(total_value, 2),
 		best_performer=best_performer,
 		worst_performer=worst_performer
 	)

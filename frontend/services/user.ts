@@ -286,8 +286,8 @@ export const getPerformanceMetrics = async (userId: number, days: number = 365) 
         // shape of stocks expected by performance metrics service
         const formattedStocks = stocks.map((s: any) => ({
             ticker: s.symbol,
-            shares: s.quantity,
-            purchase_price: s.purchasePrice
+            shares: s.shares ?? s.quantity ?? 0,
+            purchase_price: s.purchase_price ?? s.purchasePrice ?? 0
         }));
 
         const response = await axios.post(endpoints.getPerformanceMetrics,{

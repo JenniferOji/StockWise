@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-       "log"
 	"net/http"
 )
 
@@ -21,12 +20,15 @@ type PerformanceMetricsRequest struct {
 }
 
 type PerformanceMetricsResponse struct {
-       OverallReturn     float64            `json:"overall_return"`
-       AnnualizedReturn  float64            `json:"annualized_return"`
-       ReturnsByTicker   map[string]float64 `json:"returns_by_ticker"`
-       PortfolioValue    float64            `json:"portfolio_value"`
-       BestPerformer     string             `json:"best_performer"`
-       WorstPerformer    string             `json:"worst_performer"`
+    Success         bool `json:"success"`
+    Metrics         struct {
+        OverallReturn    string            `json:"overall_return"`
+        AnnualizedReturn string            `json:"annualized_return"`
+        ReturnsByTicker  map[string]string `json:"returns_by_ticker"`
+    } `json:"metrics"`
+    PortfolioValue float64 `json:"portfolio_value"`
+    BestPerformer  string  `json:"best_performer"`
+    WorstPerformer string  `json:"worst_performer"`
 }
 
 // calls the FastAPI microservice for performance metrics
