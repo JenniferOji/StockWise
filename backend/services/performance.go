@@ -1,17 +1,26 @@
+package services
+
 import (
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+       "log"
 	"net/http"
 )
 
-type PerformanceMetricsServiceRequest struct {
+type StockHolding struct {
+    Ticker        string  `json:"ticker"`
+    Shares        float64 `json:"shares"`
+    PurchasePrice float64 `json:"purchase_price"`
+}
+
+type PerformanceMetricsRequest struct {
        Stocks []StockHolding `json:"stocks"`
        Days   int            `json:"days"`
 }
 
-type PerformanceMetricsServiceResponse struct {
+type PerformanceMetricsResponse struct {
        OverallReturn     float64            `json:"overall_return"`
        AnnualizedReturn  float64            `json:"annualized_return"`
        ReturnsByTicker   map[string]float64 `json:"returns_by_ticker"`
@@ -21,8 +30,8 @@ type PerformanceMetricsServiceResponse struct {
 }
 
 // calls the FastAPI microservice for performance metrics
-func CalculatePerformanceMetrics(req PerformanceMetricsRequest) (*PerformanceMetricsServiceResponse, error) {
-       requestBody := PerformanceMetricsServiceRequest{
+func CalculatePerformanceMetrics(req PerformanceMetricsRequest) (*PerformanceMetricsResponse, error) {
+       requestBody := PerformanceMetricsRequest{
 	       Stocks: req.Stocks,
 	       Days:   req.Days,
        }
@@ -50,10 +59,10 @@ func CalculatePerformanceMetrics(req PerformanceMetricsRequest) (*PerformanceMet
        }
 
        if resp.StatusCode != http.StatusOK {
-	       return nil, fmt.Errorf("performance metrics service error: %s", string(body))
+       return nil, fmt.Errorf("performance metrics service error: %s", string(body))
        }
 
-       var result PerformanceMetricsServiceResponse
+       var result PerformanceMetricsResponse
        if err := json.Unmarshal(body, &result); err != nil {
 	       return nil, err
        }

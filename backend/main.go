@@ -6,7 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
-	// "github.com/kataras/iris/v12/middleware/cors"
+	"github.com/kataras/iris/v12/middleware/cors"
 
 	_ "github.com/lib/pq"
 )
@@ -18,28 +18,16 @@ func main() {
 
 	app := iris.New()
 
-	// app.UseRouter(cors.New().
-	// 	AllowOrigin("*").
-	// 	Handler())
+	crs := cors.New()
 
-	app.UseRouter(func(ctx iris.Context) {
-		origin := ctx.GetHeader("Origin")
-		if origin != "" {
-			ctx.Header("Access-Control-Allow-Origin", origin)
-			ctx.Header("Vary", "Origin")
-		} else {
-			ctx.Header("Access-Control-Allow-Origin", "*")
-		}
+	crs.AllowOrigin("*")
+	crs.AllowHeaders("Origin", "Content-Type", "Accept", "Authorization")
+	crs.ExposeHeaders("*")
 
-		ctx.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		ctx.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
+	app.UseRouter(crs.Handler())
 
-		if ctx.Method() == iris.MethodOptions {
-			ctx.StatusCode(iris.StatusNoContent)
-			return
-		}
-
-		ctx.Next()
+	app.Options("/{any:path}", func(ctx iris.Context) {
+		ctx.StatusCode(iris.StatusNoContent)
 	})
 
 	app.Validator = validator.New()
@@ -65,6 +53,7 @@ func main() {
 	{
 		service.Post("/risk-metrics", routes.GetRiskMetrics)
 		service.Post("/stock-risk-categories", routes.GetStockRiskCategories)
+		service.Post("/performance-metrics", routes.GetPerformanceMetrics)
 	}
 
 	app.Listen(":4000")

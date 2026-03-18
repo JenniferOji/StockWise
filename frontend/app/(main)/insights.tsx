@@ -7,6 +7,7 @@ import { NAV_HEIGHT } from '@/constants/layout';
 import PortfolioInsightsWidget from '@/components/PortfolioInsightsWidget';
 import RiskInsightsWidget from '@/components/RiskInsightsWidget';
 import DiversificationWidget from '@/components/DiversificationWidget';
+import PerformanceMetricsWidget from '@/components/PerformanceMetricsWidget';
 
 // accordion tutorial i used: https://sanjanahumanintech.medium.com/accordion-in-react-native-95586a738aee
 
@@ -52,7 +53,7 @@ function Accordian({ title }: AccordianProps) {
             {expanded && title === 'Risk Metrics' && <RiskInsightsWidget />}
             {expanded && title == 'Stock Allocation' && <PortfolioInsightsWidget />}
             {expanded && title == 'Diversification Suggestions' && <DiversificationWidget />}
-
+            {expanded && title == 'Performance Analysis' && <PerformanceMetricsWidget />}
         </View>
     );
 }

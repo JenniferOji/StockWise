@@ -47,12 +47,12 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 
 	price_data = price_data.ffill().bfill().dropna(how="all")
 
-    # Calculate value for each stock in the portfolio
+	# Calculate value for each stock in the portfolio
 	portfolio_value = {}
 	total_value = 0
 	returns = {}
-	
-    for ticker, holding in portfolio.items():
+
+	for ticker, holding in portfolio.items():
 		if ticker not in price_data:
 			continue
 
@@ -78,15 +78,15 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 	total_invested = sum(holding['shares'] * holding['purchase_price'] for holding in portfolio.values())
 	overall_return = (total_value - total_invested) / total_invested if total_invested else 0
 
-	# annualised return using thw CAGR formula: https://www.investopedia.com/terms/c/cagr.asp
+	# annualised return using the CAGR formula: https://www.investopedia.com/terms/c/cagr.asp
 	n_years = portfolio_request.days / 365
 
-    if total_invested and n_years > 0:
-        growth_factor = total_value / total_invested
-        annual_growth_rate = 1 / n_years
-        cagr = (growth_factor ** annual_growth_rate) - 1
-    else:
-        cagr = 0
+	if total_invested and n_years > 0:
+		growth_factor = total_value / total_invested
+		annual_growth_rate = 1 / n_years
+		cagr = (growth_factor ** annual_growth_rate) - 1
+	else:
+		cagr = 0
 
 	metrics = {
 		"overall_return": f"{overall_return * 100:.2f}%",

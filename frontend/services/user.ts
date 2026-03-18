@@ -278,3 +278,28 @@ export const getSingleStockSentiment = async (symbols: string[]) => {
         return {};
     }
 };
+
+export const getPerformanceMetrics = async (userId: number, days: number = 365) => {
+    try {
+        const stocks = await getUserStocks(userId);
+        if (!stocks) throw new Error("No stocks found");
+        // shape of stocks expected by performance metrics service
+        const formattedStocks = stocks.map((s: any) => ({
+            ticker: s.symbol,
+            shares: s.quantity,
+            purchase_price: s.purchasePrice
+        }));
+
+        const response = await axios.post(endpoints.getPerformanceMetrics,{
+                stocks: formattedStocks,
+                days: days
+            }
+        );
+
+        return response.data;
+    } catch (error) {
+        console.error("Performance metrics error:", error);
+        handleError(error);
+        return null;
+    }
+};

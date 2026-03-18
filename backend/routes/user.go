@@ -319,98 +319,27 @@ func UpdateRisk(ctx iris.Context) {
 	})
 }
 
-// // resource: https://www.youtube.com/watch?v=U6Q1iwaNrKI
-// func GetNews(ctx iris.Context) {
-// 	// load the .env file
-// 	err := godotenv.Load()
-// 	if err != nil {
-// 		log.Fatal("Error loading .env file:", err)
-// 	}
-// 	// get the API key from environment variable
-// 	api_key := os.Getenv("NEWS_API_KEY")
-
-// 	// get user id from url param
-// 	userID := ctx.URLParam("user_id")
-// 	if userID == "" {
-// 		utils.CreateError(iris.StatusBadRequest, "Bad Request", "User ID is required", ctx)
-// 		return
-// 	}
-
-// 	// fetch user stocks from database
-// 	var stocks []models.Stock
-// 	result := storage.DB.Where("user_id = ?", userID).Find(&stocks)
-// 	if result.Error != nil {
-// 		utils.CreateInternalServerError(ctx)
-// 		return
-// 	}
-
-// 	// build a list of keywords from the users stocks (company names and symbols)
-// 	keywords := []string{}
-// 	for _, stock := range stocks {
-// 		if stock.CompanyName != "" {
-// 			keywords = append(keywords, stock.CompanyName)
-// 		}
-// 		if stock.Symbol != "" {
-// 			keywords = append(keywords, stock.Symbol)
-// 		}
-// 	}
-
-// 	if len(keywords) == 0 {
-// 		ctx.StatusCode(http.StatusBadRequest)
-// 		ctx.JSON(iris.Map{"error": "No keywords found from user stocks"})
-// 		return
-// 	}
-
-// 	// concatenate keywords and setting the timeframe
-// 	query := strings.Join(keywords, " OR ")
-// 	fromDate := time.Now().AddDate(0, 0, -7).Format("2006-01-02") // past 7 days
-// 	toDate := time.Now().Format("2006-01-02")                     // today
-
-// 	// make the http get request to get the news
-// 	requestURL := fmt.Sprintf("https://newsapi.org/v2/everything?q=%s&from=%s&to=%s&apiKey=%s", query, fromDate, toDate, api_key)
-// 	resp, err := http.Get(requestURL)
-// 	if err != nil {
-// 		ctx.StatusCode(http.StatusInternalServerError)
-// 		ctx.JSON(iris.Map{"error": "Error making HTTP request to NewsAPI"})
-// 		return
-// 	}
-
-// 	// this happenss after making the request
-// 	defer resp.Body.Close()
-
-// 	body, err := io.ReadAll(resp.Body)
-// 	if err != nil {
-// 		log.Fatal("Error reading response body:", err)
-// 	}
-
-// 	fmt.Println(string(body))
-
-// 	// slice of articles and each article has a title and description...
-// 	var NewsData struct {
-// 		Articles []struct {
-// 			Title       string
-// 			Description string
-// 			Url         string
-// 			PublishedAt string
-// 		}
-// 	}
-
-// 	// unmarshelling means converting json data to go struct
-// 	err = json.Unmarshal(body, &NewsData)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	// for i, article := range NewsData.Articles {
-// 	// 	if i > 5 {
-// 	// 		break
-// 	// 	}
-// 	// 	fmt.Println(article.Title)
-// 	// 	fmt.Println(article.Description)
-// 	// 	fmt.Println(article.Url)
-// 	// 	fmt.Println(article.PublishedAt)
-// 	// 	fmt.Println("--------------------------------")
-// }
+func GetPerformanceMetrics(ctx iris.Context) {
+	log.Println("[PerformanceMetrics] Incoming request to /api/services/performance-metrics")
+	var req services.PerformanceMetricsRequest
+	if err := ctx.ReadJSON(&req); err != nil {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.JSON(iris.Map{"error": "Invalid request", "details": err.Error()})
+		return
+	}
+	if req.Stocks == nil || len(req.Stocks) == 0 {
+		ctx.StatusCode(iris.StatusBadRequest)
+		ctx.JSON(iris.Map{"error": "No stocks provided"})
+		return
+	}
+	result, err := services.CalculatePerformanceMetrics(req)
+	if err != nil {
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.JSON(iris.Map{"error": err.Error()})
+		return
+	}
+	ctx.JSON(result)
+}
 
 type RegisterUserInput struct {
 	Username string `json:"username" validate:"required,min=3,max=256"`
