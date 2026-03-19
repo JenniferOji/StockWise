@@ -17,5 +17,15 @@ services:
       timeout: 5s
       retries: 10
 
+  backend:
+    build: ./backend
+    container_name: stockwise-backend
+    depends_on:
+      - postgres
+    environment:
+      DB_CONNECTION_STRING: "postgres://postgres:Nnedimma11@postgres:5432/stockwise_db?sslmode=disable"
+    ports:
+      - "8080:8080"
+
 volumes:
   stockwise_pgdata:

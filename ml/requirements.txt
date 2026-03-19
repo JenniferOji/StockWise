@@ -1,4 +1,3 @@
-numpy
 pandas
 scikit-learn
 skl2onnx
@@ -10,4 +9,3 @@ yfinance
 textblob
 vaderSentiment
 newsapi-python
-sklearn

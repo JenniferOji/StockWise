@@ -20,7 +20,7 @@
     "@rn-primitives/accordion": "^1.2.0",
     "@rn-primitives/slot": "^1.2.0",
     "axios": "^1.13.2",
-    "expo": "~55.0.4",
+    "expo": "^55.0.8",
     "expo-constants": "^55.0.7",
     "expo-font": "~55.0.4",
     "expo-haptics": "~55.0.8",

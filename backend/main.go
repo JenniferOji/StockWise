@@ -9,10 +9,10 @@ import (
 	"github.com/kataras/iris/v12/middleware/cors"
 
 	_ "github.com/lib/pq"
+	
 )
 
 func main() {
-
 	godotenv.Load()
 	storage.InitialiseDatabase()
 
