@@ -15,6 +15,12 @@ import nltk
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
+
+# finbert model imports
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch
+import torch.nn.functional as F
+
 nltk.download("punkt")
 nltk.download("punkt_tab")
 nltk.download("wordnet")
@@ -22,6 +28,14 @@ nltk.download("wordnet")
 load_dotenv()
 lemm = WordNetLemmatizer()
 router = APIRouter()
+
+# initisalising the finbert model and tokenizer for comparison with the onnx model
+FINBERT_MODEL = "ProsusAI/finbert"
+
+tokenizer = AutoTokenizer.from_pretrained(FINBERT_MODEL)
+finbert_model = AutoModelForSequenceClassification.from_pretrained(FINBERT_MODEL)
+
+finbert_model.eval()
 
 # load the onnx models from the file path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -41,6 +55,34 @@ with open(os.path.join(BASE_DIR, "ml", "models", "sentiment_label_map.pkl"), "rb
 class StockRequest(BaseModel):
     names: List[str]
 
+# finbert inference 
+def get_finbert_sentiments(texts: List[str]):
+    results = []
+
+    for text in texts:
+        inputs = tokenizer(
+            text,
+            return_tensors="pt",
+            truncation=True,
+            padding=True,
+            max_length=512
+        )
+
+        with torch.no_grad():
+            outputs = finbert_model(**inputs)
+            probs = F.softmax(outputs.logits, dim=1)
+            pred = torch.argmax(probs, dim=1).item()
+
+        # finbert label mapping
+        label_map = {
+            0: "negative",
+            1: "neutral",
+            2: "positive"
+        }
+
+        results.append(label_map[pred])
+
+    return results
 
 # only getting the first part of the company name to search for news as the api seems to work better with that.
 def split_company_name(company_name: str):
@@ -292,11 +334,13 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
     # formatted_articles = formatted_articles[:15]
 
     # using the onnx models to get the sentiment label 
-    sentiments = get_sentiment_labels(article_texts) if article_texts else []
-
+    catboost_sentiments = get_sentiment_labels(article_texts) if article_texts else []
+    finbert_sentiments = get_finbert_sentiments(article_texts) if article_texts else []
+    
     # for each article we add the sentiment label to it
-    for article, sentiment in zip(article_refs, sentiments):
-        article["sentiment"] = sentiment
+    for article, catboost_sentiments, finbert_sentiments in zip(article_refs, catboost_sentiments, finbert_sentiments):
+        article["catboost model"] = catboost_sentiments
+        article["finbert"] = finbert_sentiments
         formatted_articles.append(article)
 
     return {

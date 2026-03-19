@@ -18,13 +18,14 @@ type NewsRequest struct {
 }
 
 type Article struct {
-	Image     string `json:"image"`
-	Name      string `json:"name"`
-	Headline  string `json:"headline"`
-	Source    string `json:"source"`
-	URL       string `json:"url"`
-	Date      string `json:"date"`
-	Sentiment string `json:"sentiment"`
+	Image      string `json:"image"`
+	Name       string `json:"name"`
+	Headline   string `json:"headline"`
+	Source     string `json:"source"`
+	URL        string `json:"url"`
+	Date       string `json:"date"`
+	Catboost  string `json:"catboost"`
+	FinBERT    string `json:"finbert"`
 }
 
 type StockSentiment struct {
