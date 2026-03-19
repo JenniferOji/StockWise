@@ -22,8 +22,8 @@ export default function SentimentPage() {
   const [userHasStocks, setUserHasStocks] = useState(false);
 
   const getSentimentColor = (label?: string) => {
-    if (label === "bullish") return "#00c853";
-    if (label === "bearish") return "#ff1744";
+    if (label === "positive") return "#00c853";
+    if (label === "negative") return "#ff1744";
     return "#ff9100";
   };
 
@@ -85,7 +85,7 @@ export default function SentimentPage() {
     };
 
     holdings.forEach((stock) => {
-      const data = sentiment[stock.symbol] || sentiment[stock.companyName];
+      const data = sentiment[stock.symbol];
 
       const label = data?.label || "neutral";
       groups[label].push(stock);
@@ -123,12 +123,6 @@ export default function SentimentPage() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.purposeBox}>
-          <Text style={styles.purposeTitle}>Stock Sentiment Overview</Text>
-          <Text style={styles.purposeText}>
-            This page helps you understand the current mood of the market for your portfolio. Your stocks are grouped by sentiment: positive, neutral, or negative - so you can quickly see which holdings are viewed positively or negatively. Use this insight to make more informed investment decisions.
-          </Text>
-        </View>
 
         {/* Sentiment Gradient bar for the user to visually gather the sentiment towards their stock */}
         <View style={styles.heatmapBox}>
@@ -189,7 +183,7 @@ export default function SentimentPage() {
                   <Text style={styles.sectionCount}>{section.data.length}</Text>
                 </View>
                 {section.data.map((item: any) => {
-                  const sentimentData = sentiment[item.symbol] || sentiment[item.companyName];
+                  const sentimentData = sentiment[item.symbol];
                   return (
                     <Pressable
                       key={item.dbId?.toString() || item.symbol}

@@ -24,7 +24,7 @@ type Article struct {
 	Source     string `json:"source"`
 	URL        string `json:"url"`
 	Date       string `json:"date"`
-	Catboost  string `json:"catboost"`
+	CatboostModel  string `json:"catboost_model"`
 	FinBERT    string `json:"finbert"`
 }
 

@@ -159,7 +159,6 @@ def text_preprocess(doc: str):
 
 # gets the sentiment label for a list of texts by running them through the preprocessing and model onnx pipelines
 def get_sentiment_labels(texts: List[str]):
-
     clean_texts = [text_preprocess(t) for t in texts]
 
     # initialising the input for the preprocessing model 
@@ -178,10 +177,7 @@ def get_sentiment_labels(texts: List[str]):
     model_input = model_sess.get_inputs()[0].name
 
     # running the sentiment model to get the sentiment predictions for the input features
-    outputs = model_sess.run(
-        None,
-        {model_input: features}
-    )
+    outputs = model_sess.run(None, {model_input: features})
 
     labels = outputs[0].flatten()
 
@@ -205,8 +201,8 @@ def compute_stock_sentiment(articles, names: List[str] | None = None):
 
     # for each article, we get the stock name and sentiment, convert the sentiment to a score using the SENTIMENT_SCORE dictionary and tally the scores and counts for each stock
     for article in articles:
-        stock = article["name"]
-        sentiment = article["sentiment"]
+        stock = article.get("symbol")
+        sentiment = article.get("catboost_model", "neutral")
 
         score = SENTIMENT_SCORE.get(sentiment, 0)
         stock_scores[stock] = stock_scores.get(stock, 0) + score
@@ -232,15 +228,6 @@ def compute_stock_sentiment(articles, names: List[str] | None = None):
             "articles": stock_counts[stock]
         }
 
-    if names:
-        for stock_name in names:
-            if stock_name not in results:
-                results[stock_name] = {
-                    "score": 0.0,
-                    "label": "neutral",
-                    "articles": 0,
-                }
-
     return results
 
 # this endpoint fetches the news articles and gets a sentiment label for each 
@@ -255,6 +242,7 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
 
     # get the frist part of the company name 
     search_terms = [split_company_name(name) for name in names]
+    
     to_date = datetime.utcnow().date()
     if look_back_days <= 1:
         from_date = to_date
@@ -325,6 +313,7 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
             article_refs.append({
                 "image": image,
                 "name": names[i],
+                "symbol": symbol, 
                 "headline": headline,
                 "source": article.get("source"),
                 "url": url,
@@ -339,7 +328,7 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
     
     # for each article we add the sentiment label to it
     for article, catboost_sentiments, finbert_sentiments in zip(article_refs, catboost_sentiments, finbert_sentiments):
-        article["catboost model"] = catboost_sentiments
+        article["catboost_model"] = catboost_sentiments
         article["finbert"] = finbert_sentiments
         formatted_articles.append(article)
 

@@ -91,14 +91,6 @@ export default function News() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Purpose Box */}
-      <View style={styles.purposeBox}>
-        <Text style={styles.purposeTitle}>Stock Sentiment Overview</Text>
-        <Text style={styles.purposeText}>
-          News headlines can quickly move stock prices - staying informed helps you react to market changes. Here, you'll find the latest news affecting your holdings, each with a sentiment label so you can instantly gauge the tone of an article without reading it. Use this page to spot opportunities and risks as they emerge and keep your portfolio decisions up to date with current events.
-        </Text>
-      </View>
-      {/* Enhanced filter box */}
       <View style={styles.filterBox}>
         <Text style={styles.filterLabel}>Filter by Stock:</Text>
         <View style={styles.pickerWrapper}>
@@ -115,14 +107,23 @@ export default function News() {
           </Picker>
         </View>
       </View>
-      {hasNewsForSelected ? (
+      {loading ? (
+        <View style={{ alignItems: 'center', marginTop: 32 }}>
+          <Text style={{ color: '#0b3d91', fontSize: 16, fontWeight: '600' }}>
+            Loading news articles...
+          </Text>
+        </View>
+      ) : filteredNews.length === 0 ? (
+        <View style={{ alignItems: 'center', marginTop: 32 }}>
+          <Text style={{ color: '#0b3d91', fontSize: 16, fontWeight: '600' }}>
+            No news for your stocks available
+          </Text>
+        </View>
+      ) : (
         <FlatList
           data={filteredNews}
           keyExtractor={(item) => item.name + item.headline}
-          contentContainerStyle={[
-            styles.list
-          ]}
-          // display each news item as a card
+          contentContainerStyle={styles.list}
           renderItem={({ item }) => (
             <Pressable style={styles.card} onPress={() => openArticle(item.url)}>
               <View style={styles.cardBody}>
@@ -132,21 +133,32 @@ export default function News() {
                     <Text style={styles.stockName}>{item.source}</Text>
                   </View>
                 </View>
+
                 <Text style={styles.headline}>{item.headline}</Text>
-                <View style={styles.metaRow}>
-                  <Text style={[styles.sentiment, { color: getSentimentColor(item.sentiment) }]}>{item.sentiment}</Text>
-                  <Text style={styles.date}>{item.date}</Text>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <Text
+                    style={[
+                      styles.sentiment,
+                      { color: getSentimentColor(item.catboost_model) },
+                    ]}
+                  >
+                    CatBoost: {item.catboost_model}
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.sentiment,
+                      { color: getSentimentColor(item.finbert) },
+                    ]}
+                  >
+                    FinBERT: {item.finbert}
+                  </Text>
                 </View>
               </View>
             </Pressable>
           )}
         />
-      ) : (
-        <View style={{ alignItems: 'center', marginTop: 32 }}>
-          <Text style={{ color: '#0b3d91', fontSize: 16, fontWeight: '600' }}>
-            No news found for this stock.
-          </Text>
-        </View>
       )}
     </SafeAreaView>
   );
