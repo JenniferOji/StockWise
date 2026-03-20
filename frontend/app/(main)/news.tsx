@@ -1,10 +1,10 @@
 import { View, Text, StyleSheet, FlatList, Pressable, Linking } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { NAV_HEIGHT } from '@/constants/layout';
 import { storage } from '../../utils/storage';
 import {getStockNews} from '../../services/user';
-import React, { useEffect, useState, useRef  } from 'react';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { RouteProp, useRoute, useFocusEffect} from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
 
 type NewsRouteParams = {
@@ -75,9 +75,11 @@ export default function News() {
     }
   };
 
-  useEffect(() => {
-    loadStockNews();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadStockNews();
+    }, [])
+  );
 
   useEffect(() => {
     const routeSymbol = route.params?.selectedStock;

@@ -38,7 +38,7 @@ finbert_model = AutoModelForSequenceClassification.from_pretrained(FINBERT_MODEL
 finbert_model.eval()
 
 # load the onnx models from the file path
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # preprocessing converts text to the numeric feature vectors used b the model - catboost cannot read text 
 preproc_path = os.path.join(BASE_DIR, "ml", "models", "sentiment_preprocessor.onnx")

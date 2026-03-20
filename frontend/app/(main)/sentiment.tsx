@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NAV_HEIGHT } from "@/constants/layout";
@@ -73,9 +73,11 @@ export default function SentimentPage() {
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+    useFocusEffect(
+      useCallback(() => {
+        loadData();
+      }, [])
+    );
 
   const groupedStocks = useMemo(() => {
     const groups: any = {

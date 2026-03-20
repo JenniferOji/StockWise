@@ -18,14 +18,14 @@ from risk_metrics import (
 
 router = APIRouter()
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 df2 = pd.read_csv(os.path.join(BASE_DIR, 'ml/models/clustered_stocks.csv'))
 
 with open(os.path.join(BASE_DIR, 'ml/models/cluster_risk_mapping.pkl'), 'rb') as f:
     cluster_risk = pickle.load(f)
 
-stock_data_path = os.path.join(os.path.dirname(__file__), 'stock_data.json')
+stock_data_path = os.path.join(BASE_DIR, 'stock_data.json')
 with open(stock_data_path, 'r') as f:
     STOCK_DATA = json.load(f)
 
@@ -146,8 +146,8 @@ def get_diversification_suggestions(request: DiversificationRequest):
                 },
             }
 
-        # limit the candidate pool so the optimisation remains fast
-        candidate_pool = suggested_stocks.sort_values(by="Volatility").head(10)
+        # limiting the candidate pool so the optimisation remains fast
+        candidate_pool = suggested_stocks.sort_values(by="Volatility").head(7)
 
         candidate_symbols = candidate_pool["Stock Symbols"].tolist()
 

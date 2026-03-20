@@ -16,21 +16,22 @@ from risk_metrics import (
     calculate_risk_metrics
 )
 
-router = APIRouter()
+# kmeans_session = ort.InferenceSession(str(KMEANS_MODEL_PATH), providers=["CPUExecutionProvider"])
+router = APIRouter() 
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # load the kmeans model for stock clustering 
-KMEANS_MODEL_PATH = BASE_DIR / "ml" / "models" / "kmeans_stock_clustering.onnx"
-kmeans_session = ort.InferenceSession(str(KMEANS_MODEL_PATH), providers=["CPUExecutionProvider"])
+KMEANS_MODEL_PATH = os.path.join(BASE_DIR, "ml", "models", "kmeans_stock_clustering.onnx")
+kmeans_session = ort.InferenceSession(KMEANS_MODEL_PATH, providers=["CPUExecutionProvider"])
 
-# loads the trained scaler - the featues have very different numeric ranges so scalign makes them contribute equally to clustering distance calculations
-SCALER_PATH = BASE_DIR / "ml" / "models" / "stock_scaler.pkl"
+# loads the trained scaler - the features have very different numeric ranges so scaling makes them contribute equally to clustering distance calculations
+SCALER_PATH = os.path.join(BASE_DIR, "ml", "models", "stock_scaler.pkl")
 with open(SCALER_PATH, "rb") as f:
     scaler = pickle.load(f)
 
 # The cluster risk mapping is needed to assign the risk category to the stocks based on the predicted cluster label from the kmeans model
-CLUSTER_RISK_PATH = BASE_DIR / "ml" / "models" / "cluster_risk_mapping.pkl"
+CLUSTER_RISK_PATH = os.path.join(BASE_DIR, "ml", "models", "cluster_risk_mapping.pkl")
 with open(CLUSTER_RISK_PATH, "rb") as f:
     cluster_risk_mapping = pickle.load(f)
 
