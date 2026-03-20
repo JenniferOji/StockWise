@@ -3,18 +3,29 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { NAV_HEIGHT } from '@/constants/layout';
 import { storage } from '../../utils/storage';
 import {getStockNews} from '../../services/user';
-import React, { useEffect, useState } from 'react';
-import { useRoute } from '@react-navigation/native';
+import React, { useEffect, useState, useRef  } from 'react';
+import { RouteProp, useRoute } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
+
+type NewsRouteParams = {
+  selectedStock?: string;
+};
 
 export default function News() {
 
-  const route = useRoute();
+  type RootStackParamList = {
+    news: NewsRouteParams;
+  };
+
+  const route = useRoute<RouteProp<RootStackParamList, 'news'>>();
+
   const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [holdings, setHoldings] = useState<string[]>([]);
+  const [holdings, setHoldings] = useState<[string, string][]>([]);  
   const [selectedStock, setSelectedStock] = useState<string>('all');
+  const prevParamRef = useRef<string | undefined>(undefined);
+  const hasMountedRef = useRef(false);
 
   const getSentimentColor = (sentiment: string) => {
     const value = (sentiment || '').toLowerCase();
@@ -43,26 +54,18 @@ export default function News() {
         const articles = res?.articles ?? [];
         setNews(articles);
 
-        // unique stock names from news articles
-        const uniqueStocks = Array.from(
-          new Set(articles.map((a: any) => String(a.name)))
-        ) as string[];
+        const uniqueStocks: [string, string][] = Array.from(
+          new Map<string, string>(
+            articles.map((a: any) => [a.symbol, a.name])
+          ).entries()
+        );
 
         setHoldings(uniqueStocks);
-
-        const routeStock = (route?.params as any)?.selectedStock;
-
-        if (routeStock && uniqueStocks.includes(routeStock)) {
-          setSelectedStock(routeStock);
-        } else {
-          setSelectedStock('all');
-        }
 
       } else {
         setNews([]);
         setHoldings([]);
       }
-
     } catch (err) {
       setError('Failed to load news');
       setNews([]);
@@ -76,18 +79,29 @@ export default function News() {
     loadStockNews();
   }, []);
 
-  // Set initial selected stock from navigation params if present
-  // useEffect(() => {
-  //   if (route?.params && (route.params as any).selectedStock) {
-  //     setSelectedStock((route.params as any).selectedStock);
-  //   }
-  // }, [route?.params]);
+  useEffect(() => {
+    const routeSymbol = route.params?.selectedStock;
+
+    // ignoring the first render to prevent stale parameters
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    if (!routeSymbol || routeSymbol === prevParamRef.current) {
+      return;
+    }
+
+    prevParamRef.current = routeSymbol;
+
+    setSelectedStock(routeSymbol);
+  }, [route.params?.selectedStock]);
 
   // filtering the news by the selected stock
-  const filteredNews = selectedStock === 'all' ? news : news.filter((item) => item.name === selectedStock);
-
-  // Check if selected stock has news
-  const hasNewsForSelected = selectedStock === 'all' ? true : filteredNews.length > 0;
+  const filteredNews = selectedStock === 'all'
+    ? news
+    : news.filter((item) => item.symbol === selectedStock);
+    
 
   return (
     <SafeAreaView style={styles.container}>
@@ -101,8 +115,8 @@ export default function News() {
             dropdownIconColor="#0b3d91"
           >
             <Picker.Item label="All Holdings" value="all" />
-            {holdings.map((stock) => (
-              <Picker.Item key={stock} label={stock} value={stock} />
+            {holdings.map(([symbol, name]) => (
+              <Picker.Item key={symbol} label={name} value={symbol} />
             ))}
           </Picker>
         </View>

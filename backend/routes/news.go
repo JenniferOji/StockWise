@@ -20,6 +20,7 @@ type NewsRequest struct {
 type Article struct {
 	Image      string `json:"image"`
 	Name       string `json:"name"`
+	Symbol     string `json:"symbol"`
 	Headline   string `json:"headline"`
 	Source     string `json:"source"`
 	URL        string `json:"url"`
