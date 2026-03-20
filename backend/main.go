@@ -1,15 +1,14 @@
 package main
 
 import (
+	"os"
 	"github.com/YourGitHubUser/StockWise/backend/routes"
 	"github.com/YourGitHubUser/StockWise/backend/storage"
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/middleware/cors"
-
 	_ "github.com/lib/pq"
-	
 )
 
 func main() {
@@ -56,7 +55,13 @@ func main() {
 		service.Post("/performance-metrics", routes.GetPerformanceMetrics)
 	}
 
-	app.Listen(":4000")
+	// app.Listen(":4000")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	app.Listen(":" + port)
 
 }
 
