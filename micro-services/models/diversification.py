@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
+# import seaborn as sns
+# import matplotlib.pyplot as plt
 import yfinance as yf
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
@@ -10,6 +10,7 @@ import skl2onnx
 from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
 import pickle
+from sklearn.pipeline import Pipeline
 
 # List of stock tickers grouped by different sectors/ types to ensure diversification in the the dataset 
 sp500_large_cap = [
@@ -163,44 +164,53 @@ for cluster_idx in range(optimal_k):
 with open('cluster_risk_mapping.pkl', 'wb') as f:
     pickle.dump(cluster_risk, f)
 
-df2.to_csv('clustered_stocks.csv', index=False)
+# df2.to_csv('clustered_stocks.csv', index=False)
 
 with open("stock_scaler.pkl", "wb") as f:
     pickle.dump(scaler, f)
 
 # https://onnx.ai/sklearn-onnx/introduction.html
 initial_type = [('float_input', FloatTensorType([None, 4]))]
-onnx_model = convert_sklearn(kmeans, initial_types=initial_type)
+# onnx_model = convert_sklearn(kmeans, initial_types=initial_type)
+pipeline = Pipeline([
+    ("scaler", scaler),
+    ("kmeans", kmeans)
+])
 
-with open("kmeans_stock_clustering.onnx", "wb") as f:
+onnx_model = convert_sklearn(
+    pipeline,
+    initial_types=[('float_input', FloatTensorType([None, 4]))]
+)
+
+with open("kmeans_pipeline.onnx", "wb") as f:
     f.write(onnx_model.SerializeToString())
 
 # Plotting the clusters
-colors = cm.rainbow(np.linspace(0, 1, optimal_k))
+# colors = cm.rainbow(np.linspace(0, 1, optimal_k))
 
-plt.figure(figsize=(10, 8))
+# plt.figure(figsize=(10, 8))
 
-for cluster_idx in range(optimal_k):
-    cluster_data = df2[df2['Cluster_labels'] == cluster_idx]
+# for cluster_idx in range(optimal_k):
+#     cluster_data = df2[df2['Cluster_labels'] == cluster_idx]
 
-    plt.scatter(
-        cluster_data['Log_Returns'],
-        cluster_data['Log_Variances'],
-        color=colors[cluster_idx],
-        label=f"Cluster {cluster_idx} ({len(cluster_data)} stocks)"
-    )
+#     plt.scatter(
+#         cluster_data['Log_Returns'],
+#         cluster_data['Log_Variances'],
+#         color=colors[cluster_idx],
+#         label=f"Cluster {cluster_idx} ({len(cluster_data)} stocks)"
+#     )
 
-plt.title("KMeans Clustering of Stocks")
-plt.xlabel("Log Annual Returns (Compressed)")
-plt.ylabel("Log Annual Variances (Compressed)")
-plt.legend(loc="best")
-plt.grid(True)
-plt.show()
+# plt.title("KMeans Clustering of Stocks")
+# plt.xlabel("Log Annual Returns (Compressed)")
+# plt.ylabel("Log Annual Variances (Compressed)")
+# plt.legend(loc="best")
+# plt.grid(True)
+# plt.show()
 
 # Displays stocks associated with each cluster
-for cluster_idx in range(optimal_k):
-    cluster_group = df2[df2['Cluster_labels'] == cluster_idx]
+# for cluster_idx in range(optimal_k):
+#     cluster_group = df2[df2['Cluster_labels'] == cluster_idx]
 
-    print(f"Cluster {cluster_idx} ({len(cluster_group)} stocks):")
-    print(cluster_group['Stock Symbols'].tolist())
-    print()
+#     print(f"Cluster {cluster_idx} ({len(cluster_group)} stocks):")
+#     print(cluster_group['Stock Symbols'].tolist())
+#     print()

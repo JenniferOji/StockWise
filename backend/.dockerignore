@@ -1,0 +1,20 @@
+# git
+.git
+.gitignore
+
+node_modules
+
+# env files
+.env
+
+../micro-services
+../frontend
+
+# local dev
+*.log
+tmp/
+.vscode
+.idea
+
+# binaries
+main

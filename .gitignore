@@ -12,3 +12,4 @@ ml/models/kmeans_stock_clustering.onnx
 micro-services/.env
 micro-services/.venv
 ml/models/.venv
+micro-services/models/finbert/*.onnx

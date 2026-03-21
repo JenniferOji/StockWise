@@ -13,8 +13,8 @@ scikit-learn
 skl2onnx
 catboost
 nltk
-seaborn
-matplotlib
+# seaborn
+# matplotlib
 textblob
 vaderSentiment
 newsapi-python

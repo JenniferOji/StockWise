@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException 
 from pydantic import BaseModel
 from typing import List, Optional
 import pandas as pd
@@ -8,6 +8,8 @@ import json
 from datetime import datetime, timedelta
 from operator import itemgetter
 from itertools import combinations
+import numpy as np
+import yfinance as yf
 
 from risk_metrics import (
     get_portfolio_data,
@@ -19,15 +21,22 @@ from risk_metrics import (
 router = APIRouter()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-df2 = pd.read_csv(os.path.join(BASE_DIR, 'ml/models/clustered_stocks.csv'))
-
-with open(os.path.join(BASE_DIR, 'ml/models/cluster_risk_mapping.pkl'), 'rb') as f:
+# load trained clustering components instead of CSV
+with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "rb") as f:
     cluster_risk = pickle.load(f)
 
-stock_data_path = os.path.join(BASE_DIR, 'stock_data.json')
+with open(os.path.join(BASE_DIR, "models", "stock_scaler.pkl"), "rb") as f:
+    scaler = pickle.load(f)
+
+with open(os.path.join(BASE_DIR, "models", "kmeans_model.pkl"), "rb") as f:
+    kmeans = pickle.load(f)
+
+stock_data_path = os.path.join(BASE_DIR, "stock_data.json")
 with open(stock_data_path, 'r') as f:
     STOCK_DATA = json.load(f)
+
 
 class StockHolding(BaseModel):
     symbol: str
@@ -35,9 +44,54 @@ class StockHolding(BaseModel):
     quantity: Optional[float] = None
     purchase_price: Optional[float] = None
 
+
 class DiversificationRequest(BaseModel):
     current_stocks: List[StockHolding]
     user_risk_preference: str
+
+
+# builds feature dataframe dynamically at runtime instead of reading CSV
+def build_feature_dataframe(tickers: List[str]):
+    prices = yf.download(tickers, period="1y", auto_adjust=True)['Close']
+    prices = prices.dropna(axis=1, how='all')
+    prices = prices.ffill().bfill()
+
+    returns = prices.pct_change(fill_method=None).dropna()
+
+    # caculating max drawdown fro each stock 
+    max_drawdowns = {}
+    for ticker in returns.columns:
+        r = returns[ticker].dropna()
+        cumulative = (1 + r).cumprod()
+        running_max = cumulative.cummax()
+        drawdown = (cumulative - running_max) / running_max
+        max_drawdowns[ticker] = abs(drawdown.min())
+
+    # Calculate annual means and annual variances
+    annual_means_returns = returns.mean() * 252
+    annual_return_variances = returns.var() * 252
+
+    df = pd.DataFrame({
+        'Stock Symbols': annual_return_variances.index,
+        'Variances': annual_return_variances.values,
+        'Returns': annual_means_returns.values,
+        'Max_Drawdown': [max_drawdowns.get(t, np.nan) for t in annual_return_variances.index]
+    })
+
+    # log scaling to compress extreme values
+    df['Log_Returns'] = np.log1p(np.clip(df['Returns'], -0.999, None))
+
+    # clipping extreme variances so outliers do not dominate clustering
+    df['Log_Variances'] = np.log1p(np.clip(df['Variances'], 0, 2))
+
+    # adding features to capture risk adjusted returns 
+    df['Volatility'] = np.sqrt(df['Variances'])
+
+    # Dropping rows with NaN values before scaling to avoid errors
+    df = df.dropna()
+
+    return df
+
 
 # calculates the annualised portfolio volatility for a list of stocks
 def calculate_portfolio_volatility(stocks: List[StockHolding], lookback_days: int = 365):
@@ -64,6 +118,7 @@ def calculate_portfolio_volatility(stocks: List[StockHolding], lookback_days: in
     daily_returns, _ = calculate_returns(portfolio_value)
     volatility = calculate_volatility(daily_returns.dropna())
     return round(float(volatility), 2)
+
 
 # calculates the percentage sector allocation of the portfolio
 def sector_breakdown(stocks: List[StockHolding]):
@@ -102,6 +157,7 @@ def get_diversification_suggestions(request: DiversificationRequest):
         current_stock_symbols = [stock.symbol for stock in request.current_stocks]
         current_stock_breakdown = sector_breakdown(request.current_stocks)
         current_portfolio_volatility = calculate_portfolio_volatility(request.current_stocks)
+
         risk_levels = [
             "Very Low Risk",
             "Low Risk",
@@ -115,6 +171,17 @@ def get_diversification_suggestions(request: DiversificationRequest):
 
         user_index = risk_levels.index(request.user_risk_preference)
 
+        # build full ticker universe dynamically
+        tickers = list(STOCK_DATA.keys())
+
+        # build features + cluster at runtime
+        df_runtime = build_feature_dataframe(tickers)
+
+        X = df_runtime[['Log_Returns', 'Log_Variances', 'Volatility', 'Max_Drawdown']].values
+        Xs = scaler.transform(X)
+
+        df_runtime['Cluster_labels'] = kmeans.predict(Xs)
+
         target_clusters = []
 
         # determine which clusters match the user's risk preference
@@ -124,8 +191,11 @@ def get_diversification_suggestions(request: DiversificationRequest):
             # allowing stock suggestions within a +/- 1 risk band
             if abs(cluster_index - user_index) <= 1:
                 target_clusters.append(cluster_idx)
+
         # only considers stocks the user doesnt currently hold 
-        available_stocks = df2[~df2['Stock Symbols'].isin(current_stock_symbols)].copy()
+        available_stocks = df_runtime[
+            ~df_runtime['Stock Symbols'].isin(current_stock_symbols)
+        ].copy()
 
         # keep only stocks belonging to the selected clusters
         suggested_stocks = available_stocks[
@@ -146,8 +216,8 @@ def get_diversification_suggestions(request: DiversificationRequest):
                 },
             }
 
-        # limiting the candidate pool so the optimisation remains fast
-        candidate_pool = suggested_stocks.sort_values(by="Volatility").head(7)
+        # limit the candidate pool so the optimisation remains fast
+        candidate_pool = suggested_stocks.sort_values(by="Volatility").head(10)
 
         candidate_symbols = candidate_pool["Stock Symbols"].tolist()
 
@@ -178,7 +248,6 @@ def get_diversification_suggestions(request: DiversificationRequest):
             vol = calculate_portfolio_volatility(projected)
 
             if vol is not None:
-
                 results.append({
                     "symbols": combo,
                     "volatility": vol
@@ -221,11 +290,9 @@ def get_diversification_suggestions(request: DiversificationRequest):
 
         # add suggested stocks to simulate the new portfolio
         for symbol in best_symbols:
-
             company = STOCK_DATA.get(symbol)
 
             if company:
-
                 projected_holdings.append(
                     StockHolding(
                         symbol=symbol,
@@ -235,7 +302,6 @@ def get_diversification_suggestions(request: DiversificationRequest):
 
         # compute sector allocation and volatility after adding suggestions
         projected_stock_breakdown = sector_breakdown(projected_holdings)
-
         projected_portfolio_volatility = calculate_portfolio_volatility(projected_holdings)
 
         return {
@@ -249,5 +315,6 @@ def get_diversification_suggestions(request: DiversificationRequest):
                 "with_suggestions_volatility": projected_portfolio_volatility,
             },
         }
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

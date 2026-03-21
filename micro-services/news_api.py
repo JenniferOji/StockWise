@@ -3,7 +3,6 @@ import pickle
 from datetime import datetime, timedelta
 
 import numpy as np
-import onnxruntime as ort
 import requests
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -14,66 +13,73 @@ import re
 import nltk
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
+from transformers import AutoTokenizer
+import onnxruntime as ort
 
-
-# finbert model imports
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-import torch
-import torch.nn.functional as F
-
-nltk.download("punkt")
-nltk.download("punkt_tab")
-nltk.download("wordnet")
+# nltk.download("punkt")
+# nltk.download("punkt_tab")
+# nltk.download("wordnet")
 
 load_dotenv()
 lemm = WordNetLemmatizer()
 router = APIRouter()
 
-# initisalising the finbert model and tokenizer for comparison with the onnx model
-FINBERT_MODEL = "ProsusAI/finbert"
-
-tokenizer = AutoTokenizer.from_pretrained(FINBERT_MODEL)
-finbert_model = AutoModelForSequenceClassification.from_pretrained(FINBERT_MODEL)
-
-finbert_model.eval()
-
 # load the onnx models from the file path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# paths for the onnx models and label mapping
+FINBERT_PATH = os.path.join(BASE_DIR, "models", "finbert")
+tokenizer = AutoTokenizer.from_pretrained(FINBERT_PATH)
+
+finbert_session = ort.InferenceSession(os.path.join(FINBERT_PATH, "model.onnx"),providers=["CPUExecutionProvider"])
+
 # preprocessing converts text to the numeric feature vectors used b the model - catboost cannot read text 
-preproc_path = os.path.join(BASE_DIR, "ml", "models", "sentiment_preprocessor.onnx")
+preproc_path = os.path.join(BASE_DIR, "models", "sentiment_preprocessor.onnx")
 # takes the numeric feature vectors from the preprocessing step and predicts the sentiment class
-model_path = os.path.join(BASE_DIR, "ml", "models", "sentiment_catboost_model.onnx")
+model_path = os.path.join(BASE_DIR, "models", "sentiment_catboost_model.onnx")
 
 preproc_sess = ort.InferenceSession(preproc_path, providers=["CPUExecutionProvider"])
 model_sess = ort.InferenceSession(model_path, providers=["CPUExecutionProvider"])
 
 # loads the label dictionary to convert the model output back to the sentiment label
-with open(os.path.join(BASE_DIR, "ml", "models", "sentiment_label_map.pkl"), "rb") as f:
+with open(os.path.join(BASE_DIR, "models", "sentiment_label_map.pkl"), "rb") as f:
     sentiment_label = pickle.load(f)
 
 class StockRequest(BaseModel):
     names: List[str]
 
-# finbert inference 
+# finbert inference
 def get_finbert_sentiments(texts: List[str]):
     results = []
+
+    input_names = [inp.name for inp in finbert_session.get_inputs()]
 
     for text in texts:
         inputs = tokenizer(
             text,
-            return_tensors="pt",
+            return_tensors="np",
             truncation=True,
-            padding=True,
+            padding="max_length",
             max_length=512
         )
 
-        with torch.no_grad():
-            outputs = finbert_model(**inputs)
-            probs = F.softmax(outputs.logits, dim=1)
-            pred = torch.argmax(probs, dim=1).item()
+        ort_inputs = {
+            "input_ids": inputs["input_ids"],
+            "attention_mask": inputs["attention_mask"],
+        }
 
-        # finbert label mapping
+        # ADD THIS FIX 👇
+        if "token_type_ids" in input_names:
+            if "token_type_ids" in inputs:
+                ort_inputs["token_type_ids"] = inputs["token_type_ids"]
+            else:
+                ort_inputs["token_type_ids"] = np.zeros_like(inputs["input_ids"])
+
+        outputs = finbert_session.run(None, ort_inputs)
+
+        logits = outputs[0]
+        pred = int(np.argmax(logits, axis=1)[0])
+
         label_map = {
             0: "negative",
             1: "neutral",
@@ -83,6 +89,7 @@ def get_finbert_sentiments(texts: List[str]):
         results.append(label_map[pred])
 
     return results
+
 
 # only getting the first part of the company name to search for news as the api seems to work better with that.
 def split_company_name(company_name: str):
@@ -135,27 +142,13 @@ def reduce_lengthening(text):
     return pattern.sub(r"\1\1", text)
 
 # cleans text - removes urls, mentions, numbers
-def text_preprocess(doc: str):
-    temp = doc.lower()
-    temp = re.sub("@[A-Za-z0-9_]+", "", temp)
-    temp = re.sub("#[A-Za-z0-9_]+", "", temp)
-
-    temp = re.sub(r"http\S+", "", temp)
-    temp = re.sub(r"www.\S+", "", temp)
-
-    temp = re.sub("[0-9]", "", temp)
-    temp = re.sub("'", " ", temp)
-
-    # tokenising is when we split the text into individual words
-    temp = word_tokenize(temp)
-
-    temp = [reduce_lengthening(w) for w in temp]
-    # lemmatisation is when we reduce words to their base form - running becomes run - this helps the model generalise better
-    temp = [lemm.lemmatize(w) for w in temp]
-    temp = [w for w in temp if len(w) > 1]
-    temp = " ".join(temp)
-
-    return temp
+def text_preprocess(text: str):
+    text = text.lower()
+    text = re.sub(r"http\S+", "", text)
+    text = re.sub(r"[^a-z\s]", "", text)
+    text = re.sub(r"(.)\1{2,}", r"\1\1", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
 
 # gets the sentiment label for a list of texts by running them through the preprocessing and model onnx pipelines
 def get_sentiment_labels(texts: List[str]):

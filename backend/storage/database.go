@@ -14,17 +14,21 @@ var DB *gorm.DB
 
 // connectToDatabase opens a connection and returns the *gorm.DB so callers can use it
 func connectToDatabase() *gorm.DB {
-	err := godotenv.Load()
-	// if there is an error loading .env file raise a panic
-	if err != nil {
-		panic("Error loading .env file")
-	}
+	// err := godotenv.Load()
+	// // if there is an error loading .env file raise a panic
+	// if err != nil {
+	// 	panic("Error loading .env file")
+	// }
+
+	_ = godotenv.Load() 
 
 	// first pass in the connection string then the gorm open function
 	dsn := os.Getenv("DB_CONNECTION_STRING")
 	if dsn == "" {
 		panic("DB_CONNECTION_STRING is not set")
 	}
+
+	fmt.Println("Connecting to database")
 
 	db, dbError := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if dbError != nil {
