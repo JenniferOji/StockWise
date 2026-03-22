@@ -6,7 +6,6 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
-    build-essential \
     locales \
     && rm -rf /var/lib/apt/lists/*
 
@@ -16,11 +15,11 @@ RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
 ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 
-COPY requirements.txt .
+COPY micro-services/requirements.txt .
 
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY micro-services/ .
 
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
