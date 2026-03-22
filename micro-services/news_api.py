@@ -16,6 +16,10 @@ from nltk.tokenize import word_tokenize
 from transformers import AutoTokenizer
 import onnxruntime as ort
 
+from model_loader import load_all_models
+
+load_all_models()
+
 # nltk.download("punkt")
 # nltk.download("punkt_tab")
 # nltk.download("wordnet")

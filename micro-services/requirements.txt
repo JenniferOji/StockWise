@@ -18,5 +18,6 @@ nltk
 textblob
 vaderSentiment
 newsapi-python
-torch
+# torch
 transformers
+huggingface_hub
