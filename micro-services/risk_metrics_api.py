@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
 from datetime import datetime, timedelta
-from pathlib import Path
 import os
 import numpy as np
 import onnxruntime as ort
@@ -21,21 +20,37 @@ router = APIRouter()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# load the kmeans model for stock clustering 
-KMEANS_MODEL_PATH = os.path.join(BASE_DIR, "models", "kmeans_pipeline.onnx")
-kmeans_session = ort.InferenceSession(KMEANS_MODEL_PATH, providers=["CPUExecutionProvider"])
+# kmeans model for stock clustering 
+kmeans_session = None  
+scaler = None
+cluster_risk_mapping = None
+
+def get_kmeans_session():
+    global kmeans_session
+    if kmeans_session is None:
+        path = os.path.join(BASE_DIR, "models", "kmeans_pipeline.onnx")
+        kmeans_session = ort.InferenceSession(path, providers=["CPUExecutionProvider"])
+    return kmeans_session
 
 # loads the trained scaler - the features have very different numeric ranges so scaling makes them contribute equally to clustering distance calculations
-SCALER_PATH = os.path.join(BASE_DIR, "models", "stock_scaler.pkl")
-with open(SCALER_PATH, "rb") as f:
-    scaler = pickle.load(f)
+def get_scaler():
+    global scaler
+    if scaler is None:
+        path = os.path.join(BASE_DIR, "models", "stock_scaler.pkl")
+        with open(path, "rb") as f:
+            scaler = pickle.load(f)
+    return scaler
 
 # The cluster risk mapping is needed to assign the risk category to the stocks based on the predicted cluster label from the kmeans model
-CLUSTER_RISK_PATH = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
-with open(CLUSTER_RISK_PATH, "rb") as f:
-    cluster_risk_mapping = pickle.load(f)
+def get_cluster_risk_mapping():
+    global cluster_risk_mapping
+    if cluster_risk_mapping is None:
+        path = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
+        with open(path, "rb") as f:
+            cluster_risk_mapping = pickle.load(f)
+    return cluster_risk_mapping
 
-CLUSTER_CATEGORY = cluster_risk_mapping
+# CLUSTER_CATEGORY = get_cluster_risk_mapping()
 
 # pydantic models for request validation and type checking
 class Stock(BaseModel):
@@ -65,7 +80,7 @@ def predict_cluster_label(session, log_return, log_variance, volatility, max_dra
 
     features = np.array([[log_return, log_variance, volatility, max_drawdown]])
 
-    scaled_features = scaler.transform(features)
+    scaled_features = get_scaler().transform(features)
 
     model_input = session.get_inputs()[0].name
 
@@ -152,7 +167,7 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
 
         # passes into the model the required features to get the cluster label 
         cluster_label = predict_cluster_label(
-            kmeans_session,
+            get_kmeans_session(),
             features["log_return"],
             features["log_variance"],
             features["volatility"],
@@ -160,7 +175,7 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
         )
 
         # mapping the cluster label (0,1,2...) to the label mapping (low/moderate risk...)
-        category = CLUSTER_CATEGORY.get(cluster_label, "Moderate Risk")
+        category = get_cluster_risk_mapping().get(cluster_label, "Moderate Risk")
 
         categories[category].append(
             StockRiskCategory(
