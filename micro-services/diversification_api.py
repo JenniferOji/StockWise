@@ -23,17 +23,35 @@ router = APIRouter()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# load trained clustering components instead of CSV
-with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "rb") as f:
-    cluster_risk = pickle.load(f)
+cluster_risk = None
+scaler = None
+kmeans_session = None
 
-with open(os.path.join(BASE_DIR, "models", "stock_scaler.pkl"), "rb") as f:
-    scaler = pickle.load(f)
 
-# with open(os.path.join(BASE_DIR, "models", "kmeans_model.pkl"), "rb") as f:
-#     kmeans = pickle.load(f)
-kmeans_path = os.path.join(BASE_DIR, "models", "kmeans_pipeline.onnx")
-kmeans_session = ort.InferenceSession(kmeans_path, providers=["CPUExecutionProvider"])
+def get_cluster_risk():
+    global cluster_risk
+    if cluster_risk is None:
+        path = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
+        with open(path, "rb") as f:
+            cluster_risk = pickle.load(f)
+    return cluster_risk
+
+
+def get_scaler():
+    global scaler
+    if scaler is None:
+        path = os.path.join(BASE_DIR, "models", "stock_scaler.pkl")
+        with open(path, "rb") as f:
+            scaler = pickle.load(f)
+    return scaler
+
+
+def get_kmeans_session():
+    global kmeans_session
+    if kmeans_session is None:
+        path = os.path.join(BASE_DIR, "models", "kmeans_pipeline.onnx")
+        kmeans_session = ort.InferenceSession(path, providers=["CPUExecutionProvider"])
+    return kmeans_session
 
 stock_data_path = os.path.join(BASE_DIR, "stock_data.json")
 with open(stock_data_path, 'r') as f:
@@ -180,17 +198,17 @@ def get_diversification_suggestions(request: DiversificationRequest):
         df_runtime = build_feature_dataframe(tickers)
 
         X = df_runtime[['Log_Returns', 'Log_Variances', 'Volatility', 'Max_Drawdown']].values
-        Xs = scaler.transform(X)
+        Xs = get_scaler().transform(X)
 
         # df_runtime['Cluster_labels'] = kmeans.predict(Xs)
-        input_name = kmeans_session.get_inputs()[0].name
-        outputs = kmeans_session.run(None, {input_name: Xs})
+        input_name = get_kmeans_session().get_inputs()[0].name
+        outputs = get_kmeans_session().run(None, {input_name: Xs})
         df_runtime['Cluster_labels'] = outputs[0].flatten()
 
         target_clusters = []
 
         # determine which clusters match the user's risk preference
-        for cluster_idx, risk_label in cluster_risk.items():
+        for cluster_idx, risk_label in get_cluster_risk().items():
             cluster_index = risk_levels.index(risk_label)
 
             # allowing stock suggestions within a +/- 1 risk band

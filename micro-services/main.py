@@ -9,12 +9,13 @@ from news_api import router as news_router
 from performance_metrics_api import router as performance_metrics_router
 # resource used: https://fastapi.tiangolo.com/#example-upgrade
 
-from model_loader import load_all_models  
+from model_loader import MODEL_DIR, load_all_models  
 
 app = FastAPI()
 
 @app.on_event("startup")
 def startup_event():
+    print("Downloading models")
     load_all_models()
     print("Models loaded")
 
