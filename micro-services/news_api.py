@@ -10,32 +10,32 @@ from typing import List
 
 from dotenv import load_dotenv
 import re
-import nltk
-from nltk.stem import WordNetLemmatizer
-from nltk.tokenize import word_tokenize
+
 from transformers import AutoTokenizer
 import onnxruntime as ort
 
-from model_loader import load_all_models
 
-load_all_models()
 
 # nltk.download("punkt")
 # nltk.download("punkt_tab")
 # nltk.download("wordnet")
 
 load_dotenv()
-lemm = WordNetLemmatizer()
+
 router = APIRouter()
 
 # load the onnx models from the file path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# paths for the onnx models and label mapping
-FINBERT_PATH = os.path.join(BASE_DIR, "models", "finbert")
-tokenizer = AutoTokenizer.from_pretrained(FINBERT_PATH)
+tokenizer = AutoTokenizer.from_pretrained("ProsusAI/finbert")
 
-finbert_session = ort.InferenceSession(os.path.join(FINBERT_PATH, "model.onnx"),providers=["CPUExecutionProvider"])
+# paths for the onnx models and label mapping
+# FINBERT_PATH = os.path.join(BASE_DIR, "models", "finbert")
+# finbert_session = ort.InferenceSession(os.path.join(FINBERT_PATH, "model.onnx"),providers=["CPUExecutionProvider"])
+
+# paths for the downloaded files from hugging face 
+finbert_model_path = os.path.join(BASE_DIR, "models", "finbert", "model.onnx")
+finbert_session = ort.InferenceSession(finbert_model_path, providers=["CPUExecutionProvider"])
 
 # preprocessing converts text to the numeric feature vectors used b the model - catboost cannot read text 
 preproc_path = os.path.join(BASE_DIR, "models", "sentiment_preprocessor.onnx")
@@ -72,7 +72,6 @@ def get_finbert_sentiments(texts: List[str]):
             "attention_mask": inputs["attention_mask"],
         }
 
-        # ADD THIS FIX 👇
         if "token_type_ids" in input_names:
             if "token_type_ids" in inputs:
                 ort_inputs["token_type_ids"] = inputs["token_type_ids"]

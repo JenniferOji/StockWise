@@ -10,6 +10,7 @@ from operator import itemgetter
 from itertools import combinations
 import numpy as np
 import yfinance as yf
+import onnxruntime as ort
 
 from risk_metrics import (
     get_portfolio_data,
@@ -21,7 +22,6 @@ from risk_metrics import (
 router = APIRouter()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # load trained clustering components instead of CSV
 with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "rb") as f:
@@ -30,8 +30,10 @@ with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "rb") as
 with open(os.path.join(BASE_DIR, "models", "stock_scaler.pkl"), "rb") as f:
     scaler = pickle.load(f)
 
-with open(os.path.join(BASE_DIR, "models", "kmeans_model.pkl"), "rb") as f:
-    kmeans = pickle.load(f)
+# with open(os.path.join(BASE_DIR, "models", "kmeans_model.pkl"), "rb") as f:
+#     kmeans = pickle.load(f)
+kmeans_path = os.path.join(BASE_DIR, "models", "kmeans_pipeline.onnx")
+kmeans_session = ort.InferenceSession(kmeans_path, providers=["CPUExecutionProvider"])
 
 stock_data_path = os.path.join(BASE_DIR, "stock_data.json")
 with open(stock_data_path, 'r') as f:
@@ -180,7 +182,10 @@ def get_diversification_suggestions(request: DiversificationRequest):
         X = df_runtime[['Log_Returns', 'Log_Variances', 'Volatility', 'Max_Drawdown']].values
         Xs = scaler.transform(X)
 
-        df_runtime['Cluster_labels'] = kmeans.predict(Xs)
+        # df_runtime['Cluster_labels'] = kmeans.predict(Xs)
+        input_name = kmeans_session.get_inputs()[0].name
+        outputs = kmeans_session.run(None, {input_name: Xs})
+        df_runtime['Cluster_labels'] = outputs[0].flatten()
 
         target_clusters = []
 
