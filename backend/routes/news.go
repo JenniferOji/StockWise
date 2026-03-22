@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-
+	"os"
 	"github.com/kataras/iris/v12"
 )
 
@@ -47,6 +47,15 @@ type NewsAPIRequest struct {
 
 // GetStockNews handles http requests for stock news
 func GetStockNews(ctx iris.Context) {
+	mlApiUrl := os.Getenv("ML_API_URL")
+    endpoint := "/stock-news"
+
+	if mlApiUrl == "" {
+		ctx.StatusCode(500)
+		ctx.JSON(map[string]string{"error": "ML_API_URL not set"})
+		return
+	}
+
 	// variable to hold the request body
 	var req NewsRequest
 
@@ -73,13 +82,9 @@ func GetStockNews(ctx iris.Context) {
 	}
 
 	// call call the fastAPI endpoint
-	fastAPIURL := "http://localhost:8000"
+	url := mlApiUrl + endpoint
 
-	resp, err := http.Post(
-		fastAPIURL+"/stock-news",
-		"application/json",
-		bytes.NewBuffer(reqBody),
-	)
+	resp, err := http.Post(url,"application/json",bytes.NewBuffer(reqBody))
 
 	if err != nil {
 		ctx.StatusCode(500)
@@ -109,6 +114,15 @@ func GetStockNews(ctx iris.Context) {
 
 func GetStockSentiment(ctx iris.Context) {
 
+	mlApiUrl := os.Getenv("ML_API_URL")
+    endpoint := "/stock-sentiment"
+
+	if mlApiUrl == "" {
+		ctx.StatusCode(500)
+		ctx.JSON(map[string]string{"error": "ML_API_URL not set"})
+		return
+	}
+
 	var req NewsRequest
 	if err := ctx.ReadJSON(&req); err != nil {
 		ctx.StatusCode(400)
@@ -129,8 +143,10 @@ func GetStockSentiment(ctx iris.Context) {
 	apiReq := NewsAPIRequest{Names: names}
 	reqBody, _ := json.Marshal(apiReq)
 
+	url := mlApiUrl + endpoint
+	
 	resp, err := http.Post(
-		"http://localhost:8000/stock-sentiment",
+		url,
 		"application/json",
 		bytes.NewBuffer(reqBody),
 	)

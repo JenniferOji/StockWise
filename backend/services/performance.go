@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+    "os"
 )
 
 type StockHolding struct {
@@ -33,41 +34,46 @@ type PerformanceMetricsResponse struct {
 
 // calls the FastAPI microservice for performance metrics
 func CalculatePerformanceMetrics(req PerformanceMetricsRequest) (*PerformanceMetricsResponse, error) {
-       requestBody := PerformanceMetricsRequest{
-	       Stocks: req.Stocks,
-	       Days:   req.Days,
-       }
+    mlApiUrl := os.Getenv("ML_API_URL")
+    endpoint := "/api/performance-metrics"
 
-       jsonData, err := json.Marshal(requestBody)
-       if err != nil {
-	       return nil, err
-       }
+    if mlApiUrl == "" {
+        return nil, fmt.Errorf("ML_API_URL not set")
+    }
 
-       fastAPIURL := "http://localhost:8000"
+    requestBody := PerformanceMetricsRequest{
+	    Stocks: req.Stocks,
+	   Days:   req.Days,
+   }
 
-       resp, err := http.Post(
-	       fastAPIURL+"/api/performance-metrics",
-	       "application/json",
-	       bytes.NewBuffer(jsonData),
-       )
-       if err != nil {
-	       return nil, err
-       }
-       defer resp.Body.Close()
+    jsonData, err := json.Marshal(requestBody)
+    if err != nil {
+       return nil, err
+    }
 
-       body, err := io.ReadAll(resp.Body)
-       if err != nil {
-	       return nil, err
-       }
+    // fastAPIURL := "http://localhost:8000"
+    url := mlApiUrl + endpoint
+    
+    resp, err := http.Post(url,"application/json",bytes.NewBuffer(jsonData))
+    if err != nil {
+        return nil, err
+    }
 
-       if resp.StatusCode != http.StatusOK {
-       return nil, fmt.Errorf("performance metrics service error: %s", string(body))
-       }
+    defer resp.Body.Close()
 
-       var result PerformanceMetricsResponse
-       if err := json.Unmarshal(body, &result); err != nil {
-	       return nil, err
-       }
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return nil, err
+    }
 
-       return &result, nil
+    if resp.StatusCode != http.StatusOK {
+    return nil, fmt.Errorf("performance metrics service error: %s", string(body))
+    }
+
+    var result PerformanceMetricsResponse
+    if err := json.Unmarshal(body, &result); err != nil {
+        return nil, err
+    }
+
+    return &result, nil
 }

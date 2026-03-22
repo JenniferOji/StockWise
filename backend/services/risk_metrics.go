@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 )
 
 type Stock struct {
@@ -43,6 +44,12 @@ type StockRiskCategoriesResponse struct {
 
 // either returns the risk metrics respinse or an error
 func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
+	mlApiUrl := os.Getenv("ML_API_URL")
+    endpoint := "/api/risk-metrics"
+
+    if mlApiUrl == "" {
+        return nil, fmt.Errorf("ML_API_URL not set")
+    }
 	requestBody := RiskMetricsRequest{
 		Stocks: stocks,
 	}
@@ -53,10 +60,10 @@ func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
 	}
 
 	// calling the fastAPI microservice
-	fastAPIURL := "http://localhost:8000"
+	url := mlApiUrl + endpoint
 
 	resp, err := http.Post(
-		fastAPIURL+"/api/risk-metrics",
+		url,
 		"application/json",
 		// bytes because http.Post requires an io.Reader
 		bytes.NewBuffer(jsonData),
@@ -98,10 +105,16 @@ func CalculateStockRiskCategories(stocks []Stock) (*StockRiskCategoriesResponse,
 		return nil, err
 	}
 
-	fastAPIURL := "http://localhost:8000"
+	mlApiUrl := os.Getenv("ML_API_URL")
+    endpoint := "/api/stock-risk-categories"
+
+    if mlApiUrl == "" {
+        return nil, fmt.Errorf("ML_API_URL not set")
+    }
+	url := mlApiUrl + endpoint
 
 	resp, err := http.Post(
-		fastAPIURL+"/api/stock-risk-categories",
+		url,
 		"application/json",
 		bytes.NewBuffer(jsonData),
 	)
