@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"github.com/kataras/iris/v12"
-	"fmt"
 )
 
 type StockHolding struct {
@@ -54,7 +53,7 @@ type DiversificationResponse struct {
 func GetDiversificationSuggestions(ctx iris.Context) {
 	mlApiUrl := os.Getenv("ML_API_URL")
     endpoint := "/api/diversification-suggestions"
-	
+
 	if mlApiUrl == "" {
 		ctx.StatusCode(500)
 		ctx.JSON(map[string]string{"error": "ML_API_URL not set"})
