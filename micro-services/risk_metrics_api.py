@@ -2,23 +2,14 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
 from datetime import datetime, timedelta
-from pathlib import Path
 import os
 import numpy as np
 import pickle
 import pandas as pd
 
-from risk_metrics import (
-    get_stock_data,
-    get_portfolio_data, 
-    calculate_portfolio_value, 
-    calculate_returns,
-    calculate_risk_metrics
-)
-
 router = APIRouter() 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
 SCALER_PATH = os.path.join(BASE_DIR, "models", "scaler.pkl")
@@ -79,39 +70,34 @@ def root():
 
 @router.post("/api/risk-metrics")
 def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
-    portfolio = {}
+    vols = []
+    returns = []
+    drawdowns = []
+
     for stock in portfolio_request.stocks:
-        portfolio[stock.ticker] = {
-            'shares': stock.shares,
-            'purchase_price': stock.purchase_price
-        }
+        features = feature_map.get(stock.ticker)
+        if not features:
+            continue
 
-    # calculate date range for historical data analysis
-    start_date = (datetime.now() - timedelta(days=portfolio_request.days)).strftime('%Y-%m-%d')
-    end_date = datetime.now().strftime('%Y-%m-%d')
+        vols.append(features["volatility"])
+        returns.append(np.expm1(features["log_return"]))
+        drawdowns.append(features["max_drawdown"])
 
-    # fetch historical price data from yahoo finance via yfinance library
-    price_data = get_portfolio_data(portfolio, start_date, end_date)
-    
-    # validate that the data was recieved for the tickers
-    if price_data.empty:
+    if not vols:
         raise HTTPException(status_code=404, detail="No data for the tickers")
-    
-    # calculate total portfolio value over time 
-    portfolio_value = calculate_portfolio_value(price_data, portfolio)
-    
-    # calculate daily returns and cumulative returns
-    daily_returns, cumulative_returns = calculate_returns(portfolio_value)
-    
-    # calculate all risk metrics: volatility, sharpe ratio, max drawdown, and var
-    risk_metrics = calculate_risk_metrics(daily_returns)
-    
-    current_portfolio_value = portfolio_value['Total'].values[-1]
-    
+
+    portfolio_volatility = np.mean(vols) * 100
+    portfolio_return = np.mean(returns) * 100
+    portfolio_drawdown = np.max(drawdowns) * 100
+
     return {
         "success": True,
-        "metrics": risk_metrics,
-        "portfolio_value": current_portfolio_value
+        "metrics": {
+            "volatility": f"{portfolio_volatility:.2f}%",
+            "annual_return": f"{portfolio_return:.2f}%",
+            "max_drawdown": f"{portfolio_drawdown:.2f}%"
+        },
+        "portfolio_value": 0
     }
 
 # this endpoint gets the risk category for each stock in the portfolio based on the model

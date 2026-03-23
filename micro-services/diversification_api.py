@@ -1,25 +1,17 @@
-from fastapi import APIRouter, HTTPException 
+from fastapi import APIRouter, HTTPException  
 from pydantic import BaseModel
 from typing import List, Optional
 import pandas as pd
 import pickle
 import os
 import json
-from datetime import datetime, timedelta
 from operator import itemgetter
 from itertools import combinations
 import numpy as np
 
-from risk_metrics import (
-    get_portfolio_data,
-    calculate_portfolio_value,
-    calculate_returns,
-    calculate_volatility,
-)
-
 router = APIRouter()
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
 SCALER_PATH = os.path.join(BASE_DIR, "models", "scaler.pkl")
@@ -54,30 +46,21 @@ class DiversificationRequest(BaseModel):
 
 
 # calculates the annualised portfolio volatility for a list of stocks
-def calculate_portfolio_volatility(stocks: List[StockHolding], lookback_days: int = 365):
+def calculate_portfolio_volatility(stocks: List[StockHolding]):
     if not stocks:
         return None
 
-    portfolio = {}
+    vols = []
     for stock in stocks:
-        symbol = stock.symbol
-        shares = stock.quantity if stock.quantity and stock.quantity > 0 else 1.0
-        if symbol in portfolio:
-            portfolio[symbol]["shares"] += shares
-        else:
-            portfolio[symbol] = {
-                "shares": shares,
-                "purchase_price": stock.purchase_price if stock.purchase_price else 0.0,
-            }
+        features = df_features[df_features["ticker"] == stock.symbol]
+        if features.empty:
+            continue
+        vols.append(features.iloc[0]["volatility"])
 
-    start_date = (datetime.now() - timedelta(days=lookback_days)).strftime('%Y-%m-%d')
-    end_date = datetime.now().strftime('%Y-%m-%d')
+    if not vols:
+        return None
 
-    price_data = get_portfolio_data(portfolio, start_date, end_date).dropna(how='all')
-    portfolio_value = calculate_portfolio_value(price_data, portfolio)
-    daily_returns, _ = calculate_returns(portfolio_value)
-    volatility = calculate_volatility(daily_returns.dropna())
-    return round(float(volatility), 2)
+    return round(float(np.mean(vols) * 100), 2)
 
 
 # calculates the percentage sector allocation of the portfolio
@@ -140,10 +123,9 @@ def get_diversification_suggestions(request: DiversificationRequest):
 
         user_index = risk_levels.index(request.user_risk_preference)
 
-        # build full ticker universe dynamically
-        tickers = list(STOCK_DATA.keys())
-
         df_runtime = df_features.copy()
+
+        df_runtime = df_runtime.dropna(subset=["log_return", "log_variance", "volatility", "max_drawdown"])
 
         df_runtime["Cluster_labels"] = [
             predict_cluster(

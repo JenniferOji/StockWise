@@ -82,6 +82,7 @@ def get_stock_data(tickers, days):
     return features_by_ticker
 
 def get_portfolio_data(portfolio, start_date, end_date):
+    print("Fetching prices...")
     tickers = list(portfolio.keys())
     data = yf.download(tickers, start=start_date, end=end_date, auto_adjust=True)['Close']
     data = data.dropna()

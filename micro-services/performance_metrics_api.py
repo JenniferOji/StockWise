@@ -1,11 +1,17 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
-from datetime import datetime, timedelta
 import numpy as np
-import yfinance as yf
+import pandas as pd
+import os
 
 router = APIRouter()
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
+
+df_features = pd.read_csv(FEATURES_PATH)
+feature_map = df_features.set_index("ticker").to_dict(orient="index")
 
 # Pydantic models for request validation and type checking
 class Stock(BaseModel):
@@ -37,40 +43,24 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 			'purchase_price': stock.purchase_price
 		}
 
-	start_date = (datetime.now() - timedelta(days=portfolio_request.days)).strftime('%Y-%m-%d')
-	end_date = datetime.now().strftime('%Y-%m-%d')
-
-	tickers = list(portfolio.keys())
-	price_data = yf.download(tickers, start=start_date, end=end_date, auto_adjust=True)
-
-	if price_data.empty:
-		raise HTTPException(status_code=404, detail="No data for the tickers")
-
-	if len(tickers) == 1:
-		price_data = price_data["Close"].to_frame(name=tickers[0])
-	else:
-		price_data = price_data["Close"]
-
-	price_data = price_data.ffill().bfill().dropna(how="all")
-
-	# Calculate value for each stock in the portfolio
 	portfolio_value = {}
 	total_value = 0
 	returns = {}
 
 	for ticker, holding in portfolio.items():
-		if ticker not in price_data.columns:
+		features = feature_map.get(ticker)
+		if not features:
 			continue
 
 		shares = holding['shares']
 		purchase_price = holding['purchase_price']
-		initial_price = price_data[ticker].iloc[0]
-		final_price = price_data[ticker].iloc[-1]
-		value = final_price * shares
+
+		annual_return = np.expm1(features["log_return"])
+
+		value = purchase_price * (1 + annual_return) * shares
 		total_value += value
 
-		# Total return for the period
-		returns[ticker] = (final_price - purchase_price) / purchase_price
+		returns[ticker] = annual_return
 		portfolio_value[ticker] = value
 
 	if not returns:

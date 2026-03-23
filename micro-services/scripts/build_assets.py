@@ -57,12 +57,12 @@ labels = kmeans.fit_predict(Xs)
 df["cluster"] = labels
 
 # saving
-df.to_csv("data/features.csv", index=False)
+df.to_csv(os.path.join(BASE_DIR, "data", "features.csv"), index=False)
 
-with open("models/scaler.pkl", "wb") as f:
+with open(os.path.join(BASE_DIR, "models", "scaler.pkl"), "wb") as f:
     pickle.dump(scaler, f)
 
-with open("models/kmeans.pkl", "wb") as f:
+with open(os.path.join(BASE_DIR, "models", "kmeans.pkl"), "wb") as f:
     pickle.dump(kmeans, f)
-
+    
 print("Assets built")
