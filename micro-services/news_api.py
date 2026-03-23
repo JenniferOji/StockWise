@@ -16,10 +16,6 @@ from nltk.tokenize import word_tokenize
 # from transformers import AutoTokenizer
 import onnxruntime as ort
 
-from model_loader import load_all_models
-
-load_all_models()
-
 # nltk.download("punkt")
 # nltk.download("punkt_tab")
 # nltk.download("wordnet")
@@ -51,48 +47,6 @@ with open(os.path.join(BASE_DIR, "models", "sentiment_label_map.pkl"), "rb") as 
 
 class StockRequest(BaseModel):
     names: List[str]
-
-# finbert inference
-# def get_finbert_sentiments(texts: List[str]):
-#     results = []
-
-#     input_names = [inp.name for inp in finbert_session.get_inputs()]
-
-#     for text in texts:
-#         inputs = tokenizer(
-#             text,
-#             return_tensors="np",
-#             truncation=True,
-#             padding="max_length",
-#             max_length=512
-#         )
-
-#         ort_inputs = {
-#             "input_ids": inputs["input_ids"],
-#             "attention_mask": inputs["attention_mask"],
-#         }
-
-#         if "token_type_ids" in input_names:
-#             if "token_type_ids" in inputs:
-#                 ort_inputs["token_type_ids"] = inputs["token_type_ids"]
-#             else:
-#                 ort_inputs["token_type_ids"] = np.zeros_like(inputs["input_ids"])
-
-#         outputs = finbert_session.run(None, ort_inputs)
-
-#         logits = outputs[0]
-#         pred = int(np.argmax(logits, axis=1)[0])
-
-#         label_map = {
-#             0: "negative",
-#             1: "neutral",
-#             2: "positive"
-#         }
-
-#         results.append(label_map[pred])
-
-#     return results
-
 
 # only getting the first part of the company name to search for news as the api seems to work better with that.
 def split_company_name(company_name: str):
@@ -323,9 +277,8 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
     # finbert_sentiments = get_finbert_sentiments(article_texts) if article_texts else []
     
     # for each article we add the sentiment label to it
-    for article, catboost_sentiments, finbert_sentiments in zip(article_refs, catboost_sentiments, finbert_sentiments):
-        article["catboost_model"] = catboost_sentiments
-        # article["finbert"] = finbert_sentiments
+    for article, catboost_sentiment in zip(article_refs, catboost_sentiments):
+        article["catboost_model"] = catboost_sentiment
         formatted_articles.append(article)
 
     return {
