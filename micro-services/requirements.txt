@@ -7,10 +7,8 @@ numpy
 pandas
 yfinance
 onnxruntime
-redis
-types-redis
 scikit-learn
-skl2onnx
+# skl2onnx
 catboost
 nltk
 # seaborn
@@ -18,6 +16,7 @@ nltk
 textblob
 vaderSentiment
 newsapi-python
+
 # torch
-transformers
-huggingface_hub
+# transformers
+# huggingface_hub

@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import os
 import numpy as np
-import onnxruntime as ort
 import pickle
+import pandas as pd
 
 from risk_metrics import (
     get_stock_data,
@@ -16,19 +16,21 @@ from risk_metrics import (
     calculate_risk_metrics
 )
 
-# kmeans_session = ort.InferenceSession(str(KMEANS_MODEL_PATH), providers=["CPUExecutionProvider"])
 router = APIRouter() 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# load the kmeans model for stock clustering 
-KMEANS_MODEL_PATH = os.path.join(BASE_DIR, "models", "kmeans_pipeline.onnx")
-kmeans_session = ort.InferenceSession(KMEANS_MODEL_PATH, providers=["CPUExecutionProvider"])
+FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
+SCALER_PATH = os.path.join(BASE_DIR, "models", "scaler.pkl")
+KMEANS_PATH = os.path.join(BASE_DIR, "models", "kmeans.pkl")
 
-# loads the trained scaler - the features have very different numeric ranges so scaling makes them contribute equally to clustering distance calculations
-SCALER_PATH = os.path.join(BASE_DIR, "models", "stock_scaler.pkl")
+df_features = pd.read_csv(FEATURES_PATH)
+
 with open(SCALER_PATH, "rb") as f:
     scaler = pickle.load(f)
+
+with open(KMEANS_PATH, "rb") as f:
+    kmeans = pickle.load(f)
 
 # The cluster risk mapping is needed to assign the risk category to the stocks based on the predicted cluster label from the kmeans model
 CLUSTER_RISK_PATH = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
@@ -36,6 +38,8 @@ with open(CLUSTER_RISK_PATH, "rb") as f:
     cluster_risk_mapping = pickle.load(f)
 
 CLUSTER_CATEGORY = cluster_risk_mapping
+
+feature_map = df_features.set_index("ticker").to_dict(orient="index")
 
 # pydantic models for request validation and type checking
 class Stock(BaseModel):
@@ -59,22 +63,15 @@ class StockRiskCategoryResponse(BaseModel):
     categories: dict[str, List[StockRiskCategory]]
     total: int
 
-def predict_cluster_label(session, log_return, log_variance, volatility, max_drawdown):
+def predict_cluster_label(log_return, log_variance, volatility, max_drawdown):
 
     features = np.array([[log_return, log_variance, volatility, max_drawdown]])
 
     scaled_features = scaler.transform(features)
 
-    model_input = session.get_inputs()[0].name
+    labels = kmeans.predict(scaled_features)
 
-    outputs = session.run(
-        None,
-        {model_input: scaled_features.astype(np.float32)}
-    )
-
-    labels = outputs[0]
-
-    return int(np.ravel(labels)[0])
+    return int(labels[0])
 
 @router.get("/")
 def root():
@@ -126,10 +123,7 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
 
     tickers = list({stock.ticker for stock in portfolio_request.stocks})
 
-    # gets the stock data for each ticker 
-    stock_features = get_stock_data(tickers, portfolio_request.days)
-
-    if len(stock_features) == 0:
+    if len(feature_map) == 0:
         raise HTTPException(status_code=404, detail="No price data found for the stocks")
 
     categories: dict[str, List[StockRiskCategory]] = {
@@ -143,14 +137,13 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
     # predict the cluster label for each stock and assign the risk category
     for ticker in tickers:
 
-        features = stock_features.get(ticker)
+        features = feature_map.get(ticker)
 
         if not features:
             continue
 
         # passes into the model the required features to get the cluster label 
         cluster_label = predict_cluster_label(
-            kmeans_session,
             features["log_return"],
             features["log_variance"],
             features["volatility"],

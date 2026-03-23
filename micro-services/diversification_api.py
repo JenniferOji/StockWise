@@ -9,8 +9,6 @@ from datetime import datetime, timedelta
 from operator import itemgetter
 from itertools import combinations
 import numpy as np
-import yfinance as yf
-import onnxruntime as ort
 
 from risk_metrics import (
     get_portfolio_data,
@@ -23,14 +21,20 @@ router = APIRouter()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# load trained clustering components instead of CSV
-with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "rb") as f:
-    cluster_risk = pickle.load(f)
+FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
+SCALER_PATH = os.path.join(BASE_DIR, "models", "scaler.pkl")
+KMEANS_PATH = os.path.join(BASE_DIR, "models", "kmeans.pkl")
 
-with open(os.path.join(BASE_DIR, "models", "stock_scaler.pkl"), "rb") as f:
+df_features = pd.read_csv(FEATURES_PATH)
+
+with open(SCALER_PATH, "rb") as f:
     scaler = pickle.load(f)
 
-kmeans_session = ort.InferenceSession(os.path.join(BASE_DIR, "models", "kmeans_pipeline.onnx"))
+with open(KMEANS_PATH, "rb") as f:
+    kmeans = pickle.load(f)
+
+with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "rb") as f:
+    cluster_risk = pickle.load(f)
 
 stock_data_path = os.path.join(BASE_DIR, "stock_data.json")
 with open(stock_data_path, 'r') as f:
@@ -47,73 +51,6 @@ class StockHolding(BaseModel):
 class DiversificationRequest(BaseModel):
     current_stocks: List[StockHolding]
     user_risk_preference: str
-
-CACHE = {
-    "prices": None,
-    "last_updated": None
-}
-# 1 hour cache
-CACHE_TTL = 60 * 60  
-
-def get_cached_prices(tickers):
-    now = datetime.now()
-
-    if CACHE["prices"] is not None and CACHE["last_updated"] is not None:
-        if (now - CACHE["last_updated"]).seconds < CACHE_TTL:
-            return CACHE["prices"]
-
-    # fetch data
-    prices = yf.download(tickers, period="1y", auto_adjust=True)['Close']
-    prices = prices.dropna(axis=1, how='all')
-    prices = prices.ffill().bfill()
-
-    CACHE["prices"] = prices
-    CACHE["last_updated"] = now
-
-    return prices
-
-# builds feature dataframe dynamically at runtime instead of reading CSV
-def build_feature_dataframe(tickers: List[str]):
-    prices = get_cached_prices(tickers)
-
-    prices = prices.dropna(axis=1, how='all')
-    prices = prices.ffill().bfill()
-
-    returns = prices.pct_change(fill_method=None).dropna()
-
-    # caculating max drawdown fro each stock 
-    max_drawdowns = {}
-    for ticker in returns.columns:
-        r = returns[ticker].dropna()
-        cumulative = (1 + r).cumprod()
-        running_max = cumulative.cummax()
-        drawdown = (cumulative - running_max) / running_max
-        max_drawdowns[ticker] = abs(drawdown.min())
-
-    # Calculate annual means and annual variances
-    annual_means_returns = returns.mean() * 252
-    annual_return_variances = returns.var() * 252
-
-    df = pd.DataFrame({
-        'Stock Symbols': annual_return_variances.index,
-        'Variances': annual_return_variances.values,
-        'Returns': annual_means_returns.values,
-        'Max_Drawdown': [max_drawdowns.get(t, np.nan) for t in annual_return_variances.index]
-    })
-
-    # log scaling to compress extreme values
-    df['Log_Returns'] = np.log1p(np.clip(df['Returns'], -0.999, None))
-
-    # clipping extreme variances so outliers do not dominate clustering
-    df['Log_Variances'] = np.log1p(np.clip(df['Variances'], 0, 2))
-
-    # adding features to capture risk adjusted returns 
-    df['Volatility'] = np.sqrt(df['Variances'])
-
-    # Dropping rows with NaN values before scaling to avoid errors
-    df = df.dropna()
-
-    return df
 
 
 # calculates the annualised portfolio volatility for a list of stocks
@@ -174,6 +111,15 @@ def sector_breakdown(stocks: List[StockHolding]):
     return breakdown
 
 
+def predict_cluster(log_return, log_variance, volatility, max_drawdown):
+    X = np.array([[log_return, log_variance, volatility, max_drawdown]])
+    Xs = scaler.transform(X)
+    return int(kmeans.predict(Xs)[0])
+
+
+feature_map = df_features.set_index("ticker").to_dict(orient="index")
+
+
 @router.post("/api/diversification-suggestions")
 def get_diversification_suggestions(request: DiversificationRequest):
     try:
@@ -197,16 +143,17 @@ def get_diversification_suggestions(request: DiversificationRequest):
         # build full ticker universe dynamically
         tickers = list(STOCK_DATA.keys())
 
-        # build features + cluster at runtime
-        df_runtime = build_feature_dataframe(tickers)
+        df_runtime = df_features.copy()
 
-        X = df_runtime[['Log_Returns', 'Log_Variances', 'Volatility', 'Max_Drawdown']].values
-        Xs = scaler.transform(X).astype(np.float32)
-
-        # df_runtime['Cluster_labels'] = kmeans.predict(Xs)
-        input_name = kmeans_session.get_inputs()[0].name
-        outputs = kmeans_session.run(None, {input_name: Xs})
-        df_runtime['Cluster_labels'] = outputs[0].flatten()
+        df_runtime["Cluster_labels"] = [
+            predict_cluster(
+                row["log_return"],
+                row["log_variance"],
+                row["volatility"],
+                row["max_drawdown"]
+            )
+            for _, row in df_runtime.iterrows()
+        ]
 
         target_clusters = []
 
@@ -220,7 +167,7 @@ def get_diversification_suggestions(request: DiversificationRequest):
 
         # only considers stocks the user doesnt currently hold 
         available_stocks = df_runtime[
-            ~df_runtime['Stock Symbols'].isin(current_stock_symbols)
+            ~df_runtime['ticker'].isin(current_stock_symbols)
         ].copy()
 
         # keep only stocks belonging to the selected clusters
@@ -243,9 +190,9 @@ def get_diversification_suggestions(request: DiversificationRequest):
             }
 
         # limit the candidate pool so the optimisation remains fast
-        candidate_pool = suggested_stocks.sort_values(by="Volatility").head(10)
+        candidate_pool = suggested_stocks.sort_values(by="volatility").head(10)
 
-        candidate_symbols = candidate_pool["Stock Symbols"].tolist()
+        candidate_symbols = candidate_pool["ticker"].tolist()
 
         combos = []
 
