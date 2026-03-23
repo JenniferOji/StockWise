@@ -26,7 +26,7 @@ type Article struct {
 	URL        string `json:"url"`
 	Date       string `json:"date"`
 	CatboostModel  string `json:"catboost_model"`
-	FinBERT    string `json:"finbert"`
+	// FinBERT    string `json:"finbert"`
 }
 
 type StockSentiment struct {

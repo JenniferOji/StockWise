@@ -10,6 +10,7 @@ from operator import itemgetter
 from itertools import combinations
 import numpy as np
 import yfinance as yf
+import onnxruntime as ort
 
 from risk_metrics import (
     get_portfolio_data,
@@ -29,8 +30,7 @@ with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "rb") as
 with open(os.path.join(BASE_DIR, "models", "stock_scaler.pkl"), "rb") as f:
     scaler = pickle.load(f)
 
-with open(os.path.join(BASE_DIR, "models", "kmeans_pipeline.onnx"), "rb") as f:
-    kmeans = pickle.load(f)
+kmeans_session = ort.InferenceSession(os.path.join(BASE_DIR, "models", "kmeans_pipeline.onnx"))
 
 stock_data_path = os.path.join(BASE_DIR, "stock_data.json")
 with open(stock_data_path, 'r') as f:
@@ -48,10 +48,34 @@ class DiversificationRequest(BaseModel):
     current_stocks: List[StockHolding]
     user_risk_preference: str
 
+CACHE = {
+    "prices": None,
+    "last_updated": None
+}
+# 1 hour cache
+CACHE_TTL = 60 * 60  
+
+def get_cached_prices(tickers):
+    now = datetime.now()
+
+    if CACHE["prices"] is not None and CACHE["last_updated"] is not None:
+        if (now - CACHE["last_updated"]).seconds < CACHE_TTL:
+            return CACHE["prices"]
+
+    # fetch data
+    prices = yf.download(tickers, period="1y", auto_adjust=True)['Close']
+    prices = prices.dropna(axis=1, how='all')
+    prices = prices.ffill().bfill()
+
+    CACHE["prices"] = prices
+    CACHE["last_updated"] = now
+
+    return prices
 
 # builds feature dataframe dynamically at runtime instead of reading CSV
 def build_feature_dataframe(tickers: List[str]):
-    prices = yf.download(tickers, period="1y", auto_adjust=True)['Close']
+    prices = get_cached_prices(tickers)
+
     prices = prices.dropna(axis=1, how='all')
     prices = prices.ffill().bfill()
 
@@ -177,9 +201,12 @@ def get_diversification_suggestions(request: DiversificationRequest):
         df_runtime = build_feature_dataframe(tickers)
 
         X = df_runtime[['Log_Returns', 'Log_Variances', 'Volatility', 'Max_Drawdown']].values
-        Xs = scaler.transform(X)
+        Xs = scaler.transform(X).astype(np.float32)
 
-        df_runtime['Cluster_labels'] = kmeans.predict(Xs)
+        # df_runtime['Cluster_labels'] = kmeans.predict(Xs)
+        input_name = kmeans_session.get_inputs()[0].name
+        outputs = kmeans_session.run(None, {input_name: Xs})
+        df_runtime['Cluster_labels'] = outputs[0].flatten()
 
         target_clusters = []
 

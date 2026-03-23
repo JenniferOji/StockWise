@@ -72,7 +72,6 @@ class StockRequest(BaseModel):
 #             "attention_mask": inputs["attention_mask"],
 #         }
 
-#         # ADD THIS FIX 👇
 #         if "token_type_ids" in input_names:
 #             if "token_type_ids" in inputs:
 #                 ort_inputs["token_type_ids"] = inputs["token_type_ids"]

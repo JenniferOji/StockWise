@@ -162,14 +162,14 @@ export default function News() {
                     CatBoost: {item.catboost_model}
                   </Text>
 
-                  <Text
+                  {/* <Text
                     style={[
                       styles.sentiment,
                       { color: getSentimentColor(item.finbert) },
                     ]}
                   >
                     FinBERT: {item.finbert}
-                  </Text>
+                  </Text> */}
                 </View>
               </View>
             </Pressable>
