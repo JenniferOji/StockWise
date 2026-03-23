@@ -10,109 +10,89 @@ from typing import List
 
 from dotenv import load_dotenv
 import re
-
-from transformers import AutoTokenizer
+import nltk
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
+# from transformers import AutoTokenizer
 import onnxruntime as ort
 
+from model_loader import load_all_models
 
+load_all_models()
 
 # nltk.download("punkt")
 # nltk.download("punkt_tab")
 # nltk.download("wordnet")
 
 load_dotenv()
-
+lemm = WordNetLemmatizer()
 router = APIRouter()
 
 # load the onnx models from the file path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-tokenizer = AutoTokenizer.from_pretrained("ProsusAI/finbert")
-
 # paths for the onnx models and label mapping
 # FINBERT_PATH = os.path.join(BASE_DIR, "models", "finbert")
+# tokenizer = AutoTokenizer.from_pretrained(FINBERT_PATH)
+
 # finbert_session = ort.InferenceSession(os.path.join(FINBERT_PATH, "model.onnx"),providers=["CPUExecutionProvider"])
 
-# paths for the downloaded files from hugging face 
-# finbert_model_path = os.path.join(BASE_DIR, "models", "finbert", "model.onnx")
-# finbert_session = ort.InferenceSession(finbert_model_path, providers=["CPUExecutionProvider"])
-
-finbert_session = None
-preproc_sess = None
-model_sess = None
-sentiment_label = None
-
-def get_finbert_session():
-    global finbert_session
-    if finbert_session is None:
-        path = os.path.join(BASE_DIR, "models", "finbert", "model.onnx")
-        finbert_session = ort.InferenceSession(path, providers=["CPUExecutionProvider"])
-    return finbert_session
-
 # preprocessing converts text to the numeric feature vectors used b the model - catboost cannot read text 
-# preproc_path = os.path.join(BASE_DIR, "models", "sentiment_preprocessor.onnx")
-
-
-def get_preproc_sess():
-    global preproc_sess
-    if preproc_sess is None:
-        path = os.path.join(BASE_DIR, "models", "sentiment_preprocessor.onnx")
-        preproc_sess = ort.InferenceSession(path, providers=["CPUExecutionProvider"])
-    return preproc_sess
-
+preproc_path = os.path.join(BASE_DIR, "models", "sentiment_preprocessor.onnx")
 # takes the numeric feature vectors from the preprocessing step and predicts the sentiment class
-# model_path = os.path.join(BASE_DIR, "models", "sentiment_catboost_model.onnx")
-def get_model_sess():
-    global model_sess
-    if model_sess is None:
-        path = os.path.join(BASE_DIR, "models", "sentiment_catboost_model.onnx")
-        model_sess = ort.InferenceSession(path, providers=["CPUExecutionProvider"])
-    return model_sess
+model_path = os.path.join(BASE_DIR, "models", "sentiment_catboost_model.onnx")
 
-
-# preproc_sess = ort.InferenceSession(preproc_path, providers=["CPUExecutionProvider"])
-# model_sess = ort.InferenceSession(model_path, providers=["CPUExecutionProvider"])
+preproc_sess = ort.InferenceSession(preproc_path, providers=["CPUExecutionProvider"])
+model_sess = ort.InferenceSession(model_path, providers=["CPUExecutionProvider"])
 
 # loads the label dictionary to convert the model output back to the sentiment label
-# with open(os.path.join(BASE_DIR, "models", "sentiment_label_map.pkl"), "rb") as f:
-#     sentiment_label = pickle.load(f)
+with open(os.path.join(BASE_DIR, "models", "sentiment_label_map.pkl"), "rb") as f:
+    sentiment_label = pickle.load(f)
 
 class StockRequest(BaseModel):
     names: List[str]
 
 # finbert inference
-def get_finbert_sentiments(texts: List[str]):
-    session = get_finbert_session()
-    results = []
-    input_names = [inp.name for inp in session.get_inputs()]
+# def get_finbert_sentiments(texts: List[str]):
+#     results = []
 
-    for text in texts:
-        inputs = tokenizer(
-            text,
-            return_tensors="np",
-            truncation=True,
-            padding="max_length",
-            max_length=512
-        )
+#     input_names = [inp.name for inp in finbert_session.get_inputs()]
 
-        ort_inputs = {
-            "input_ids": inputs["input_ids"],
-            "attention_mask": inputs["attention_mask"],
-        }
+#     for text in texts:
+#         inputs = tokenizer(
+#             text,
+#             return_tensors="np",
+#             truncation=True,
+#             padding="max_length",
+#             max_length=512
+#         )
 
-        if "token_type_ids" in input_names:
-            ort_inputs["token_type_ids"] = inputs.get(
-                "token_type_ids",
-                np.zeros_like(inputs["input_ids"])
-            )
+#         ort_inputs = {
+#             "input_ids": inputs["input_ids"],
+#             "attention_mask": inputs["attention_mask"],
+#         }
 
-        outputs = session.run(None, ort_inputs)
-        pred = int(np.argmax(outputs[0], axis=1)[0])
+#         # ADD THIS FIX 👇
+#         if "token_type_ids" in input_names:
+#             if "token_type_ids" in inputs:
+#                 ort_inputs["token_type_ids"] = inputs["token_type_ids"]
+#             else:
+#                 ort_inputs["token_type_ids"] = np.zeros_like(inputs["input_ids"])
 
-        label_map = {0: "negative", 1: "neutral", 2: "positive"}
-        results.append(label_map[pred])
+#         outputs = finbert_session.run(None, ort_inputs)
 
-    return results
+#         logits = outputs[0]
+#         pred = int(np.argmax(logits, axis=1)[0])
+
+#         label_map = {
+#             0: "negative",
+#             1: "neutral",
+#             2: "positive"
+#         }
+
+#         results.append(label_map[pred])
+
+#     return results
 
 
 # only getting the first part of the company name to search for news as the api seems to work better with that.
@@ -176,29 +156,33 @@ def text_preprocess(text: str):
 
 # gets the sentiment label for a list of texts by running them through the preprocessing and model onnx pipelines
 def get_sentiment_labels(texts: List[str]):
-    # running the preprocessing model to get the features for the sentiment model
-    # preprocessing model take the clean text and converts them to numeric feature vectors as model inout 
-    preproc = get_preproc_sess()
-    model = get_model_sess()
-    
     clean_texts = [text_preprocess(t) for t in texts]
 
     # initialising the input for the preprocessing model 
-    preproc_input = preproc.get_inputs()[0].name
+    preproc_input = preproc_sess.get_inputs()[0].name
 
-    preproc_input = preproc.get_inputs()[0].name
-    features = preproc.run(
+    # running the preprocessing model to get the features for the sentiment model
+    # preprocessing model take the clean text and converts them to numeric feature vectors as model inout 
+    preproc_out = preproc_sess.run(
         None,
         {preproc_input: np.array([[t] for t in clean_texts], dtype=object)}
-    )[0]
+    )
+
+    features = preproc_out[0]
 
     # initialising the input for the sentiment model
-    model_input = model.get_inputs()[0].name
+    model_input = model_sess.get_inputs()[0].name
 
     # running the sentiment model to get the sentiment predictions for the input features
-    labels = model.run(None, {model_input: features})[0].flatten()
+    outputs = model_sess.run(None, {model_input: features})
 
-    return list(labels)
+    labels = outputs[0].flatten()
+
+    result = []
+    for label in labels:
+        # the label is a number representing the sentiment class 
+        result.append(label)
+    return result
 
 SENTIMENT_SCORE = {
     "positive": 1,
@@ -337,12 +321,12 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
 
     # using the onnx models to get the sentiment label 
     catboost_sentiments = get_sentiment_labels(article_texts) if article_texts else []
-    finbert_sentiments = get_finbert_sentiments(article_texts) if article_texts else []
+    # finbert_sentiments = get_finbert_sentiments(article_texts) if article_texts else []
     
     # for each article we add the sentiment label to it
     for article, catboost_sentiments, finbert_sentiments in zip(article_refs, catboost_sentiments, finbert_sentiments):
         article["catboost_model"] = catboost_sentiments
-        article["finbert"] = finbert_sentiments
+        # article["finbert"] = finbert_sentiments
         formatted_articles.append(article)
 
     return {

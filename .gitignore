@@ -14,7 +14,7 @@ micro-services/.venv
 ml/models/.venv
 micro-services/models/finbert/*.onnx
 
-micro-services/models/*.onnx
-micro-services/models/*.pkl
-micro-services/models/*.csv
+# micro-services/models/*.onnx
+# micro-services/models/*.pkl
+# micro-services/models/*.csv
 micro-services/models/finbert/*

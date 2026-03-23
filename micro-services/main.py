@@ -10,30 +10,7 @@ from performance_metrics_api import router as performance_metrics_router
 import os 
 # resource used: https://fastapi.tiangolo.com/#example-upgrade
 
-from model_loader import MODEL_DIR, load_all_models  
-
 app = FastAPI()
-
-@app.on_event("startup")
-def startup_event():
-    print("Downloading models")
-    load_all_models()
-    print("Models loaded")
-
-@app.get("/debug/models")
-def check_models():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    model_dir = os.path.join(base_dir, "models")
-
-    files = []
-    for root, dirs, filenames in os.walk(model_dir):
-        for name in filenames:
-            files.append(os.path.join(root, name))
-
-    return {
-        "model_dir": model_dir,
-        "files": files
-    }
 
 app.include_router(diversification_router)  
 app.include_router(risk_metrics_router) 

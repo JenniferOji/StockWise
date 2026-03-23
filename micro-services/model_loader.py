@@ -26,8 +26,6 @@ def download_file(filename: str, subdir: str = ""):
 
 
 def load_all_models():
-    print("Downloading models")
-
     download_file("finbert/model.onnx", "finbert")
     download_file("sentiment_preprocessor.onnx")
     download_file("sentiment_catboost_model.onnx")
@@ -37,5 +35,3 @@ def load_all_models():
     download_file("cluster_risk_mapping.pkl")
     download_file("stock_scaler.pkl")
     download_file("kmeans_pipeline.onnx")
-
-    print("Models downloaded")
