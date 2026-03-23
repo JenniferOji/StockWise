@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-
+	"os"
 	"github.com/kataras/iris/v12"
+	"fmt"
 )
 
 type StockHolding struct {
@@ -51,6 +52,15 @@ type DiversificationResponse struct {
 
 // GetDiversificationSuggestions handles HTTP requests.
 func GetDiversificationSuggestions(ctx iris.Context) {
+	mlApiUrl := os.Getenv("ML_API_URL")
+    endpoint := "/api/diversification-suggestions"
+	
+	if mlApiUrl == "" {
+		ctx.StatusCode(500)
+		ctx.JSON(map[string]string{"error": "ML_API_URL not set"})
+		return
+	}
+
 	// variable to hold the request body
 	var req DiversificationRequest
 
@@ -70,10 +80,10 @@ func GetDiversificationSuggestions(ctx iris.Context) {
 	}
 
 	// call FastAPI endpoint
-	fastAPIURL := "http://localhost:8000"
+	url := mlApiUrl + endpoint
 
 	resp, err := http.Post(
-		fastAPIURL+"/api/diversification-suggestions",
+		url,
 		"application/json",
 		bytes.NewBuffer(reqBody),
 	)

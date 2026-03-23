@@ -106,11 +106,7 @@ feature_map = df_features.set_index("ticker").to_dict(orient="index")
 @router.post("/api/diversification-suggestions")
 def get_diversification_suggestions(request: DiversificationRequest):
     try:
-        print("REQUEST:", request)
-        
         current_stock_symbols = [stock.symbol for stock in request.current_stocks]
-        print("Symbols:", current_stock_symbols)
-
         current_stock_breakdown = sector_breakdown(request.current_stocks)
         current_portfolio_volatility = calculate_portfolio_volatility(request.current_stocks)
 
@@ -276,5 +272,4 @@ def get_diversification_suggestions(request: DiversificationRequest):
         }
 
     except Exception as e:
-        print("ERROR:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
