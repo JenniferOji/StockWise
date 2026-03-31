@@ -7,11 +7,14 @@ from sklearn.mixture import GaussianMixture
 import json
 import os
 
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # load the stock data from the json file to get the tickers
-with open(os.path.join(BASE_DIR, "stock_data.json"), "r") as f:
+with open(os.path.join(BASE_DIR, "data", "stock_data.json"), "r") as f:
     STOCK_DATA = json.load(f)
+
+RISK_FREE_RATE = 0.02
 
 tickers = list(STOCK_DATA.keys())
 
@@ -27,6 +30,7 @@ returns = prices.pct_change().dropna()
 annual_returns = returns.mean() * 252
 variances = returns.var() * 252
 
+
 # value at risk: looking at the worst 5% of daily returns for each stock
 var_95 = {}
 for t in returns.columns:
@@ -41,17 +45,28 @@ for t in returns.columns:
     drawdown = (cumulative - cumulative.cummax()) / cumulative.cummax()
     max_drawdowns[t] = abs(drawdown.min())
 
+volatility = np.sqrt(variances)
+sharpe_ratios = np.where(
+    # assignign sharpe ratio of 0 to avoid stocks with 0 volatility 
+    volatility == 0,
+    0,
+    (annual_returns - RISK_FREE_RATE) / volatility
+)
+
 df = pd.DataFrame({
     "ticker": variances.index,
     "returns": annual_returns.values,
     "variance": variances.values,
     "VaR_95": [var_95.get(t, np.nan) for t in variances.index],
     "max_drawdown": [max_drawdowns.get(t, np.nan) for t in variances.index],
+    "Sharpe": sharpe_ratios.values,
+
 })
 
 # log transform variance to reduce the skew caused by extreme outliers like meme stocks
 df["Log_Variances"] = np.log1p(np.clip(df["variance"], 0, 2))
 df["Volatility"] = np.sqrt(df["variance"])
+
 
 df.dropna(inplace=True)
 

@@ -48,6 +48,8 @@ class StockRiskCategory(BaseModel):
     volatility: float
     max_drawdown: float
     annual_return: float
+    sharpe: float
+    var_95: float 
 
 class StockRiskCategoryResponse(BaseModel):
     success: bool
@@ -70,6 +72,8 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
     vols = []
     returns = []
     drawdowns = []
+    sharpes = []
+    vars_ = []
 
     for stock in portfolio_request.stocks:
         features = feature_map.get(stock.ticker)
@@ -79,6 +83,8 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
         vols.append(features["Volatility"])
         returns.append(features["returns"])
         drawdowns.append(features["max_drawdown"])
+        sharpes.append(features["Sharpe"])     
+        vars_.append(features["VaR_95"])  
 
     if not vols:
         raise HTTPException(status_code=404, detail="No data for the tickers")
@@ -86,13 +92,18 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
     portfolio_volatility = np.mean(vols) * 100
     portfolio_return = np.mean(returns) * 100
     portfolio_drawdown = np.max(drawdowns) * 100
+    portfolio_sharpe = np.mean(sharpes)
+    portfolio_var_95 = np.mean(vars_) * 100
 
     return {
         "success": True,
         "metrics": {
             "volatility": f"{portfolio_volatility:.2f}%",
             "annual_return": f"{portfolio_return:.2f}%",
-            "max_drawdown": f"{portfolio_drawdown:.2f}%"
+            "max_drawdown": f"{portfolio_drawdown:.2f}%",
+            "sharpe": f"{portfolio_sharpe:.3f}",
+            "var_95": f"{portfolio_var_95:.2f}%"
+
         },
         "portfolio_value": 0
     }
@@ -132,7 +143,7 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
             features["VaR_95"],
         )
 
-        # mapping the cluster label (0,1,2...) to the label mapping (low/moderate risk...)
+        # mapping the cluster label (0,1,2...) to the label mapping  to low/moderate 
         category = CLUSTER_CATEGORY.get(cluster_label, "Moderate Risk")
 
         categories[category].append(
@@ -142,6 +153,8 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
                 volatility=round(features["Volatility"] * 100, 2),
                 max_drawdown=round(features["max_drawdown"] * 100, 2),
                 annual_return=round(features["returns"] * 100, 2),
+                sharpe=round(features["Sharpe"], 3),         
+                var_95=round(features["VaR_95"] * 100, 2), 
             )
         )
         

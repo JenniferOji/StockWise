@@ -55,7 +55,7 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 		shares = holding['shares']
 		purchase_price = holding['purchase_price']
 
-		annual_return = np.expm1(features["log_return"])
+		annual_return = features["returns"]
 
 		value = purchase_price * (1 + annual_return) * shares
 		total_value += value

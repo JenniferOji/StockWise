@@ -13,32 +13,22 @@ router = APIRouter()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-FEATURES_PATH = os.path.join(BASE_DIR, "ml", "data", "features.csv")  
-SCALER_PATH = os.path.join(BASE_DIR, "ml", "models", "stock_scaler.pkl")
-KMEANS_PATH = os.path.join(BASE_DIR, "ml", "models", "gmm_model.pkl")
+FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")  
+SCALER_PATH = os.path.join(BASE_DIR, "models", "stock_scaler.pkl")
+GMM_PATH = os.path.join(BASE_DIR, "models", "gmm_model.pkl")
 
 df_features = pd.read_csv(FEATURES_PATH)
-df_features = df_features.rename(columns={
-    "Stock Symbols": "ticker",
-    "Log_Returns": "log_return",
-    "Log_Variances": "log_variance",
-    "Max_Drawdown": "max_drawdown",
-    "Volatility": "volatility",
-    "Beta": "beta",
-    "Downside_Dev": "downside_dev",
-    "VaR_95": "var_95",
-})
 
 with open(SCALER_PATH, "rb") as f:
     scaler = pickle.load(f)
 
-with open(KMEANS_PATH, "rb") as f:
-    kmeans = pickle.load(f)
+with open(GMM_PATH, "rb") as f:
+    gmm = pickle.load(f)
 
-with open(os.path.join(BASE_DIR, "ml", "models", "cluster_risk_mapping.pkl"), "rb") as f:
+with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "rb") as f:
     cluster_risk = pickle.load(f)
 
-with open(os.path.join(BASE_DIR, "ml", "models", "feature_columns.pkl"), "rb") as f:
+with open(os.path.join(BASE_DIR, "models", "feature_columns.pkl"), "rb") as f:
     feature_columns = pickle.load(f)
 
 stock_data_path = os.path.join(BASE_DIR, "data", "stock_data.json")
@@ -68,7 +58,7 @@ def calculate_portfolio_volatility(stocks: List[StockHolding]):
         features = df_features[df_features["ticker"] == stock.symbol]
         if features.empty:
             continue
-        vols.append(features.iloc[0]["volatility"])
+        vols.append(features.iloc[0]["Volatility"])
 
     if not vols:
         return None
@@ -107,10 +97,11 @@ def sector_breakdown(stocks: List[StockHolding]):
     return breakdown
 
 
+# predicts the cluster for a stock using the 3 features the model was trained on
 def predict_cluster(row_dict):
     X = np.array([[row_dict[col] for col in feature_columns]])
     Xs = scaler.transform(X)
-    return int(kmeans.predict(Xs)[0])
+    return int(gmm.predict(Xs)[0])
 
 
 feature_map = df_features.set_index("ticker").to_dict(orient="index")
@@ -138,17 +129,13 @@ def get_diversification_suggestions(request: DiversificationRequest):
 
         df_runtime = df_features.copy()
 
-        df_runtime = df_runtime.dropna(subset=["log_return", "log_variance", "volatility", "max_drawdown", "beta", "downside_dev", "var_95"])
+        df_runtime = df_runtime.dropna(subset=["Log_Variances", "Volatility", "VaR_95"])
 
         df_runtime["Cluster_labels"] = [
             predict_cluster({
-                "Log_Returns": row["log_return"],
-                "Log_Variances": row["log_variance"],
-                "Volatility": row["volatility"],
-                "Max_Drawdown": row["max_drawdown"],
-                "Beta": row["beta"],
-                "Downside_Dev": row["downside_dev"],
-                "VaR_95": row["var_95"],
+                "Log_Variances": row["Log_Variances"],
+                "Volatility": row["Volatility"],
+                "VaR_95": row["VaR_95"],
             })
             for _, row in df_runtime.iterrows()
         ]
@@ -188,7 +175,7 @@ def get_diversification_suggestions(request: DiversificationRequest):
             }
 
         # limit the candidate pool so the optimisation remains fast
-        candidate_pool = suggested_stocks.sort_values(by="volatility").head(10)
+        candidate_pool = suggested_stocks.sort_values(by="Volatility").head(10)
 
         candidate_symbols = candidate_pool["ticker"].tolist()
 
