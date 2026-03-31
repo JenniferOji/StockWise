@@ -53,6 +53,8 @@ func CalculatePerformanceMetrics(req PerformanceMetricsRequest) (*PerformanceMet
 
     // fastAPIURL := "http://localhost:8000"
     url := mlApiUrl + endpoint
+    // url := "http://fastapi:8000" + endpoint
+
     
     resp, err := http.Post(url,"application/json",bytes.NewBuffer(jsonData))
     if err != nil {

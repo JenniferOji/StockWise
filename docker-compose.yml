@@ -24,8 +24,17 @@ services:
       - postgres
     environment:
       DB_CONNECTION_STRING: "postgres://postgres:Nnedimma11@postgres:5432/stockwise_db?sslmode=disable"
+      ML_API_URL: "http://fastapi:8000"  
     ports:
       - "8080:8080"
+    volumes:
+      - ./backend/.env:/app/.env
 
+  fastapi:
+    build: ./micro-services
+    container_name: stockwise-fastapi
+    ports:
+      - "8000:8000"
+    
 volumes:
   stockwise_pgdata:

@@ -81,6 +81,8 @@ func GetDiversificationSuggestions(ctx iris.Context) {
 	// call FastAPI endpoint
 	url := mlApiUrl + endpoint
 
+	// url := "http://fastapi:8000" + endpoint
+
 	resp, err := http.Post(
 		url,
 		"application/json",
@@ -89,7 +91,7 @@ func GetDiversificationSuggestions(ctx iris.Context) {
 
 	if err != nil {
 		ctx.StatusCode(500)
-		ctx.JSON(map[string]string{"error": "Failed to call to diversisifcation api"})
+		ctx.JSON(map[string]string{"error": err.Error()})
 		return
 	}
 	defer resp.Body.Close()

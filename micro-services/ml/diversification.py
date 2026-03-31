@@ -1,18 +1,21 @@
 import numpy as np
 import pandas as pd
-# import seaborn as sns
-# import matplotlib.pyplot as plt
 import yfinance as yf
 from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans
-from matplotlib import cm
-import skl2onnx
-from skl2onnx import convert_sklearn
-from skl2onnx.common.data_types import FloatTensorType
+from sklearn.mixture import GaussianMixture
+from sklearn.metrics import silhouette_score, davies_bouldin_score, calinski_harabasz_score
 import pickle
-from sklearn.pipeline import Pipeline
+import warnings
+import os
+warnings.filterwarnings("ignore")
 
-# List of stock tickers grouped by different sectors/ types to ensure diversification in the the dataset 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+MODELS_DIR = os.path.join(BASE_DIR, "models")
+
+os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(MODELS_DIR, exist_ok=True)
+
 sp500_large_cap = [
     "AAPL","MSFT","AMZN","GOOGL","GOOG","META","NVDA","TSLA","BRK-B","JPM",
     "V","UNH","JNJ","WMT","PG","MA","HD","BAC","PFE","DIS",
@@ -38,9 +41,11 @@ speculative_stocks = [
     "GME","AMC","CVNA","UPST","SOFI",
     "MARA","RIOT","BITF","HUT","BTBT",
     "SPCE","RKLB","ASTS","ACHR","JOBY",
-    "NKLA","LCID","RIVN","IONQ","AI", "FRM","BBBYQ","BYND","CLOV","CVNA","ENVX","FUBO",
-    "GNS","HIMS","LCID","MULN","NVAX","OPEN","QS",
-    "RBLX","SAVA","SEDG","UPST","WISH","ZIM"
+    "LCID","RIVN","IONQ","AI",
+    "BYND","CLOV","ENVX","FUBO",
+    "GNS","HIMS","NVAX","OPEN","QS",
+    "RBLX","SAVA","SEDG","ZIM",
+    "HOOD","DKNG","SKLZ"
 ]
 
 tickers = list(set(
@@ -50,87 +55,137 @@ tickers = list(set(
     speculative_stocks
 ))
 
-# Download stock histories from Yahoo Finance
-stocks_histories = yf.download(tickers, period="2y", auto_adjust=True)['Close']
+# download 2 years of price data for all tickers
+stocks_histories = yf.download(tickers, period="1y", auto_adjust=True)['Close']
 stocks_histories = stocks_histories.dropna(axis=1, how='all')
 stocks_histories = stocks_histories.ffill().bfill()
 
 print("Prices shape after cleanup:", stocks_histories.shape)
 
-# Calculate daily returns
 daily_returns = stocks_histories.pct_change(fill_method=None).dropna()
 
-# caculating max drawdown fro each stock 
-max_drawdowns = {}
-for ticker in daily_returns.columns:
-
-    r = daily_returns[ticker].dropna()
-
-    cumulative = (1 + r).cumprod()
-    running_max = cumulative.cummax()
-    drawdown = (cumulative - running_max) / running_max
-
-    max_drawdowns[ticker] = abs(drawdown.min())
-
-# Calculate annual means and annual variances
+# annualised returns and variance
 annual_means_returns = daily_returns.mean() * 252
 annual_return_variances = daily_returns.var() * 252
+
+# value at risk - worst 5% of daily returns for each stock
+var_95 = {}
+for ticker in daily_returns.columns:
+    r = daily_returns[ticker].dropna()
+    var_95[ticker] = abs(np.percentile(r, 5))
 
 df2 = pd.DataFrame({
     'Stock Symbols': annual_return_variances.index,
     'Variances': annual_return_variances.values,
     'Returns': annual_means_returns.values,
-    'Max_Drawdown': [max_drawdowns.get(t, np.nan) for t in annual_return_variances.index]
+    'VaR_95': [var_95.get(t, np.nan) for t in annual_return_variances.index],
 })
 
-# log scaling to compress extreme values
-df2['Log_Returns'] = np.log1p(np.clip(df2['Returns'], -0.999, None))
-
-# clipping extreme variances so outliers do not dominate clustering
+# log transform variance to reduce skew from outliers like meme stocks
 df2['Log_Variances'] = np.log1p(np.clip(df2['Variances'], 0, 2))
-
-# adding features to capture risk adjusted returns 
 df2['Volatility'] = np.sqrt(df2['Variances'])
-df2['Sharpe'] = df2['Returns'] / df2['Volatility']
 
-# Dropping rows with NaN values before scaling to avoid errors
 df2 = df2.dropna()
 
-# features for clustering
-# X = df2[['Log_Returns', 'Log_Variances', 'Sharpe']].values
-X = df2[['Log_Returns', 'Log_Variances', 'Volatility', 'Max_Drawdown']].values
-# Scale the data
+# these 3 features were selected after testing all combinations - best BIC and silhouette
+features = ['Log_Variances', 'Volatility', 'VaR_95']
+
+X = df2[features].values
+
 scaler = StandardScaler()
 Xs = scaler.fit_transform(X)
 
-# number of clusters determined by elbow method 
-optimal_k = 5  
-kmeans = KMeans(n_clusters=optimal_k, n_init=50, random_state=42)
+# trying different covariance types and component counts to find the best gmm
+print("\nGMM Model Selection (BIC):")
+print(f"{'Components':<15} {'Covariance Type':<20} {'BIC':<15} {'Silhouette'}")
+print("-" * 65)
 
-labels = kmeans.fit_predict(Xs)
-df2['Cluster_labels'] = labels
+best_bic = np.inf
+best_gmm = None
+best_labels = None
 
+covariance_types = ['full', 'tied', 'diag', 'spherical']
 
-# assign the risk levels to each of the clusters
-cluster_volatility = {}
+for cov_type in covariance_types:
+    for n in range(3, 8):
+        try:
+            gmm = GaussianMixture(
+                n_components=n,
+                covariance_type=cov_type,
+                n_init=10,
+                random_state=42,
+                max_iter=500
+            )
+            gmm.fit(Xs)
+            labels = gmm.predict(Xs)
 
-# computing the volatility for each cluster
-for cluster_idx in range(optimal_k):
+            # skip if any cluster is too small to be meaningful
+            unique, counts = np.unique(labels, return_counts=True)
+            if len(unique) < n or any(counts < 3):
+                print(f"{n:<15} {cov_type:<20} {'skipped - small cluster':<15}")
+                continue
 
+            bic = gmm.bic(Xs)
+            sil = silhouette_score(Xs, labels)
+            print(f"{n:<15} {cov_type:<20} {bic:<15.2f} {sil:.4f}")
+
+            if bic < best_bic:
+                best_bic = bic
+                best_gmm = gmm
+                best_labels = labels
+
+        except Exception as e:
+            print(f"{n:<15} {cov_type:<20} failed: {e}")
+            continue
+
+# fallback in case nothing valid was found
+if best_gmm is None:
+    print("\nWARNING: No valid GMM found. Falling back to full covariance, 5 components.")
+    best_gmm = GaussianMixture(
+        n_components=5,
+        covariance_type='full',
+        n_init=10,
+        random_state=42,
+        max_iter=500
+    )
+    best_gmm.fit(Xs)
+    best_labels = best_gmm.predict(Xs)
+else:
+    print(f"\nBest GMM: {best_gmm.n_components} components, "
+          f"covariance={best_gmm.covariance_type}, BIC={best_bic:.2f}")
+
+# need exactly 5 clusters to map to the 5 risk levels
+if best_gmm.n_components != 5:
+    print(f"Refitting with 5 components using best covariance type: {best_gmm.covariance_type}")
+    best_gmm = GaussianMixture(
+        n_components=5,
+        covariance_type=best_gmm.covariance_type,
+        n_init=10,
+        random_state=42,
+        max_iter=500
+    )
+    best_gmm.fit(Xs)
+    best_labels = best_gmm.predict(Xs)
+
+df2['Cluster_labels'] = best_labels
+n_components = 5
+
+# rank clusters by risk using volatility and var - higher = more risky
+cluster_risk_scores = {}
+
+for cluster_idx in range(n_components):
     cluster_data = df2[df2['Cluster_labels'] == cluster_idx]
+    if len(cluster_data) == 0:
+        cluster_risk_scores[cluster_idx] = 0
+        continue
 
-    avg_variance = cluster_data['Variances'].mean()
-    volatility = np.sqrt(avg_variance)
+    composite = (
+        0.60 * cluster_data['Volatility'].mean() +
+        0.40 * cluster_data['VaR_95'].mean()
+    )
+    cluster_risk_scores[cluster_idx] = composite
 
-    cluster_volatility[cluster_idx] = volatility
-
-
-# sorting the clusters by volatility
-sorted_clusters = sorted(cluster_volatility.items(), key=lambda x: x[1])
-
-
-# assigning risk labels based on ranking
-cluster_risk = {}
+sorted_clusters = sorted(cluster_risk_scores.items(), key=lambda x: x[1])
 
 risk_labels = [
     "Very Low Risk",
@@ -140,77 +195,56 @@ risk_labels = [
     "Very High Risk"
 ]
 
+cluster_risk = {}
 for i, (cluster_idx, _) in enumerate(sorted_clusters):
     cluster_risk[cluster_idx] = risk_labels[i]
 
+# print a summary of each cluster
+print("\nCluster Summary:")
+print(f"{'Cluster':<10} {'Risk Level':<20} {'Avg Return':<15} {'Avg Volatility':<18} {'Avg VaR_95':<15} {'Stock Count'}")
+print("-" * 85)
 
-# printing the cluster information for visualisation of groups
-for cluster_idx in range(optimal_k):
-
+for cluster_idx in range(n_components):
     cluster_data = df2[df2['Cluster_labels'] == cluster_idx]
-
-    avg_return = cluster_data['Returns'].mean()
-    avg_variance = cluster_data['Variances'].mean()
-    volatility = np.sqrt(avg_variance)
-
-    risk_level = cluster_risk[cluster_idx]
-
+    risk_level = cluster_risk.get(cluster_idx, "Unknown")
     print(
-        f"Cluster {cluster_idx}: Avg Return={avg_return:.4f}, "
-        f"Volatility={volatility:.4f} - {risk_level}"
+        f"{cluster_idx:<10} {risk_level:<20} "
+        f"{cluster_data['Returns'].mean():<15.4f} "
+        f"{cluster_data['Volatility'].mean():<18.4f} "
+        f"{cluster_data['VaR_95'].mean():<15.4f} "
+        f"{len(cluster_data)}"
     )
 
-# save the cluster risk mapping to use in the api microservice 
-with open('cluster_risk_mapping.pkl', 'wb') as f:
+final_sil = silhouette_score(Xs, best_labels)
+db_score = davies_bouldin_score(Xs, best_labels)
+ch_score = calinski_harabasz_score(Xs, best_labels)
+
+print(f"\nFinal Silhouette Score: {final_sil:.4f}  (higher is better, max 1.0)")
+print(f"Davies-Bouldin Score:   {db_score:.4f}  (lower is better, min 0.0)")
+print(f"Calinski-Harabasz Score:{ch_score:.4f}  (higher is better)")
+print(f"BIC: {best_gmm.bic(Xs):.4f}")
+
+print("\nStocks per Cluster:")
+for cluster_idx in range(n_components):
+    cluster_data = df2[df2['Cluster_labels'] == cluster_idx]
+    risk_level = cluster_risk.get(cluster_idx, "Unknown")
+    print(f"\n{risk_level}: {cluster_data['Stock Symbols'].tolist()}")
+
+# saving everything
+df2.to_csv(os.path.join(DATA_DIR, "features.csv"), index=False)
+print(f"\nfeatures.csv saved to {DATA_DIR}")
+
+with open(os.path.join(MODELS_DIR, "cluster_risk_mapping.pkl"), "wb") as f:
     pickle.dump(cluster_risk, f)
 
-# df2.to_csv('clustered_stocks.csv', index=False)
+with open(os.path.join(MODELS_DIR, "feature_columns.pkl"), "wb") as f:
+    pickle.dump(features, f)
 
-with open("stock_scaler.pkl", "wb") as f:
+with open(os.path.join(MODELS_DIR, "gmm_model.pkl"), "wb") as f:
+    pickle.dump(best_gmm, f)
+
+with open(os.path.join(MODELS_DIR, "stock_scaler.pkl"), "wb") as f:
     pickle.dump(scaler, f)
 
-# https://onnx.ai/sklearn-onnx/introduction.html
-initial_type = [('float_input', FloatTensorType([None, 4]))]
-# onnx_model = convert_sklearn(kmeans, initial_types=initial_type)
-pipeline = Pipeline([
-    ("scaler", scaler),
-    ("kmeans", kmeans)
-])
-
-onnx_model = convert_sklearn(
-    pipeline,
-    initial_types=[('float_input', FloatTensorType([None, 4]))]
-)
-
-with open("kmeans_pipeline.onnx", "wb") as f:
-    f.write(onnx_model.SerializeToString())
-
-# Plotting the clusters
-# colors = cm.rainbow(np.linspace(0, 1, optimal_k))
-
-# plt.figure(figsize=(10, 8))
-
-# for cluster_idx in range(optimal_k):
-#     cluster_data = df2[df2['Cluster_labels'] == cluster_idx]
-
-#     plt.scatter(
-#         cluster_data['Log_Returns'],
-#         cluster_data['Log_Variances'],
-#         color=colors[cluster_idx],
-#         label=f"Cluster {cluster_idx} ({len(cluster_data)} stocks)"
-#     )
-
-# plt.title("KMeans Clustering of Stocks")
-# plt.xlabel("Log Annual Returns (Compressed)")
-# plt.ylabel("Log Annual Variances (Compressed)")
-# plt.legend(loc="best")
-# plt.grid(True)
-# plt.show()
-
-# Displays stocks associated with each cluster
-# for cluster_idx in range(optimal_k):
-#     cluster_group = df2[df2['Cluster_labels'] == cluster_idx]
-
-#     print(f"Cluster {cluster_idx} ({len(cluster_group)} stocks):")
-#     print(cluster_group['Stock Symbols'].tolist())
-#     print()
+print(f"Models saved to {MODELS_DIR}")
+print("\nModel training complete.")

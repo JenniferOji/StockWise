@@ -29,27 +29,27 @@ type StockRiskCategoriesRequest struct {
 	Stocks []Stock `json:"stocks"`
 }
 type StockRiskCategory struct {
-    Ticker        string  `json:"ticker"`
-    RiskBucket    string  `json:"risk_bucket"`
-    Volatility    float64 `json:"volatility"`
-    MaxDrawdown   float64 `json:"max_drawdown"`
-    AnnualReturn  float64 `json:"annual_return"`
+	Ticker       string  `json:"ticker"`
+	RiskBucket   string  `json:"risk_bucket"`
+	Volatility   float64 `json:"volatility"`
+	MaxDrawdown  float64 `json:"max_drawdown"`
+	AnnualReturn float64 `json:"annual_return"`
 }
 
 type StockRiskCategoriesResponse struct {
-	Success    bool                            `json:"success"`
-	Categories map[string][]StockRiskCategory  `json:"categories"`
-	Total      int                             `json:"total"`
+	Success    bool                           `json:"success"`
+	Categories map[string][]StockRiskCategory `json:"categories"`
+	Total      int                            `json:"total"`
 }
 
 // either returns the risk metrics respinse or an error
 func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
 	mlApiUrl := os.Getenv("ML_API_URL")
-    endpoint := "/api/risk-metrics"
+	endpoint := "/api/risk-metrics"
 
-    if mlApiUrl == "" {
-        return nil, fmt.Errorf("ML_API_URL not set")
-    }
+	if mlApiUrl == "" {
+		return nil, fmt.Errorf("ML_API_URL not set")
+	}
 	requestBody := RiskMetricsRequest{
 		Stocks: stocks,
 	}
@@ -60,7 +60,8 @@ func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
 	}
 
 	// calling the fastAPI microservice
-	url := mlApiUrl + endpoint
+	// url := mlApiUrl + endpoint
+	url := "http://192.168.1.19:8000" + endpoint
 
 	resp, err := http.Post(
 		url,
@@ -106,12 +107,14 @@ func CalculateStockRiskCategories(stocks []Stock) (*StockRiskCategoriesResponse,
 	}
 
 	mlApiUrl := os.Getenv("ML_API_URL")
-    endpoint := "/api/stock-risk-categories"
+	endpoint := "/api/stock-risk-categories"
 
-    if mlApiUrl == "" {
-        return nil, fmt.Errorf("ML_API_URL not set")
-    }
+	if mlApiUrl == "" {
+		return nil, fmt.Errorf("ML_API_URL not set")
+	}
+
 	url := mlApiUrl + endpoint
+	// url := "http://fastapi:8000" + endpoint 
 
 	resp, err := http.Post(
 		url,

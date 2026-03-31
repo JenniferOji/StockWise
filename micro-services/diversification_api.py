@@ -13,11 +13,21 @@ router = APIRouter()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
-SCALER_PATH = os.path.join(BASE_DIR, "models", "scaler.pkl")
-KMEANS_PATH = os.path.join(BASE_DIR, "models", "kmeans.pkl")
+FEATURES_PATH = os.path.join(BASE_DIR, "ml", "data", "features.csv")  
+SCALER_PATH = os.path.join(BASE_DIR, "ml", "models", "stock_scaler.pkl")
+KMEANS_PATH = os.path.join(BASE_DIR, "ml", "models", "gmm_model.pkl")
 
 df_features = pd.read_csv(FEATURES_PATH)
+df_features = df_features.rename(columns={
+    "Stock Symbols": "ticker",
+    "Log_Returns": "log_return",
+    "Log_Variances": "log_variance",
+    "Max_Drawdown": "max_drawdown",
+    "Volatility": "volatility",
+    "Beta": "beta",
+    "Downside_Dev": "downside_dev",
+    "VaR_95": "var_95",
+})
 
 with open(SCALER_PATH, "rb") as f:
     scaler = pickle.load(f)
@@ -25,10 +35,13 @@ with open(SCALER_PATH, "rb") as f:
 with open(KMEANS_PATH, "rb") as f:
     kmeans = pickle.load(f)
 
-with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "rb") as f:
+with open(os.path.join(BASE_DIR, "ml", "models", "cluster_risk_mapping.pkl"), "rb") as f:
     cluster_risk = pickle.load(f)
 
-stock_data_path = os.path.join(BASE_DIR, "stock_data.json")
+with open(os.path.join(BASE_DIR, "ml", "models", "feature_columns.pkl"), "rb") as f:
+    feature_columns = pickle.load(f)
+
+stock_data_path = os.path.join(BASE_DIR, "data", "stock_data.json")
 with open(stock_data_path, 'r') as f:
     STOCK_DATA = json.load(f)
 
@@ -94,8 +107,8 @@ def sector_breakdown(stocks: List[StockHolding]):
     return breakdown
 
 
-def predict_cluster(log_return, log_variance, volatility, max_drawdown):
-    X = np.array([[log_return, log_variance, volatility, max_drawdown]])
+def predict_cluster(row_dict):
+    X = np.array([[row_dict[col] for col in feature_columns]])
     Xs = scaler.transform(X)
     return int(kmeans.predict(Xs)[0])
 
@@ -125,15 +138,18 @@ def get_diversification_suggestions(request: DiversificationRequest):
 
         df_runtime = df_features.copy()
 
-        df_runtime = df_runtime.dropna(subset=["log_return", "log_variance", "volatility", "max_drawdown"])
+        df_runtime = df_runtime.dropna(subset=["log_return", "log_variance", "volatility", "max_drawdown", "beta", "downside_dev", "var_95"])
 
         df_runtime["Cluster_labels"] = [
-            predict_cluster(
-                row["log_return"],
-                row["log_variance"],
-                row["volatility"],
-                row["max_drawdown"]
-            )
+            predict_cluster({
+                "Log_Returns": row["log_return"],
+                "Log_Variances": row["log_variance"],
+                "Volatility": row["volatility"],
+                "Max_Drawdown": row["max_drawdown"],
+                "Beta": row["beta"],
+                "Downside_Dev": row["downside_dev"],
+                "VaR_95": row["var_95"],
+            })
             for _, row in df_runtime.iterrows()
         ]
 

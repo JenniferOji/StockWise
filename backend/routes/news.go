@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"github.com/kataras/iris/v12"
+	"fmt"
 )
 
 type StockHoldings struct {
@@ -83,18 +84,22 @@ func GetStockNews(ctx iris.Context) {
 
 	// call call the fastAPI endpoint
 	url := mlApiUrl + endpoint
+	// url := "http://fastapi:8000" + endpoint
+
 
 	resp, err := http.Post(url,"application/json",bytes.NewBuffer(reqBody))
 
 	if err != nil {
 		ctx.StatusCode(500)
-		ctx.JSON(map[string]string{"error": "Failed to call news api"})
+		ctx.JSON(map[string]string{"error": err.Error()})
 		return
 	}
 	defer resp.Body.Close()
 
 	// read the response from the fastapi
 	body, err := io.ReadAll(resp.Body)
+	fmt.Println("RAW FASTAPI RESPONSE:", string(body))
+
 	if err != nil {
 		ctx.StatusCode(500)
 		ctx.JSON(map[string]string{"error": "Failed to read resp"})

@@ -8,7 +8,7 @@ pandas
 yfinance
 onnxruntime
 scikit-learn
-# skl2onnx
+skl2onnx
 catboost
 nltk
 # seaborn
