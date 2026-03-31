@@ -12,18 +12,18 @@ router = APIRouter()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
-SCALER_PATH = os.path.join(BASE_DIR, "models", "scaler.pkl")
-KMEANS_PATH = os.path.join(BASE_DIR, "models", "kmeans.pkl")
+SCALER_PATH = os.path.join(BASE_DIR, "models", "stock_scaler.pkl")
+GMM_PATH = os.path.join(BASE_DIR, "models", "gmm_model.pkl")
 
 df_features = pd.read_csv(FEATURES_PATH)
 
 with open(SCALER_PATH, "rb") as f:
     scaler = pickle.load(f)
 
-with open(KMEANS_PATH, "rb") as f:
-    kmeans = pickle.load(f)
+with open(GMM_PATH, "rb") as f:
+    gmm = pickle.load(f)
 
-# The cluster risk mapping is needed to assign the risk category to the stocks based on the predicted cluster label from the kmeans model
+# the cluster risk mapping is needed to assign the risk category to the stocks based on the predicted cluster label from the gmm model
 CLUSTER_RISK_PATH = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
 with open(CLUSTER_RISK_PATH, "rb") as f:
     cluster_risk_mapping = pickle.load(f)
@@ -54,14 +54,11 @@ class StockRiskCategoryResponse(BaseModel):
     categories: dict[str, List[StockRiskCategory]]
     total: int
 
-def predict_cluster_label(log_return, log_variance, volatility, max_drawdown):
-
-    features = np.array([[log_return, log_variance, volatility, max_drawdown]])
-
+# predicts the cluster label for a stock using the 3 features the model was trained on
+def predict_cluster_label(log_variance, volatility, var_95):
+    features = np.array([[log_variance, volatility, var_95]])
     scaled_features = scaler.transform(features)
-
-    labels = kmeans.predict(scaled_features)
-
+    labels = gmm.predict(scaled_features)
     return int(labels[0])
 
 @router.get("/")
@@ -79,8 +76,8 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
         if not features:
             continue
 
-        vols.append(features["volatility"])
-        returns.append(np.expm1(features["log_return"]))
+        vols.append(features["Volatility"])
+        returns.append(features["returns"])
         drawdowns.append(features["max_drawdown"])
 
     if not vols:
@@ -128,12 +125,11 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
         if not features:
             continue
 
-        # passes into the model the required features to get the cluster label 
+        # passes the 3 features the model was trained on to get the cluster label
         cluster_label = predict_cluster_label(
-            features["log_return"],
-            features["log_variance"],
-            features["volatility"],
-            features["max_drawdown"],
+            features["Log_Variances"],
+            features["Volatility"],
+            features["VaR_95"],
         )
 
         # mapping the cluster label (0,1,2...) to the label mapping (low/moderate risk...)
@@ -143,9 +139,9 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
             StockRiskCategory(
                 ticker=ticker,
                 risk_bucket=category,
-                volatility=round(features["volatility"] * 100, 2),
+                volatility=round(features["Volatility"] * 100, 2),
                 max_drawdown=round(features["max_drawdown"] * 100, 2),
-                annual_return=round(np.expm1(features["log_return"]) * 100, 2),
+                annual_return=round(features["returns"] * 100, 2),
             )
         )
         

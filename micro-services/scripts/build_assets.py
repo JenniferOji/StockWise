@@ -3,17 +3,19 @@ import pandas as pd
 import yfinance as yf
 import pickle
 from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans
+from sklearn.mixture import GaussianMixture
 import json
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# load the stock data from the json file to get the tickers
 with open(os.path.join(BASE_DIR, "stock_data.json"), "r") as f:
     STOCK_DATA = json.load(f)
 
 tickers = list(STOCK_DATA.keys())
 
+# download 1 year of price data for all tickers
 prices = yf.download(tickers, period="1y", auto_adjust=True)["Close"]
 prices = prices.dropna(axis=1, how="all")
 prices.ffill(inplace=True)
@@ -21,7 +23,17 @@ prices.bfill(inplace=True)
 
 returns = prices.pct_change().dropna()
 
-# features 
+# annualised returns and variance
+annual_returns = returns.mean() * 252
+variances = returns.var() * 252
+
+# value at risk: looking at the worst 5% of daily returns for each stock
+var_95 = {}
+for t in returns.columns:
+    r = returns[t].dropna()
+    var_95[t] = abs(np.percentile(r, 5))
+
+# max drawdown: how far did the stock drop from its peak at its worst point
 max_drawdowns = {}
 for t in returns.columns:
     r = returns[t]
@@ -29,40 +41,69 @@ for t in returns.columns:
     drawdown = (cumulative - cumulative.cummax()) / cumulative.cummax()
     max_drawdowns[t] = abs(drawdown.min())
 
-annual_returns = returns.mean() * 252
-variances = returns.var() * 252
-
 df = pd.DataFrame({
     "ticker": variances.index,
     "returns": annual_returns.values,
     "variance": variances.values,
-    "max_drawdown": [max_drawdowns[t] for t in variances.index]
+    "VaR_95": [var_95.get(t, np.nan) for t in variances.index],
+    "max_drawdown": [max_drawdowns.get(t, np.nan) for t in variances.index],
 })
 
-df["log_return"] = np.log1p(df["returns"])
-df["log_variance"] = np.log1p(df["variance"])
-df["volatility"] = np.sqrt(df["variance"])
+# log transform variance to reduce the skew caused by extreme outliers like meme stocks
+df["Log_Variances"] = np.log1p(np.clip(df["variance"], 0, 2))
+df["Volatility"] = np.sqrt(df["variance"])
 
 df.dropna(inplace=True)
 
-# model
-X = df[["log_return","log_variance","volatility","max_drawdown"]].values
+# these 3 features were chosen after testing all possible combinations - these gave best BIC and silhouette
+features = ["Log_Variances", "Volatility", "VaR_95"]
+
+X = df[features].values
 
 scaler = StandardScaler()
 Xs = scaler.fit_transform(X)
 
-kmeans = KMeans(n_clusters=5, random_state=42, n_init=50)
-labels = kmeans.fit_predict(Xs)
+# fitting the gmm model with 5 components 
+gmm = GaussianMixture(n_components=5, covariance_type="full", n_init=10, random_state=42, max_iter=500)
+gmm.fit(Xs)
+labels = gmm.predict(Xs)
 
-df["cluster"] = labels
+df["Cluster_labels"] = labels
 
-# saving
+# ranking each cluster by risk the higher volatility and var means higher risk
+cluster_risk_scores = {}
+for cluster_idx in range(5):
+    cluster_data = df[df["Cluster_labels"] == cluster_idx]
+    if len(cluster_data) == 0:
+        cluster_risk_scores[cluster_idx] = 0
+        continue
+    cluster_risk_scores[cluster_idx] = (
+        0.60 * cluster_data["Volatility"].mean() +
+        0.40 * cluster_data["VaR_95"].mean()
+    )
+
+# sorting the clusters from the lowest to highest risk score and assign risk labels
+sorted_clusters = sorted(cluster_risk_scores.items(), key=lambda x: x[1])
+
+risk_labels = ["Very Low Risk", "Low Risk", "Moderate Risk", "High Risk", "Very High Risk"]
+
+cluster_risk = {}
+for i, (cluster_idx, _) in enumerate(sorted_clusters):
+    cluster_risk[cluster_idx] = risk_labels[i]
+
+# saving the files for API to use
 df.to_csv(os.path.join(BASE_DIR, "data", "features.csv"), index=False)
 
-with open(os.path.join(BASE_DIR, "models", "scaler.pkl"), "wb") as f:
+with open(os.path.join(BASE_DIR, "models", "stock_scaler.pkl"), "wb") as f:
     pickle.dump(scaler, f)
 
-with open(os.path.join(BASE_DIR, "models", "kmeans.pkl"), "wb") as f:
-    pickle.dump(kmeans, f)
-    
+with open(os.path.join(BASE_DIR, "models", "gmm_model.pkl"), "wb") as f:
+    pickle.dump(gmm, f)
+
+with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "wb") as f:
+    pickle.dump(cluster_risk, f)
+
+with open(os.path.join(BASE_DIR, "models", "feature_columns.pkl"), "wb") as f:
+    pickle.dump(features, f)
+
 print("Assets built")
