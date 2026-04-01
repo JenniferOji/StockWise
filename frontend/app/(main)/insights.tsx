@@ -14,11 +14,11 @@ import PerformanceMetricsWidget from '@/components/PerformanceMetricsWidget';
 // list of all the sections that will show up on the insights page
 const menu = [
   { 
-    title: "Risk Metrics",
-  },
-  { 
     title: "Performance Analysis",
   }, 
+  { 
+    title: "Risk Metrics",
+  },
   { 
     title: "Stock Allocation",
   },
@@ -50,10 +50,10 @@ function Accordian({ title }: AccordianProps) {
                 <Icon name={expanded ? 'keyboard-arrow-up' : 'keyboard-arrow-down'} size={24} color={'#666'} />
             </TouchableOpacity>
             <View style={styles.parentHr}/>
-            {expanded && title === 'Risk Metrics' && <RiskInsightsWidget />}
+            {expanded && title == 'Performance Analysis' && <PerformanceMetricsWidget />}
+            {expanded && title == 'Risk Metrics' && <RiskInsightsWidget />}
             {expanded && title == 'Stock Allocation' && <PortfolioInsightsWidget />}
             {expanded && title == 'Diversification Suggestions' && <DiversificationWidget />}
-            {expanded && title == 'Performance Analysis' && <PerformanceMetricsWidget />}
         </View>
     );
 }

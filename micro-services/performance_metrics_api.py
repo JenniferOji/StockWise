@@ -27,6 +27,8 @@ class PerformanceMetricsResponse(BaseModel):
 	success: bool
 	metrics: dict
 	portfolio_value: float
+	total_invested: float
+	profit_loss: float
 	best_performer: str
 	worst_performer: str
 
@@ -73,6 +75,7 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 	# calculating the overall portfolio return 
 	total_invested = sum(holding['shares'] * holding['purchase_price'] for holding in portfolio.values())
 	overall_return = (total_value - total_invested) / total_invested if total_invested else 0
+	profit_loss = total_value - total_invested
 
 	# annualised return using the CAGR formula: https://www.investopedia.com/terms/c/cagr.asp
 	n_years = portfolio_request.days / 365
@@ -86,14 +89,15 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 
 	metrics = {
 		"overall_return": f"{overall_return * 100:.2f}%",
-		"annualized_return": f"{cagr * 100:.2f}%",
 		"returns_by_ticker": {k: f"{v * 100:.2f}%" for k, v in returns.items()}
 	}
 
 	return PerformanceMetricsResponse(
 		success=True,
 		metrics=metrics,
-    	portfolio_value=round(total_value, 2),
+		portfolio_value=round(total_value, 2),
+		total_invested=round(total_invested, 2),
+		profit_loss=round(profit_loss, 2),
 		best_performer=best_performer,
 		worst_performer=worst_performer
 	)

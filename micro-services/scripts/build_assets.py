@@ -59,8 +59,7 @@ df = pd.DataFrame({
     "variance": variances.values,
     "VaR_95": [var_95.get(t, np.nan) for t in variances.index],
     "max_drawdown": [max_drawdowns.get(t, np.nan) for t in variances.index],
-    "Sharpe": sharpe_ratios.values,
-
+    "Sharpe": sharpe_ratios
 })
 
 # log transform variance to reduce the skew caused by extreme outliers like meme stocks

@@ -24,10 +24,11 @@ type PerformanceMetricsResponse struct {
     Success         bool `json:"success"`
     Metrics         struct {
         OverallReturn    string            `json:"overall_return"`
-        AnnualizedReturn string            `json:"annualized_return"`
         ReturnsByTicker  map[string]string `json:"returns_by_ticker"`
     } `json:"metrics"`
     PortfolioValue float64 `json:"portfolio_value"`
+    TotalInvested  float64 `json:"total_invested"`
+    ProfitLoss     float64 `json:"profit_loss"`
     BestPerformer  string  `json:"best_performer"`
     WorstPerformer string  `json:"worst_performer"`
 }
@@ -43,19 +44,16 @@ func CalculatePerformanceMetrics(req PerformanceMetricsRequest) (*PerformanceMet
 
     requestBody := PerformanceMetricsRequest{
 	    Stocks: req.Stocks,
-	   Days:   req.Days,
-   }
+	    Days:   req.Days,
+    }
 
     jsonData, err := json.Marshal(requestBody)
     if err != nil {
        return nil, err
     }
 
-    // fastAPIURL := "http://localhost:8000"
     url := mlApiUrl + endpoint
-    // url := "http://fastapi:8000" + endpoint
 
-    
     resp, err := http.Post(url,"application/json",bytes.NewBuffer(jsonData))
     if err != nil {
         return nil, err
@@ -69,7 +67,7 @@ func CalculatePerformanceMetrics(req PerformanceMetricsRequest) (*PerformanceMet
     }
 
     if resp.StatusCode != http.StatusOK {
-    return nil, fmt.Errorf("performance metrics service error: %s", string(body))
+        return nil, fmt.Errorf("performance metrics service error: %s", string(body))
     }
 
     var result PerformanceMetricsResponse

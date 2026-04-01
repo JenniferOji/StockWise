@@ -7,13 +7,12 @@ type RiskMetrics = {
   success: boolean
   metrics: {
     volatility: string
-    sharpe_ratio: string
+    sharpe: string 
     max_drawdown: string
-    var_95: string
+    var_95: string       
   }
   portfolio_value: number
 }
-
 
 type StockRiskItem = {
   ticker: string
@@ -130,7 +129,7 @@ export default function RiskInsightsWidget() {
 
         <MetricBox
           label="Sharpe Ratio"
-          value={riskData.metrics.sharpe_ratio}
+          value={riskData.metrics.sharpe}
           desc="Return vs risk. Higher is better."
         />
 

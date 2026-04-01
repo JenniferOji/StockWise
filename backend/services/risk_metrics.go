@@ -34,6 +34,8 @@ type StockRiskCategory struct {
 	Volatility   float64 `json:"volatility"`
 	MaxDrawdown  float64 `json:"max_drawdown"`
 	AnnualReturn float64 `json:"annual_return"`
+	Sharpe       float64 `json:"sharpe"`
+	Var95        float64 `json:"var_95"`
 }
 
 type StockRiskCategoriesResponse struct {
@@ -60,8 +62,8 @@ func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
 	}
 
 	// calling the fastAPI microservice
-	// url := mlApiUrl + endpoint
-	url := "http://192.168.1.19:8000" + endpoint
+	url := mlApiUrl + endpoint
+	// url := "http://192.168.1.19:8000" + endpoint
 
 	resp, err := http.Post(
 		url,

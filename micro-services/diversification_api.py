@@ -175,8 +175,14 @@ def get_diversification_suggestions(request: DiversificationRequest):
             }
 
         # limit the candidate pool so the optimisation remains fast
-        candidate_pool = suggested_stocks.sort_values(by="Volatility").head(10)
+        # candidate_pool = suggested_stocks.sort_values(by="Volatility").head(10)
 
+        # sort candidate pool based on user risk preference
+        if request.user_risk_preference in ["High Risk", "Very High Risk"]:
+            candidate_pool = suggested_stocks.sort_values(by="Volatility", ascending=False).head(10)
+        else:
+            candidate_pool = suggested_stocks.sort_values(by="Volatility", ascending=True).head(10)
+            
         candidate_symbols = candidate_pool["ticker"].tolist()
 
         combos = []
