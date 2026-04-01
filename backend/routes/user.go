@@ -13,6 +13,49 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+
+type RegisterUserInput struct {
+	Username string `json:"username" validate:"required,min=3,max=256"`
+	Password string `json:"password" validate:"required,min=6,max=256"`
+	Email    string `json:"email" validate:"required,email"`
+	Risk     string `json:"risk" validate:"required"`
+}
+
+type LoginUserInput struct {
+	Password string `json:"password" validate:"required"`
+	Email    string `json:"email" validate:"required,email"`
+}
+
+type StockEntryInput struct {
+	Quantity      float64 `json:"quantity" validate:"gte=0"`
+	PurchasePrice float64 `json:"purchase_price" validate:"gte=0"`
+}
+
+type AddStockInput struct {
+	UserID        uint               `json:"user_id" validate:"required"`
+	Symbol        string             `json:"symbol" validate:"required"`
+	CompanyName   string             `json:"company_name" validate:"required"`
+	Sector        string             `json:"sector" validate:"required"`
+	Entries       []StockEntryInput  `json:"entries" validate:"required"`
+}
+
+type UpdateStockInput struct {
+	StockID uint               `json:"stock_id" validate:"required"`
+	Entries []StockEntryInput  `json:"entries" validate:"required"`
+}
+
+type UpdateRiskInput struct {
+	UserID uint   `json:"user_id" validate:"required"`
+	Risk   string `json:"risk" validate:"required"`
+}
+
+type NewsItem struct {
+	CompanyName string `json:"companyName"`
+	Headline    string `json:"headline"`
+	ImageUrl    string `json:"imageUrl"`
+	Date        string `json:"date"`
+}
+
 func GetRiskMetrics(ctx iris.Context) {
 	log.Println("[RiskMetrics] Incoming request to /api/services/risk-metrics")
 	var req services.RiskMetricsRequest
@@ -110,35 +153,7 @@ func DeleteStock(ctx iris.Context) {
 	ctx.JSON(iris.Map{"message": "Stock deleted successfully"})
 }
 
-func UpdateStock(ctx iris.Context) {
-	var updateInput UpdateStockInput
-	err := ctx.ReadJSON(&updateInput)
-	if err != nil {
-		utils.HandleValidationErrors(err, ctx)
-		return
-	}
-
-	var stock models.Stock
-	result := storage.DB.First(&stock, updateInput.StockID)
-	if result.Error != nil {
-		utils.CreateError(iris.StatusNotFound, "Not Found", "Stock not found", ctx)
-		return
-	}
-
-	stock.Quantity = updateInput.Quantity
-	stock.PurchasePrice = updateInput.PurchasePrice
-	storage.DB.Save(&stock)
-
-	ctx.JSON(iris.Map{
-		"ID":            stock.ID,
-		"Symbol":        stock.Symbol,
-		"CompanyName":   stock.CompanyName,
-		"Quantity":      stock.Quantity,
-		"PurchasePrice": stock.PurchasePrice,
-		"Sector":        stock.Sector,
-	})
-}
-
+// 
 func Register(ctx iris.Context) {
 	var userInput RegisterUserInput
 	err := ctx.ReadJSON(&userInput)
@@ -262,7 +277,35 @@ func hashAndSaltPassword(password string) (hashedPassword string, err error) {
 	return string(bytes), nil
 }
 
-// handles when the users adds a stock to their portfolio
+// func UpdateStock(ctx iris.Context) {
+// 	var updateInput UpdateStockInput
+// 	err := ctx.ReadJSON(&updateInput)
+// 	if err != nil {
+// 		utils.HandleValidationErrors(err, ctx)
+// 		return
+// 	}
+
+// 	var stock models.Stock
+// 	result := storage.DB.First(&stock, updateInput.StockID)
+// 	if result.Error != nil {
+// 		utils.CreateError(iris.StatusNotFound, "Not Found", "Stock not found", ctx)
+// 		return
+// 	}
+
+// 	stock.Quantity = updateInput.Quantity
+// 	stock.PurchasePrice = updateInput.PurchasePrice
+// 	storage.DB.Save(&stock)
+
+// 	ctx.JSON(iris.Map{
+// 		"ID":            stock.ID,
+// 		"Symbol":        stock.Symbol,
+// 		"CompanyName":   stock.CompanyName,
+// 		"Quantity":      stock.Quantity,
+// 		"PurchasePrice": stock.PurchasePrice,
+// 		"Sector":        stock.Sector,
+// 	})
+// }
+
 func AddStock(ctx iris.Context) {
 	var stockInput AddStockInput
 	err := ctx.ReadJSON(&stockInput)
@@ -272,25 +315,83 @@ func AddStock(ctx iris.Context) {
 	}
 
 	newStock := models.Stock{
-		UserID:        stockInput.UserID,
-		Symbol:        stockInput.Symbol,
-		CompanyName:   stockInput.CompanyName,
-		Quantity:      stockInput.Quantity,
-		PurchasePrice: stockInput.PurchasePrice,
-		Sector:        stockInput.Sector,
+		UserID:      stockInput.UserID,
+		Symbol:      stockInput.Symbol,
+		CompanyName: stockInput.CompanyName,
+		Sector:      stockInput.Sector,
 	}
 
 	storage.DB.Create(&newStock)
 
-	ctx.JSON(iris.Map{
-		"ID":            newStock.ID,
-		"Symbol":        newStock.Symbol,
-		"CompanyName":   newStock.CompanyName,
-		"Quantity":      newStock.Quantity,
-		"PurchasePrice": newStock.PurchasePrice,
-		"Sector":        newStock.Sector,
-	})
+	for _, entry := range stockInput.Entries {
+		newEntry := models.StockEntry{
+			StockID:       newStock.ID,
+			Quantity:      entry.Quantity,
+			PurchasePrice: entry.PurchasePrice,
+		}
+		storage.DB.Create(&newEntry)
+	}
+
+	ctx.JSON(newStock)
 }
+
+func UpdateStock(ctx iris.Context) {
+	var updateInput UpdateStockInput
+	err := ctx.ReadJSON(&updateInput)
+	if err != nil {
+		utils.HandleValidationErrors(err, ctx)
+		return
+	}
+
+	var stock models.Stock
+	result := storage.DB.First(&stock, updateInput.StockID)
+	if result.Error != nil {
+		utils.CreateError(iris.StatusNotFound, "Not Found", "Stock not found", ctx)
+		return
+	}
+
+	storage.DB.Where("stock_id = ?", stock.ID).Delete(&models.StockEntry{})
+
+	for _, entry := range updateInput.Entries {
+		newEntry := models.StockEntry{
+			StockID:       stock.ID,
+			Quantity:      entry.Quantity,
+			PurchasePrice: entry.PurchasePrice,
+		}
+		storage.DB.Create(&newEntry)
+	}
+
+	ctx.JSON(stock)
+}
+// handles when the users adds a stock to their portfolio
+// func AddStock(ctx iris.Context) {
+// 	var stockInput AddStockInput
+// 	err := ctx.ReadJSON(&stockInput)
+// 	if err != nil {
+// 		utils.HandleValidationErrors(err, ctx)
+// 		return
+// 	}
+
+// 	newStock := models.Stock{
+// 		UserID:        stockInput.UserID,
+// 		Symbol:        stockInput.Symbol,
+// 		CompanyName:   stockInput.CompanyName,
+// 		Quantity:      stockInput.Quantity,
+// 		PurchasePrice: stockInput.PurchasePrice,
+// 		Sector:        stockInput.Sector,
+// 	}
+
+// 	storage.DB.Create(&newStock)
+
+// 	ctx.JSON(iris.Map{
+// 		"ID":            newStock.ID,
+// 		"Symbol":        newStock.Symbol,
+// 		"CompanyName":   newStock.CompanyName,
+// 		"Quantity":      newStock.Quantity,
+// 		"PurchasePrice": newStock.PurchasePrice,
+// 		"Sector":        newStock.Sector,
+// 	})
+// }
 
 // handles when the user updates their risk profile
 func UpdateRisk(ctx iris.Context) {
@@ -341,41 +442,3 @@ func GetPerformanceMetrics(ctx iris.Context) {
 	ctx.JSON(result)
 }
 
-type RegisterUserInput struct {
-	Username string `json:"username" validate:"required,min=3,max=256"`
-	Password string `json:"password" validate:"required,min=6,max=256"`
-	Email    string `json:"email" validate:"required,email"`
-	Risk     string `json:"risk" validate:"required"`
-}
-
-type LoginUserInput struct {
-	Password string `json:"password" validate:"required"`
-	Email    string `json:"email" validate:"required,email"`
-}
-
-type AddStockInput struct {
-	UserID        uint    `json:"user_id" validate:"required"`
-	Symbol        string  `json:"symbol" validate:"required"`
-	CompanyName   string  `json:"company_name" validate:"required"`
-	Quantity      float64 `json:"quantity" validate:"gte=0"`
-	PurchasePrice float64 `json:"purchase_price" validate:"gte=0"`
-	Sector        string  `json:"sector" validate:"required"`
-}
-
-type UpdateStockInput struct {
-	StockID       uint    `json:"stock_id" validate:"required"`
-	Quantity      float64 `json:"quantity" validate:"gte=0"`
-	PurchasePrice float64 `json:"purchase_price" validate:"gte=0"`
-}
-
-type UpdateRiskInput struct {
-	UserID uint   `json:"user_id" validate:"required"`
-	Risk   string `json:"risk" validate:"required"`
-}
-
-type NewsItem struct {
-	CompanyName string `json:"companyName"`
-	Headline    string `json:"headline"`
-	ImageUrl    string `json:"imageUrl"`
-	Date        string `json:"date"`
-}
