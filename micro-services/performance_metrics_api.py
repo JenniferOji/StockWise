@@ -48,6 +48,7 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 	portfolio_value = {}
 	total_value = 0
 	returns = {}
+	price_returns = {}
 
 	for ticker, holding in portfolio.items():
 		features = feature_map.get(ticker)
@@ -57,12 +58,20 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 		shares = holding['shares']
 		purchase_price = holding['purchase_price']
 
-		annual_return = features["returns"]
+		current_price = features.get("Close", purchase_price)
 
-		value = purchase_price * (1 + annual_return) * shares
+		value = current_price * shares
 		total_value += value
 
-		returns[ticker] = annual_return
+		pct_return = (current_price - purchase_price) / purchase_price if purchase_price else 0
+
+		returns[ticker] = pct_return
+		price_returns[ticker] = {
+			"purchase_price": purchase_price,
+			"current_price": current_price,
+			"return_pct": pct_return
+		}
+
 		portfolio_value[ticker] = value
 
 	if not returns:
@@ -89,7 +98,15 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 
 	metrics = {
 		"overall_return": f"{overall_return * 100:.2f}%",
-		"returns_by_ticker": {k: f"{v * 100:.2f}%" for k, v in returns.items()}
+		"returns_by_ticker": {k: f"{v * 100:.2f}%" for k, v in returns.items()},
+		"price_comparison": {
+			k: {
+				"purchase_price": v["purchase_price"],
+				"current_price": v["current_price"],
+				"return_pct": f"{v['return_pct'] * 100:.2f}%"
+			}
+			for k, v in price_returns.items()
+		}
 	}
 
 	return PerformanceMetricsResponse(

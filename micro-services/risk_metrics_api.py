@@ -72,7 +72,6 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
     vols = []
     returns = []
     drawdowns = []
-    sharpes = []
     vars_ = []
 
     for stock in portfolio_request.stocks:
@@ -83,17 +82,27 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
         vols.append(features["Volatility"])
         returns.append(features["returns"])
         drawdowns.append(features["max_drawdown"])
-        sharpes.append(features["Sharpe"])     
         vars_.append(features["VaR_95"])  
 
     if not vols:
         raise HTTPException(status_code=404, detail="No data for the tickers")
 
-    portfolio_volatility = np.mean(vols) * 100
-    portfolio_return = np.mean(returns) * 100
-    portfolio_drawdown = np.max(drawdowns) * 100
-    portfolio_sharpe = np.mean(sharpes)
-    portfolio_var_95 = np.mean(vars_) * 100
+    portfolio_volatility = np.mean(vols)
+    portfolio_return = np.mean(returns)
+    portfolio_drawdown = np.max(drawdowns)
+    portfolio_var_95 = np.mean(vars_)
+
+    risk_free_rate = 0.02
+
+    if portfolio_volatility == 0:
+        portfolio_sharpe = 0
+    else:
+        portfolio_sharpe = (portfolio_return - risk_free_rate) / portfolio_volatility
+        
+    portfolio_volatility *= 100
+    portfolio_return *= 100
+    portfolio_drawdown *= 100
+    portfolio_var_95 *= 100
 
     return {
         "success": True,

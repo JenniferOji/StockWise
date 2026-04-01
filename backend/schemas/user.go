@@ -22,4 +22,12 @@ type Stock struct {
 	Quantity      float64 `json:"quantity"`
 	PurchasePrice float64 `json:"purchase_price"`
 	Sector        string  `json:"sector"`
+	Entries     []StockEntry    `gorm:"foreignKey:StockID" json:"entries"`
+}
+
+type StockEntry struct {
+	gorm.Model
+	StockID       uint    `json:"stock_id"`
+	Quantity      float64 `json:"quantity"`
+	PurchasePrice float64 `json:"purchase_price"`
 }

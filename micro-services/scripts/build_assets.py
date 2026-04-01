@@ -23,6 +23,7 @@ prices = yf.download(tickers, period="1y", auto_adjust=True)["Close"]
 prices = prices.dropna(axis=1, how="all")
 prices.ffill(inplace=True)
 prices.bfill(inplace=True)
+latest_prices = prices.iloc[-1]
 
 returns = prices.pct_change().dropna()
 
@@ -59,7 +60,8 @@ df = pd.DataFrame({
     "variance": variances.values,
     "VaR_95": [var_95.get(t, np.nan) for t in variances.index],
     "max_drawdown": [max_drawdowns.get(t, np.nan) for t in variances.index],
-    "Sharpe": sharpe_ratios
+    "Sharpe": sharpe_ratios,
+    "Close": [latest_prices.get(t, np.nan) for t in variances.index]
 })
 
 # log transform variance to reduce the skew caused by extreme outliers like meme stocks
