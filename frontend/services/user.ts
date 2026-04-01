@@ -6,6 +6,15 @@ import { handleError } from "../utils/handleError";
 
 type DataRes = {data: User};
 
+const aggregateEntries = (s: any) => {
+    const entries = s.entries || [];
+    const totalShares = entries.reduce((sum: number, e: any) => sum + (e.quantity || 0), 0);
+    const avgPrice = totalShares > 0
+        ? entries.reduce((sum: number, e: any) => sum + (e.quantity || 0) * (e.purchase_price || 0), 0) / totalShares
+        : 0;
+    return { totalShares, avgPrice };
+};
+
 export const registerUser = async(
     username: string,
     email: string,
@@ -138,15 +147,13 @@ export const getRiskMetrics = async (userId: number) => {
     try {
         const stocks = await getUserStocks(userId);
         if (!stocks) throw new Error("No stocks found");
-        // shape of stocks expected by risk metrics service
-        const formattedStocks = stocks.map((s: any) => ({
-            ticker: s.symbol,
-            shares: s.quantity,
-            purchase_price: s.purchasePrice
-        }));
-        const response = await axios.post(endpoints.getRiskMetrics, {
-            stocks: formattedStocks
+
+        const formattedStocks = stocks.map((s: any) => {
+            const { totalShares, avgPrice } = aggregateEntries(s);
+            return { ticker: s.symbol, shares: totalShares, purchase_price: avgPrice };
         });
+
+        const response = await axios.post(endpoints.getRiskMetrics, { stocks: formattedStocks });
         return response.data;
     } catch (error) {
         handleError(error);
@@ -157,24 +164,16 @@ export const getRiskMetrics = async (userId: number) => {
 export const getStockRiskCategories = async (userId: number) => {
     try {
         const stocks = await getUserStocks(userId);
+        if (!stocks || !Array.isArray(stocks) || stocks.length === 0) throw new Error("No stocks found");
 
-        if (!stocks || !Array.isArray(stocks) || stocks.length === 0) {
-            throw new Error("No stocks found");
-        }
-
-        const formattedStocks = stocks.map((s: any) => ({
-            ticker: s.symbol,
-            shares: s.quantity,
-            purchase_price: s.purchasePrice
-        }));
+        const formattedStocks = stocks.map((s: any) => {
+            const { totalShares, avgPrice } = aggregateEntries(s);
+            return { ticker: s.symbol, shares: totalShares, purchase_price: avgPrice };
+        });
 
         console.log("Calling endpoint:", endpoints.getStockRiskCategories);
-        const response = await axios.post(
-            endpoints.getStockRiskCategories,
-            { stocks: formattedStocks }
-        );
+        const response = await axios.post(endpoints.getStockRiskCategories, { stocks: formattedStocks });
         console.log("RAW AXIOS RESPONSE:", response.data);
-
         return response.data;
     } catch (error) {
         handleError(error);
@@ -203,26 +202,21 @@ export const getDiversificationSuggestions = async (userID: number) => {
 
         const risk = await getRiskPreference(userID);
         
-        // Send full stock holdings with sector information
-        const currentStocks = stocks.map((s: any) => ({
-            symbol: s.symbol,
-            sector: s.sector,
-            quantity: s.quantity,
-            purchase_price: s.purchasePrice
-        }));
+        const currentStocks = stocks.map((s: any) => {
+            const { totalShares, avgPrice } = aggregateEntries(s);
+            return { symbol: s.symbol, sector: s.sector, quantity: totalShares, purchase_price: avgPrice };
+        });
         
         const response = await axios.post(endpoints.getDiversificationSuggestions, {
             current_stocks: currentStocks,
             user_risk_preference: risk
         });
         return response.data;
-
     } catch (error) {
         handleError(error);
         return null;
     }
 };
-
 
 export const getStockNews = async (userID: number) => {
     try {        
@@ -288,19 +282,13 @@ export const getPerformanceMetrics = async (userId: number, days: number = 365) 
     try {
         const stocks = await getUserStocks(userId);
         if (!stocks) throw new Error("No stocks found");
-        // shape of stocks expected by performance metrics service
-        const formattedStocks = stocks.map((s: any) => ({
-            ticker: s.symbol,
-            shares: s.shares ?? s.quantity ?? 0,
-            purchase_price: s.purchase_price ?? s.purchasePrice ?? 0
-        }));
 
-        const response = await axios.post(endpoints.getPerformanceMetrics,{
-                stocks: formattedStocks,
-                days: days
-            }
-        );
+        const formattedStocks = stocks.map((s: any) => {
+            const { totalShares, avgPrice } = aggregateEntries(s);
+            return { ticker: s.symbol, shares: totalShares, purchase_price: avgPrice };
+        });
 
+        const response = await axios.post(endpoints.getPerformanceMetrics, { stocks: formattedStocks, days });
         return response.data;
     } catch (error) {
         console.error("Performance metrics error:", error);

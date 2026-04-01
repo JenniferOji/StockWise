@@ -120,6 +120,46 @@ export default function PerformanceMetricsWidget() {
           </View>
         </View>
       </View>
+
+      {/* Holdings breakdown for each stock */}
+      {metrics?.metrics?.price_comparison && (
+        <View style={styles.breakdownSection}>
+          <Text style={styles.sectionTitle}>Holdings Breakdown</Text>
+          {Object.entries(metrics.metrics.price_comparison).map(([ticker, data]: [string, any]) => {
+            const isPositive = !data.return_pct.startsWith('-');
+            const shares = metrics.metrics.returns_by_ticker?.[ticker]; // for display
+            const profitLoss = (data.current_price - data.purchase_price);
+
+            return (
+              <View key={ticker} style={styles.holdingCard}>
+                <View style={styles.holdingHeader}>
+                  <Text style={styles.holdingTicker}>{ticker}</Text>
+                  <Text style={[styles.holdingReturn, { color: isPositive ? '#16a34a' : '#dc2626' }]}>
+                    {isPositive ? '+' : ''}{data.return_pct}
+                  </Text>
+                </View>
+                <View style={styles.holdingRow}>
+                  <View style={styles.holdingCol}>
+                    <Text style={styles.holdingSubLabel}>Avg. Buy Price</Text>
+                    <Text style={styles.holdingSubValue}>€{data.purchase_price.toFixed(2)}</Text>
+                  </View>
+                  <View style={styles.holdingCol}>
+                    <Text style={styles.holdingSubLabel}>Current Price</Text>
+                    <Text style={styles.holdingSubValue}>€{data.current_price.toFixed(2)}</Text>
+                  </View>
+                  <View style={styles.holdingCol}>
+                    <Text style={styles.holdingSubLabel}>Per Share</Text>
+                    <Text style={[styles.holdingSubValue, { color: isPositive ? '#16a34a' : '#dc2626' }]}>
+                      {isPositive ? '+' : ''}€{profitLoss.toFixed(2)}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      )}
+
     </View>
   );
 }
@@ -155,4 +195,13 @@ const styles=StyleSheet.create({
   highlightValue:{fontWeight:'700',fontSize:16,color:'#111'},
   error:{color:'red'},
   sectionSubtitle:{fontSize:12,color:'#64748b',marginBottom:10},
+  breakdownSection: { marginTop: 16 },
+  holdingCard: { backgroundColor: '#fff', borderRadius: 10, padding: 14, marginBottom: 10 },
+  holdingHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  holdingTicker: { fontWeight: '700', fontSize: 15, color: '#0b3d91' },
+  holdingReturn: { fontWeight: '700', fontSize: 15 },
+  holdingRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  holdingCol: { alignItems: 'center', flex: 1 },
+  holdingSubLabel: { fontSize: 11, color: '#64748b', marginBottom: 2 },
+  holdingSubValue: { fontWeight: '600', fontSize: 13 },
 });

@@ -20,11 +20,18 @@ type PerformanceMetricsRequest struct {
        Days   int            `json:"days"`
 }
 
+type PriceComparison struct {
+    PurchasePrice float64 `json:"purchase_price"`
+    CurrentPrice  float64 `json:"current_price"`
+    ReturnPct     string  `json:"return_pct"`
+}
+
 type PerformanceMetricsResponse struct {
-    Success         bool `json:"success"`
-    Metrics         struct {
-        OverallReturn    string            `json:"overall_return"`
-        ReturnsByTicker  map[string]string `json:"returns_by_ticker"`
+    Success        bool    `json:"success"`
+    Metrics        struct {
+        OverallReturn    string                     `json:"overall_return"`
+        ReturnsByTicker  map[string]string          `json:"returns_by_ticker"`
+        PriceComparison  map[string]PriceComparison `json:"price_comparison"`
     } `json:"metrics"`
     PortfolioValue float64 `json:"portfolio_value"`
     TotalInvested  float64 `json:"total_invested"`
