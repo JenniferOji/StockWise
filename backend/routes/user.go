@@ -13,7 +13,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-
 type RegisterUserInput struct {
 	Username string `json:"username" validate:"required,min=3,max=256"`
 	Password string `json:"password" validate:"required,min=6,max=256"`
@@ -128,8 +127,9 @@ func GetUserStocks(ctx iris.Context) {
 	}
 
 	var stocks []models.Stock
-	result := storage.DB.Where("user_id = ?", userID).Find(&stocks)
+	result := storage.DB.Preload("Entries").Where("user_id = ?", userID).Find(&stocks)
 	if result.Error != nil {
+		log.Printf("[GetUserStocks] failed for user_id=%s: %v", userID, result.Error)
 		utils.CreateInternalServerError(ctx)
 		return
 	}
@@ -153,7 +153,6 @@ func DeleteStock(ctx iris.Context) {
 	ctx.JSON(iris.Map{"message": "Stock deleted successfully"})
 }
 
-// 
 func Register(ctx iris.Context) {
 	var userInput RegisterUserInput
 	err := ctx.ReadJSON(&userInput)
@@ -441,4 +440,3 @@ func GetPerformanceMetrics(ctx iris.Context) {
 	}
 	ctx.JSON(result)
 }
-

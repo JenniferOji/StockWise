@@ -15,7 +15,6 @@ export default function StockHoldings() {
   // displayed is the list of stocks the user has added to the page 
   const [displayed, setDisplayed] = useState<typeof STOCKS[number][]>([]);
 
-
   // modal controls for the edit popup
   const [modalVisible, setModalVisible] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
@@ -23,13 +22,17 @@ export default function StockHoldings() {
   // which stock is currently being edited in the modal
   const [selected, setSelected] = useState<typeof STOCKS[number] | null>(null);
   // editing shares value
-  const [editShares, setEditShares] = useState('');
-  const [editPurchasePrice, setEditPurchasePrice] = useState('');
+  const [entries, setEntries] = useState([{ shares: '', price: '' }]);
 
   // colour for the search bar icon 
   const iconColor = Colors.light.icon;
-  const isFormValid = Number.isFinite(parseFloat(editShares)) && Number.isFinite(parseFloat(editPurchasePrice)) && parseFloat(editShares) > 0 && parseFloat(editPurchasePrice) > 0;
-
+  const isFormValid = entries.every(e =>
+    Number.isFinite(parseFloat(e.shares)) &&
+    Number.isFinite(parseFloat(e.price)) &&
+    parseFloat(e.shares) > 0 &&
+    parseFloat(e.price) > 0
+  );
+  
   // function to load the users stocks from the backend  
   const loadUserStocks = async () => {
     try {
@@ -44,10 +47,27 @@ export default function StockHoldings() {
           const symbol = stock.symbol || stock.ticker;
           const foundStock = STOCKS.find(s => s.symbol === symbol);
 
+          const entries = stock.entries || [];
+
+          const totalShares = entries.reduce(
+            (sum: number, e: any) => sum + (e.quantity || 0),
+            0
+          );
+
+          const avgPrice =
+            totalShares > 0
+              ? entries.reduce(
+                  (sum: number, e: any) =>
+                    sum + (e.quantity || 0) * (e.purchase_price || 0),
+                  0
+                ) / totalShares
+              : 0;
+
           return {
             ...foundStock,
-            shares: Number(stock.shares ?? stock.quantity ?? 0),
-            purchasePrice: Number(stock.purchasePrice ?? stock.purchase_price ?? 0),
+            shares: totalShares,
+            purchasePrice: avgPrice,
+            entries: entries,
             dbId: stock.ID
           };
         }).filter(Boolean);
@@ -91,7 +111,7 @@ export default function StockHoldings() {
   }, [displayed, addQuery]);
 
   // Save a new stock to backend and refresh displayed holdings.
-  const saveStock = async (item: typeof STOCKS[number], shares: number, purchasePrice: number) => {
+  const saveStock = async (item: typeof STOCKS[number], entriesData: any[]) => {
     try {
       const userJson = await storage.getItem('user');
       if (!userJson) return;
@@ -101,8 +121,7 @@ export default function StockHoldings() {
         user.ID,
         item.symbol,
         item.companyName,
-        shares,
-        purchasePrice,
+        entriesData,
         item.sector
       );
 
@@ -144,7 +163,7 @@ export default function StockHoldings() {
           </Pressable>
         </View>
       </View>
-      {/* loops through the list of stocks in the displayed list and adds them as cards to the page */}
+
       <FlatList
         data={filteredDisplayed}
         keyExtractor={(item) => (item as any).dbId?.toString() || item.symbol}
@@ -160,20 +179,20 @@ export default function StockHoldings() {
               <View>
                 <Text style={styles.symbol}>{item.symbol}</Text>
               </View>
-
-              {/* company name */}
               <Text style={styles.name}>{item.companyName}</Text>
             </View>
             <View style={styles.cardRight}>
-              {/* shares and edit button on the right side of the card */}
               <Text style={styles.shares}>{item.shares} shares</Text>
               <TouchableOpacity
                 style={styles.editButton}
                 onPress={() => {
                   setFormMode('edit');
                   setSelected(item);
-                  setEditShares(String(item.shares ?? ''));
-                  setEditPurchasePrice(String(item.purchasePrice ?? ''));
+                  const mapped = (item as any).entries?.map((e: any) => ({
+                    shares: String(e.quantity),
+                    price: String(e.purchase_price)
+                  })) || [{ shares: '', price: '' }];
+                  setEntries(mapped);
                   setModalVisible(true);
                 }}
               >
@@ -185,7 +204,6 @@ export default function StockHoldings() {
         }}
       />
 
-      {/* pop up for adding stocks user does not currently hold */}
       <Modal
         visible={addModalVisible}
         transparent
@@ -215,8 +233,7 @@ export default function StockHoldings() {
                   onPress={() => {
                     setFormMode('add');
                     setSelected(item);
-                    setEditShares('');
-                    setEditPurchasePrice('');
+                    setEntries([{ shares: '', price: '' }]);
                     Keyboard.dismiss();
                     setAddModalVisible(false);
                     setModalVisible(true);
@@ -235,61 +252,75 @@ export default function StockHoldings() {
         </View>
       </Modal>
 
-      {/* the pop up that displays when the edit button is clicked */}
       <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => { setModalVisible(false); setSelected(null); }}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            {/* when exiting out of the pop up it goes from displaying the company name to edit */}
-            {/* modal header shows which stock is being edited */}
             <Text style={styles.modalText}>{selected ? `${selected.symbol} - ${selected.companyName}` : 'Edit'}</Text>
             
             <View style={styles.modalInputContainer}>
-              <Text style={styles.modalLabel}>Number of Shares:</Text>
-              <TextInput
-                style={styles.modalInput}
-                value={editShares}
-                onChangeText={setEditShares}
-                keyboardType="numeric"
-                placeholder="Enter shares"
-              />
-              <Text style={styles.modalLabel}>Purchased price:</Text>
-              <TextInput
-                style={styles.modalInput}
-                value={editPurchasePrice}
-                onChangeText={setEditPurchasePrice}
-                keyboardType="numeric"
-                placeholder="Enter price"
-              />
+              {entries.map((entry, index) => (
+                <View key={index}>
+                  <Text style={styles.modalLabel}>Number of Shares:</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={entry.shares}
+                    onChangeText={(text) => {
+                      const updated = [...entries];
+                      updated[index].shares = text;
+                      setEntries(updated);
+                    }}
+                    keyboardType="numeric"
+                    placeholder="Enter shares"
+                  />
+                  <Text style={styles.modalLabel}>Purchased price:</Text>
+                  <TextInput
+                    style={styles.modalInput}
+                    value={entry.price}
+                    onChangeText={(text) => {
+                      const updated = [...entries];
+                      updated[index].price = text;
+                      setEntries(updated);
+                    }}
+                    keyboardType="numeric"
+                    placeholder="Enter price"
+                  />
+                </View>
+              ))}
             </View>
+
+            <Pressable
+              style={styles.modalSave}
+              onPress={() => setEntries([...entries, { shares: '', price: '' }])}
+            >
+              <Text style={styles.modalSaveText}>+ Add Entry</Text>
+            </Pressable>
 
             <Pressable
               style={[styles.modalSave, !isFormValid && styles.modalSaveDisabled]}
               disabled={!isFormValid}
               onPress={async () => {
-                const shares = parseFloat(editShares);
-                const purchasePrice = parseFloat(editPurchasePrice);
+                const formattedEntries = entries.map(e => ({
+                  quantity: parseFloat(e.shares),
+                  purchase_price: parseFloat(e.price)
+                }));
 
-                if (!selected || !Number.isFinite(shares) || !Number.isFinite(purchasePrice) || shares <= 0 || purchasePrice <= 0) {
-                  return;
-                }
+                if (!selected) return;
 
                 if (formMode === 'add') {
-                  await saveStock(selected, shares, purchasePrice);
+                  await saveStock(selected, formattedEntries);
                 } else if ((selected as any).dbId) {
-                  await updateStock((selected as any).dbId, shares, purchasePrice);
+                  await updateStock((selected as any).dbId, formattedEntries);
                   await loadUserStocks();
                 }
 
                 setModalVisible(false);
                 setSelected(null);
-                setEditShares('');
-                setEditPurchasePrice('');
+                setEntries([{ shares: '', price: '' }]);
               }}
             >
               <Text style={styles.modalSaveText}>{formMode === 'add' ? 'Add Stock' : 'Save Changes'}</Text>
             </Pressable>
 
-            {/* delete button removes the selected stock from the displayed list */}
             {formMode === 'edit' && (
               <Pressable
                 style={styles.modalDelete}
@@ -300,8 +331,7 @@ export default function StockHoldings() {
                   }
                   setModalVisible(false);
                   setSelected(null);
-                  setEditShares('');
-                  setEditPurchasePrice('');
+                  setEntries([{ shares: '', price: '' }]);
                 }}
               >
                 <Text style={styles.modalDeleteText}>Delete stock</Text>
@@ -313,8 +343,7 @@ export default function StockHoldings() {
               onPress={() => {
                 setModalVisible(false);
                 setSelected(null);
-                setEditShares('');
-                setEditPurchasePrice('');
+                setEntries([{ shares: '', price: '' }]);
               }}
             >
               <Text style={styles.modalCloseText}>close</Text>

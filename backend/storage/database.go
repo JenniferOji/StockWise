@@ -20,7 +20,7 @@ func connectToDatabase() *gorm.DB {
 	// 	panic("Error loading .env file")
 	// }
 
-	_ = godotenv.Load() 
+	_ = godotenv.Load()
 
 	// first pass in the connection string then the gorm open function
 	dsn := os.Getenv("DB_CONNECTION_STRING")
@@ -45,6 +45,7 @@ func performMigrations(db *gorm.DB) {
 	db.AutoMigrate(
 		&models.Users{},
 		&models.Stock{},
+		&models.StockEntry{},
 	)
 }
 

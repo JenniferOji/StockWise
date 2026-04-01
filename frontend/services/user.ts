@@ -52,18 +52,36 @@ export const loginUser = async (email: string, password: string) => {
     }
 }
 
-export const addStock = async (userId: number, symbol: string, companyName: string, quantity: number, purchasePrice: number, sector: string) => {
+export const addStock = async (
+    userId: number,
+    symbol: string,
+    companyName: string,
+    entries: { quantity: number; purchase_price: number }[],
+    sector: string
+) => {
     try {
         const response = await axios.post(endpoints.addStock, {
             user_id: userId,
             symbol,
             company_name: companyName,
-            quantity,
-            purchase_price: purchasePrice,
-            sector
+            sector,
+            entries
         });
         if (response.data) return response.data;
         return null;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+}
+
+export const updateStock = async (stockId: number, entries: { quantity: number; purchase_price: number }[]) => {
+    try {
+        const response = await axios.put(endpoints.updateStock, {
+            stock_id: stockId,
+            entries
+        });
+        return response.data;
     } catch (error) {
         handleError(error);
         return null;
@@ -99,19 +117,6 @@ export const getUserStocks = async (userId: number) => {
         return response.data;
     } catch (error) {
         console.error('getUserStocks error:', error);
-        handleError(error);
-        return null;
-    }
-}
-export const updateStock = async (stockId: number, quantity: number, purchasePrice: number) => {
-    try {
-        const response = await axios.put(endpoints.updateStock, {
-            stock_id: stockId,
-            quantity,
-            purchase_price: purchasePrice
-        });
-        return response.data;
-    } catch (error) {
         handleError(error);
         return null;
     }
