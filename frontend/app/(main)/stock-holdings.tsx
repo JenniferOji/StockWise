@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Image, Text, StyleSheet, View, FlatList, TextInput, Pressable, Keyboard, Modal, TouchableOpacity } from 'react-native';
+import { Image, Text, StyleSheet, View, FlatList, TextInput, Pressable, Keyboard, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { STOCKS } from '../../constants/stocks';
 import { NAV_HEIGHT } from '@/constants/layout';
@@ -7,6 +7,12 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { storage } from '../../utils/storage';
 import { addStock, getUserStocks, updateStock, deleteStock } from '../../services/user';
+
+const ordinal = (n: number) => {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+};
 
 export default function StockHoldings() {
   // query holds the current search text from the user 
@@ -258,41 +264,65 @@ export default function StockHoldings() {
             <Text style={styles.modalText}>{selected ? `${selected.symbol} - ${selected.companyName}` : 'Edit'}</Text>
             
             <View style={styles.modalInputContainer}>
-              {entries.map((entry, index) => (
-                <View key={index}>
-                  <Text style={styles.modalLabel}>Number of Shares:</Text>
-                  <TextInput
-                    style={styles.modalInput}
-                    value={entry.shares}
-                    onChangeText={(text) => {
-                      const updated = [...entries];
-                      updated[index].shares = text;
-                      setEntries(updated);
-                    }}
-                    keyboardType="numeric"
-                    placeholder="Enter shares"
-                  />
-                  <Text style={styles.modalLabel}>Purchased price:</Text>
-                  <TextInput
-                    style={styles.modalInput}
-                    value={entry.price}
-                    onChangeText={(text) => {
-                      const updated = [...entries];
-                      updated[index].price = text;
-                      setEntries(updated);
-                    }}
-                    keyboardType="numeric"
-                    placeholder="Enter price"
-                  />
-                </View>
-              ))}
+              <ScrollView
+                style={styles.entriesScrollView}
+                contentContainerStyle={styles.entriesScrollContent}
+                nestedScrollEnabled
+                showsVerticalScrollIndicator
+              >
+                {entries.map((entry, index) => (
+                  <View key={index} style={styles.entryBlock}>
+                    {/* remove button */}
+                    <View style={styles.entryHeaderRow}>
+                      <Text style={styles.entryLabel}>{ordinal(index + 1)} Investment</Text>
+                      {entries.length > 1 && (
+                        <Pressable
+                          style={styles.removeBtn}
+                          onPress={() => {
+                            const updated = entries.filter((_, i) => i !== index);
+                            setEntries(updated);
+                          }}
+                        >
+                          <Text style={styles.removeBtnText}>−</Text>
+                        </Pressable>
+                      )}
+                    </View>
+
+                    <Text style={styles.modalLabel}>Number of Shares:</Text>
+                    <TextInput
+                      style={styles.modalInput}
+                      value={entry.shares}
+                      onChangeText={(text) => {
+                        const updated = [...entries];
+                        updated[index].shares = text;
+                        setEntries(updated);
+                      }}
+                      keyboardType="numeric"
+                      placeholder="Enter shares"
+                    />
+                    <Text style={styles.modalLabel}>Purchased price:</Text>
+                    <TextInput
+                      style={styles.modalInput}
+                      value={entry.price}
+                      onChangeText={(text) => {
+                        const updated = [...entries];
+                        updated[index].price = text;
+                        setEntries(updated);
+                      }}
+                      keyboardType="numeric"
+                      placeholder="Enter price"
+                    />
+                  </View>
+                ))}
+              </ScrollView>
             </View>
 
+            {/* entry button */}
             <Pressable
-              style={styles.modalSave}
+              style={styles.addEntryBtn}
               onPress={() => setEntries([...entries, { shares: '', price: '' }])}
             >
-              <Text style={styles.modalSaveText}>+ Add Entry</Text>
+              <Text style={styles.addEntryBtnText}>+</Text>
             </Pressable>
 
             <Pressable
@@ -380,9 +410,11 @@ const styles = StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
   modalCard: { width: '80%', backgroundColor: '#fff', padding: 20, borderRadius: 12, alignItems: 'center' },
   modalText: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
-  modalInputContainer: { width: '100%', marginBottom: 12 },
+  modalInputContainer: { width: '100%', marginBottom: 4 },
+  entriesScrollView: { width: '100%', maxHeight: 280 },
+  entriesScrollContent: { paddingBottom: 8 },
   modalLabel: { fontSize: 14, fontWeight: '600', marginBottom: 6, color: '#333' },
-  modalInput: { width: '100%', borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10, fontSize: 16, color: '#333' },
+  modalInput: { width: '100%', borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10, fontSize: 16, color: '#333', marginBottom: 8 },
   addList: { width: '100%', maxHeight: 240, marginBottom: 8 },
   addListItem: { paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f0f0f0', width: '100%' },
   ddSymbol: { fontSize: 14, fontWeight: '700' },
@@ -394,4 +426,11 @@ const styles = StyleSheet.create({
   modalCloseText: { color: '#fff', fontWeight: '700' },
   modalDelete: { width: '100%', marginTop: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#ef4444', alignItems: 'center' },
   modalDeleteText: { color: '#fff', fontWeight: '700' },
+  entryBlock: { width: '100%', borderTopWidth: 1, borderTopColor: '#f0f0f0', paddingTop: 10, marginBottom: 4 },
+  entryHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  entryLabel: { fontSize: 13, fontWeight: '700', color: '#0b3d91' },
+  removeBtn: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#fee2e2', justifyContent: 'center', alignItems: 'center' },
+  removeBtnText: { color: '#dc2626', fontSize: 18, fontWeight: '700', lineHeight: 22 },
+  addEntryBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#0b3d91', justifyContent: 'center', alignItems: 'center', marginTop: 4, marginBottom: 8 },
+  addEntryBtnText: { color: '#fff', fontSize: 22, fontWeight: '700', lineHeight: 26 },
 });
