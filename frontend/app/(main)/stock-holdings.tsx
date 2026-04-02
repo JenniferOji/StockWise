@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Image, Text, StyleSheet, View, FlatList, TextInput, Pressable, Keyboard, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { STOCKS } from '../../constants/stocks';
+import STOCKS from '../../constants/stocks.json';
 import { NAV_HEIGHT } from '@/constants/layout';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
@@ -52,6 +52,7 @@ export default function StockHoldings() {
           const displayedStocks = stocks.map((stock: any) => {
           const symbol = stock.symbol || stock.ticker;
           const foundStock = STOCKS.find(s => s.symbol === symbol);
+          if (!foundStock) return null;
 
           const entries = stock.entries || [];
 
@@ -178,8 +179,15 @@ export default function StockHoldings() {
         renderItem={({ item }) => {
           return (
           <View style={styles.card}>
-              <View style={styles.cardLeft}>
-              <Image source={{ uri: item.imageUrl }} style={styles.logo} resizeMode="contain" />
+            <View style={styles.cardLeft}>
+              <Image
+                source={{
+                  uri: item.imageUrl,
+                  cache: 'reload'
+                }}
+                style={{ width: 44, height: 44 }}
+                resizeMode="contain"
+              />
             </View>
             <View style={styles.cardBody}>
               <View>

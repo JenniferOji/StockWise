@@ -101,6 +101,8 @@ export default function SentimentPage() {
       key: "positive",
       title: "Positive",
       subtitle: "Positive momentum signals",
+      detail:
+        "This suggests the stock is leaning toward a bullish market mood, where recent coverage and commentary are generally optimistic.",
       color: "#00c853",
       data: groupedStocks.positive,
     },
@@ -108,6 +110,8 @@ export default function SentimentPage() {
       key: "neutral",
       title: "Neutral",
       subtitle: "Mixed sentiment",
+      detail:
+        "This means market opinion is balanced or uncertain, with no strong bullish or bearish conviction in recent sentiment.",
       color: "#ff9100",
       data: groupedStocks.neutral,
     },
@@ -115,6 +119,8 @@ export default function SentimentPage() {
       key: "negative",
       title: "Negative",
       subtitle: "Negative sentiment",
+      detail:
+        "This indicates a bearish tone, where recent sentiment and news flow lean cautious or unfavorable for the stock.",
       color: "#ff1744",
       data: groupedStocks.negative,
     },
@@ -125,6 +131,13 @@ export default function SentimentPage() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
+
+        <View style={styles.purposeBox}>
+          {/* <Text style={styles.purposeTitle}>What this page shows</Text> */}
+          <Text style={styles.purposeText}>
+            See the overall market mood for your holdings, classified by machine learning model: positive, neutral, or negative.
+          </Text>
+        </View>
 
         {/* Sentiment Gradient bar for the user to visually gather the sentiment towards their stock */}
         <View style={styles.heatmapBox}>
@@ -184,6 +197,7 @@ export default function SentimentPage() {
                   </View>
                   <Text style={styles.sectionCount}>{section.data.length}</Text>
                 </View>
+                <Text style={styles.sectionDetail}>{section.detail}</Text>
                 {section.data.map((item: any) => {
                   const sentimentData = sentiment[item.symbol];
                   return (
@@ -250,7 +264,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   purposeText: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#374151',
     lineHeight: 20,
   },
@@ -294,6 +308,7 @@ const styles = StyleSheet.create({
   sectionTextWrap: { flex: 1 },
   sectionTitle: { fontSize: 15, fontWeight: "800", color: "#1f2937" },
   sectionSubtitle: { fontSize: 12, color: "#6b7280", marginTop: 1 },
+  sectionDetail: { fontSize: 12, color: "#4b5563", marginBottom: 8, lineHeight: 18 },
   sectionCount: { fontSize: 13, fontWeight: "700", color: "#374151", backgroundColor: "#fff", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
   card: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", borderRadius: 10, padding: 12, marginBottom: 8, elevation: 2 },
   cardLeft: { width: 52, height: 52, marginRight: 12, justifyContent: "center", alignItems: "center" },

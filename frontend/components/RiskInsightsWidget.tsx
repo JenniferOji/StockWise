@@ -113,12 +113,9 @@ export default function RiskInsightsWidget() {
 
   return (
     <View style={styles.card}>
-      {/* <View style={styles.valueRow}>
-        <Text style={styles.valueLabel}>Portfolio Value</Text>
-        <Text style={styles.valueNum}>
-          ${riskData.portfolio_value.toLocaleString()}
-        </Text>
-      </View> */}
+      <View style={styles.valueRow}>
+        <Text style={styles.valueLabel}>Calculated over a one year period using historical data</Text>
+      </View>
 
       <View style={styles.metricsGrid}>
         <MetricBox

@@ -132,7 +132,7 @@ export default function News() {
       ) : filteredNews.length === 0 ? (
         <View style={{ alignItems: 'center', marginTop: 32 }}>
           <Text style={{ color: '#0b3d91', fontSize: 16, fontWeight: '600' }}>
-            No news for your stocks available
+            No daily news for your stocks available
           </Text>
         </View>
       ) : (
