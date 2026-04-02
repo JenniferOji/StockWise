@@ -37,7 +37,7 @@ export default function PerformanceMetricsWidget() {
 
   if (loading) {
     return (
-      <View style={styles.card}>
+      <View style={styles.sectionCard}>
         <ActivityIndicator size="small" />
         <Text>Loading performance metrics...</Text>
       </View>
@@ -46,7 +46,7 @@ export default function PerformanceMetricsWidget() {
 
   if (error) {
     return (
-      <View style={styles.card}>
+      <View style={styles.sectionCard}>
         <Text style={styles.error}>{error}</Text>
       </View>
     );
@@ -54,7 +54,7 @@ export default function PerformanceMetricsWidget() {
 
   if (!metrics) {
     return (
-      <View style={styles.card}>
+      <View style={styles.sectionCard}>
         <Text>No performance metrics available.</Text>
       </View>
     );
@@ -68,38 +68,40 @@ export default function PerformanceMetricsWidget() {
   const worst = metrics.worst_performer;
 
   return (
-    <View style={styles.card}>
-      <View style={styles.valueRow}>
-        <Text style={styles.valueLabel}>Portfolio Value</Text>
-        <Text style={styles.valueNum}>
-          €{metrics.portfolio_value?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-        </Text>
-      </View>
+    <View style={styles.container}>
+      <View style={styles.topCard}>
+        <View style={styles.valueRow}>
+          <Text style={styles.valueLabel}>Portfolio Value</Text>
+          <Text style={styles.valueNum}>
+            €{metrics.portfolio_value?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          </Text>
+        </View>
 
-      <View style={styles.metricsGrid}>
-        <MetricBox
-          label="Overall Return"
-          value={perf?.overall_return}
-          desc="Total return of your portfolio."
-        />
-        <MetricBox
-          label="Total Invested"
-          value={`€${metrics.total_invested?.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
-          desc="Amount you have invested."
-        />
-      </View>
+        <View style={styles.metricsGrid}>
+          <MetricBox
+            label="Overall Return"
+            value={perf?.overall_return}
+            desc="Total return of your portfolio."
+          />
+          <MetricBox
+            label="Total Invested"
+            value={`€${metrics.total_invested?.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+            desc="Amount you have invested."
+          />
+        </View>
 
-      <View style={[styles.profitBanner, { backgroundColor: isProfit ? '#dcfce7' : '#fee2e2' }]}>
-        <Text style={[styles.profitLabel, { color: isProfit ? '#16a34a' : '#dc2626' }]}>
-          {isProfit ? 'Total Profit' : 'Total Loss'}
-        </Text>
-        <Text style={[styles.profitValue, { color: isProfit ? '#16a34a' : '#dc2626' }]}>
-          {isProfit ? '+' : ''}€{profitLoss?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-        </Text>
+        <View style={[styles.profitBanner, { backgroundColor: isProfit ? '#dcfce7' : '#fee2e2' }]}>
+          <Text style={[styles.profitLabel, { color: isProfit ? '#16a34a' : '#dc2626' }]}>
+            {isProfit ? 'Total Profit' : 'Total Loss'}
+          </Text>
+          <Text style={[styles.profitValue, { color: isProfit ? '#16a34a' : '#dc2626' }]}>
+            {isProfit ? '+' : ''}€{profitLoss?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          </Text>
+        </View>
       </View>
 
       {/* best and worst stock */}
-      <View style={styles.performanceSection}>
+      <View style={styles.sectionCard}>
         <Text style={styles.sectionTitle}>Performance Highlights</Text>
         <Text style={styles.sectionSubtitle}>Based on your holdings performance</Text>
 
@@ -132,11 +134,10 @@ export default function PerformanceMetricsWidget() {
 
       {/* Holdings breakdown for each stock */}
       {metrics?.metrics?.price_comparison && (
-        <View style={styles.breakdownSection}>
+        <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Holdings Breakdown</Text>
           {Object.entries(metrics.metrics.price_comparison).map(([ticker, data]: [string, any]) => {
             const isPositive = !data.return_pct.startsWith('-');
-            const shares = metrics.metrics.returns_by_ticker?.[ticker];
             const profitLoss = (data.current_price - data.purchase_price);
 
             return (
@@ -168,7 +169,6 @@ export default function PerformanceMetricsWidget() {
           })}
         </View>
       )}
-
     </View>
   );
 }
@@ -183,36 +183,37 @@ function MetricBox({ label, value, desc }: any) {
   );
 }
 
-const styles=StyleSheet.create({
-  card:{backgroundColor:'#f8fafc',borderRadius:16,padding:20,marginVertical:12},
-  valueRow:{flexDirection:'row',justifyContent:'space-between',marginBottom:16},
-  valueLabel:{fontWeight:'600',color:'#475569'},
-  valueNum:{fontWeight:'700',color:'#0b3d91'},
-  metricsGrid:{flexDirection:'row',flexWrap:'wrap',justifyContent:'space-between'},
-  metricBox:{width:'48%',backgroundColor:'#fff',borderRadius:10,padding:12,marginBottom:12},
-  metricLabel:{fontWeight:'600',color:'#0b3d91'},
-  metricValue:{fontWeight:'700',fontSize:16},
-  desc:{fontSize:12,color:'#64748b'},
-  profitBanner:{borderRadius:10,padding:14,marginBottom:12,alignItems:'center'},
-  profitLabel:{fontWeight:'600',fontSize:13},
-  profitValue:{fontWeight:'700',fontSize:18,marginTop:2},
-  performanceSection:{marginTop:10},
-  sectionTitle:{fontSize:16,fontWeight:'700',marginBottom:10},
-  highlightRow:{flexDirection:'row',justifyContent:'space-between'},
-  highlightCard:{width:'48%',borderRadius:10,padding:12},
-  highlightLabel:{fontWeight:'700',marginBottom:4},
-  highlightValue:{fontWeight:'700',fontSize:16,color:'#111'},
-  highlightWorstValue:{color: '#dc2626', fontWeight: '500', marginTop: 4, fontSize: 12},
-  highlightBestValue:{color: '#16a34a', fontWeight: '500', marginTop: 4, fontSize: 12},
-  error:{color:'red'},
-  sectionSubtitle:{fontSize:12,color:'#64748b',marginBottom:10},
-  breakdownSection: { marginTop: 16 },
-  holdingCard: { backgroundColor: '#fff', borderRadius: 10, padding: 14, marginBottom: 10 },
-  holdingHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  holdingTicker: { fontWeight: '700', fontSize: 15, color: '#0b3d91' },
-  holdingReturn: { fontWeight: '700', fontSize: 15 },
-  holdingRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  holdingCol: { alignItems: 'center', flex: 1 },
-  holdingSubLabel: { fontSize: 11, color: '#64748b', marginBottom: 2 },
-  holdingSubValue: { fontWeight: '600', fontSize: 13 },
+const styles = StyleSheet.create({
+  container:{ flex:1, backgroundColor:'#f3f6fb', padding:12 },
+  topCard:{ backgroundColor:'#fff', borderRadius:16, padding:16, marginBottom:12, elevation:2, shadowColor:'#000', shadowOffset:{ width:0, height:2 }, shadowOpacity:0.05, shadowRadius:6 },
+  sectionCard:{ backgroundColor:'#fff', borderRadius:16, padding:16, marginBottom:12, elevation:2, shadowColor:'#000', shadowOffset:{ width:0, height:2 }, shadowOpacity:0.05, shadowRadius:6 },
+  valueRow:{ flexDirection:'row', justifyContent:'space-between', marginBottom:12 },
+  valueLabel:{ fontWeight:'600', color:'#64748b', fontSize:13 },
+  valueNum:{ fontWeight:'700', color:'#0b3d91', fontSize:18 },
+  metricsGrid:{ flexDirection:'row', justifyContent:'space-between' },
+  metricBox:{ width:'48%', backgroundColor:'#f8fafc', borderRadius:12, padding:12 },
+  metricLabel:{ fontWeight:'600', color:'#64748b', fontSize:12 },
+  metricValue:{ fontWeight:'700', fontSize:15, marginTop:2 },
+  desc:{ fontSize:11, color:'#94a3b8', marginTop:2 },
+  profitBanner:{ borderRadius:12, padding:12, marginTop:12, alignItems:'center' },
+  profitLabel:{ fontWeight:'600', fontSize:12 },
+  profitValue:{ fontWeight:'700', fontSize:18, marginTop:2 },
+  sectionTitle:{ fontSize:15, fontWeight:'700', marginBottom:8, color:'#111' },
+  sectionSubtitle:{ fontSize:12, color:'#64748b', marginBottom:10 },
+  highlightRow:{ flexDirection:'row', justifyContent:'space-between' },
+  highlightCard:{ width:'48%', borderRadius:12, padding:12 },
+  highlightLabel:{ fontWeight:'600', marginBottom:4, fontSize:12 },
+  highlightValue:{ fontWeight:'700', fontSize:15, color:'#111' },
+  highlightWorstValue:{ color:'#dc2626', fontWeight:'500', marginTop:4, fontSize:12 },
+  highlightBestValue:{ color:'#16a34a', fontWeight:'500', marginTop:4, fontSize:12 },
+  breakdownSection:{ marginTop:4 },
+  holdingCard:{ backgroundColor:'#f8fafc', borderRadius:12, padding:12, marginBottom:8 },
+  holdingHeader:{ flexDirection:'row', justifyContent:'space-between', marginBottom:8 },
+  holdingTicker:{ fontWeight:'700', fontSize:14, color:'#0b3d91' },
+  holdingReturn:{ fontWeight:'700', fontSize:13 },
+  holdingRow:{ flexDirection:'row', justifyContent:'space-between' },
+  holdingCol:{ alignItems:'center', flex:1 },
+  holdingSubLabel:{ fontSize:10, color:'#94a3b8', marginBottom:2 },
+  holdingSubValue:{ fontWeight:'600', fontSize:12 },
+  error:{ color:'red' },
 });
