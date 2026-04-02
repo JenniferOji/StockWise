@@ -6,7 +6,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { NAV_HEIGHT } from "@/constants/layout";
 import { getStockSentiment, getUserStocks } from "@/services/user";
 import { storage } from "@/utils/storage";
-import { STOCKS } from "@/constants/stocks";
+import STOCKS from '../../constants/stocks.json';
+
 
 type SentimentMap = Record<string, { label: string; score?: number }>;
 
@@ -162,16 +163,18 @@ export default function SentimentPage() {
 
           <View style={styles.summaryBreakdown}>
             <View style={styles.breakdownItem}>
-              <View style={[styles.breakdownDot, { backgroundColor: "#00c853" }]} />
-              <Text style={styles.breakdownText}>{groupedStocks.positive.length} Positive</Text>
+              <View style={[styles.breakdownDot, { backgroundColor: "#ff1744" }]} />
+              <Text style={styles.breakdownText}>{groupedStocks.negative.length} Negative</Text>
             </View>
+
             <View style={styles.breakdownItem}>
               <View style={[styles.breakdownDot, { backgroundColor: "#ff9100" }]} />
               <Text style={styles.breakdownText}>{groupedStocks.neutral.length} Neutral</Text>
             </View>
+            
             <View style={styles.breakdownItem}>
-              <View style={[styles.breakdownDot, { backgroundColor: "#ff1744" }]} />
-              <Text style={styles.breakdownText}>{groupedStocks.negative.length} Negative</Text>
+              <View style={[styles.breakdownDot, { backgroundColor: "#00c853" }]} />
+              <Text style={styles.breakdownText}>{groupedStocks.positive.length} Positive</Text>
             </View>
           </View>
         </View>

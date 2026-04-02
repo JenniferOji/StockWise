@@ -203,93 +203,24 @@ function MetricBox({ label, value, desc }: any) {
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 16,
-    padding: 20,
-    marginVertical: 12,
-  },
-
-  valueRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-
+  card: { backgroundColor: '#f8fafc', borderRadius: 16, padding: 20, marginVertical: 12 },
+  valueRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 },
   valueLabel: { fontWeight: '600', color: '#475569' },
   valueNum: { fontWeight: '700', color: '#0b3d91' },
-
-  metricsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-
-  metricBox: {
-    width: '48%',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 12,
-  },
-
+  metricsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  metricBox: { width: '48%', backgroundColor: '#fff', borderRadius: 10, padding: 12, marginBottom: 12 },
   metricLabel: { fontWeight: '600', color: '#0b3d91' },
   metricValue: { fontWeight: '700', fontSize: 16 },
   desc: { fontSize: 12, color: '#64748b' },
-
   riskCategorySection: { marginTop: 10 },
-
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-
-  sectionSubtitle: {
-    fontSize: 12,
-    color: '#64748b',
-    marginBottom: 10,
-  },
-
-  categoryCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 10,
-  },
-
-  categoryTitle: {
-    fontWeight: '700',
-    marginBottom: 6,
-  },
-
-  stockRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 6,
-  },
-
-  stockTicker: {
-    fontWeight: '600',
-  },
-
-  stockMetrics: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-
-  stockMetric: {
-    fontSize: 11,
-    color: '#334155',
-    fontWeight: '600',
-  },
-
-  emptyCategoryText: {
-    fontSize: 12,
-    color: '#64748b',
-  },
-
-  error: {
-    color: 'red',
-  },
-})
+  sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 2 },
+  sectionSubtitle: { fontSize: 12, color: '#64748b', marginBottom: 10 },
+  categoryCard: { backgroundColor: '#fff', borderRadius: 10, padding: 12, marginBottom: 10 },
+  categoryTitle: { fontWeight: '700', marginBottom: 6 },
+  stockRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
+  stockTicker: { fontWeight: '600' },
+  stockMetrics: { flexDirection: 'row', gap: 10 },
+  stockMetric: { fontSize: 11, color: '#334155', fontWeight: '600' },
+  emptyCategoryText: { fontSize: 12, color: '#64748b' },
+  error: { color: 'red' },
+});

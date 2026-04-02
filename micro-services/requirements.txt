@@ -16,7 +16,7 @@ nltk
 textblob
 vaderSentiment
 newsapi-python
-lmxl
+lxml
 # torch
 # transformers
 # huggingface_hub

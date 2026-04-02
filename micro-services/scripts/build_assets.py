@@ -11,12 +11,14 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # load the stock data from the json file to get the tickers
-with open(os.path.join(BASE_DIR, "data", "stock_data.json"), "r") as f:
+with open(os.path.join(BASE_DIR, "data", "stocks.json"), "r") as f:
     STOCK_DATA = json.load(f)
 
 RISK_FREE_RATE = 0.02
 
-tickers = list(STOCK_DATA.keys())
+# tickers = list(STOCK_DATA.keys())
+# yahoo finance uses - instead of . for tickers 
+tickers = [stock["symbol"].replace(".", "-") for stock in STOCK_DATA]
 
 # download 1 year of price data for all tickers
 prices = yf.download(tickers, period="1y", auto_adjust=True)["Close"]

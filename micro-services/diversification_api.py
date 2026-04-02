@@ -31,11 +31,13 @@ with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "rb") as
 with open(os.path.join(BASE_DIR, "models", "feature_columns.pkl"), "rb") as f:
     feature_columns = pickle.load(f)
 
-stock_data_path = os.path.join(BASE_DIR, "data", "stock_data.json")
+stock_data_path = os.path.join(BASE_DIR, "data", "stocks.json")
 with open(stock_data_path, 'r') as f:
     STOCK_DATA = json.load(f)
 
+STOCK_LOOKUP = {stock["symbol"]: stock for stock in STOCK_DATA}
 
+# company
 class StockHolding(BaseModel):
     symbol: str
     sector: Optional[str] = None
@@ -198,7 +200,11 @@ def get_diversification_suggestions(request: DiversificationRequest):
             projected = list(request.current_stocks)
 
             for symbol in combo:
-                company = STOCK_DATA.get(symbol)
+                # company = STOCK_DATA.get(symbol)
+
+                lookup_symbol = symbol.replace("-", ".")  
+                company = STOCK_LOOKUP.get(lookup_symbol)
+
                 if not company:
                     continue
 
@@ -238,14 +244,14 @@ def get_diversification_suggestions(request: DiversificationRequest):
 
         # build suggestion objects to return to the user
         for symbol in best_symbols:
-            company = STOCK_DATA.get(symbol)
+            company = STOCK_LOOKUP.get(symbol)
 
             if not company:
                 continue
 
             suggestions.append({
                 "symbol": symbol,
-                "company_name": company["name"],
+                "company_name": company["companyName"],
                 "sector": company["sector"],
                 "reason": f"Optimises portfolio volatility for your {request.user_risk_preference} risk preference",
             })
@@ -254,7 +260,7 @@ def get_diversification_suggestions(request: DiversificationRequest):
 
         # add suggested stocks to simulate the new portfolio
         for symbol in best_symbols:
-            company = STOCK_DATA.get(symbol)
+            company = STOCK_LOOKUP.get(symbol)
 
             if company:
                 projected_holdings.append(

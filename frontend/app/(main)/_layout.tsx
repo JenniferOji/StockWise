@@ -11,7 +11,6 @@ import TopNavBar from '@/components/ui/top-nav-bar';
 import DrawerContent from '@/components/ui/drawer';
 import StockHoldings from './stock-holdings';
 import News from './news';
-import PortfolioInsights from './portfolio-insights';
 import Insights from './insights';
 import SentimentPage from './sentiment';
 import Settings from './settings';
