@@ -28,13 +28,7 @@ type StockRiskCategories = {
   total: number
 }
 
-const CATEGORY_ORDER = [
-  'Very Low Risk',
-  'Low Risk',
-  'Moderate Risk',
-  'High Risk',
-  'Very High Risk',
-]
+const CATEGORY_ORDER = ['Very Low Risk','Low Risk','Moderate Risk','High Risk','Very High Risk']
 
 const CATEGORY_COLORS = {
   'Very Low Risk': '#22c55e',
@@ -49,6 +43,7 @@ export default function RiskInsightsWidget() {
   const [stockRiskData, setStockRiskData] = useState<StockRiskCategories | null>(null)
   const [riskPreference, setRiskPreference] = useState('Moderate')
   const [selectedMetric, setSelectedMetric] = useState<any>(null)
+  const [filter, setFilter] = useState('All')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -89,7 +84,7 @@ export default function RiskInsightsWidget() {
   function MetricBox({ label, value, desc, onPress }: any) {
     const color = getMetricColor(label, value)
     return (
-      <Pressable onPress={onPress} style={({ pressed }) => [styles.metricBox, pressed && { opacity: 0.85 }]}>
+      <Pressable onPress={onPress} style={({ pressed, hovered }) => [styles.metricBox, hovered && styles.metricBoxHover, pressed && { opacity: 0.85 }]}>
         <View style={styles.metricHeader}>
           <Text style={styles.metricLabel}>{label}</Text>
           <View style={styles.metricRight}>
@@ -150,10 +145,25 @@ export default function RiskInsightsWidget() {
       <View style={styles.riskCategorySection}>
         <Text style={styles.sectionTitle}>Stock Risk Categories</Text>
         <Text style={styles.sectionSubtitle}>Grouped by machine-learned risk profile.</Text>
+
+        <View style={styles.filterRow}>
+          {['All','High Volatility','Worst Drawdown','Best Returns'].map(f => (
+            <Pressable key={f} onPress={() => setFilter(f)} style={[styles.filterButton, filter === f && styles.filterButtonActive]}>
+              <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>{f}</Text>
+            </Pressable>
+          ))}
+        </View>
         
         {CATEGORY_ORDER.map((category) => {
-          const stocks = stockRiskData?.categories?.[category] || []
+          let stocks = stockRiskData?.categories?.[category] || []
+          if (filter === 'High Volatility') stocks = stocks.filter(s => s.volatility > 25)
+          if (filter === 'Worst Drawdown') stocks = stocks.filter(s => s.max_drawdown > 20)
+          if (filter === 'Best Returns') stocks = stocks.filter(s => s.annual_return > 10)
+
           const color = CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS] || '#fff';
+
+          if (!stocks.length && filter !== 'All') return null
+
           return (
             <View key={category} style={[styles.categoryCard, { borderLeftColor: color }]}>
               <Text style={[styles.categoryTitle, { color }]}>{category}</Text>
@@ -185,6 +195,7 @@ const styles = StyleSheet.create({
   valueLabel: { fontWeight: '600', color: '#64748b', fontSize: 13 },
   metricsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   metricBox: { width: '48%', backgroundColor: '#f8fafc', borderRadius: 14, padding: 14, marginBottom: 12 },
+  metricBoxHover: { transform: [{ translateY: -4 }, { scale: 1.01 }], shadowColor: '#0f172a', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.15, shadowRadius: 24, elevation: 6 },
   metricLabel: { fontWeight: '600', color: '#0f172a', fontSize: 13 },
   metricValue: { fontWeight: '800', fontSize: 18, color: '#0b3d91', marginBottom: 4 },
   desc: { fontSize: 11, color: '#64748b', lineHeight: 16 },
@@ -202,6 +213,11 @@ const styles = StyleSheet.create({
   riskCategorySection: { marginTop: 8 },
   sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 2, color: '#0f172a' },
   sectionSubtitle: { fontSize: 12, color: '#64748b', marginBottom: 10 },
+  filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 },
+  filterButton: { paddingVertical: 6, paddingHorizontal: 10, borderRadius: 20, backgroundColor: '#f1f5f9' },
+  filterButtonActive: { backgroundColor: '#dbeafe' },
+  filterText: { fontSize: 12, color: '#475569', fontWeight: '600' },
+  filterTextActive: { color: '#0b3d91' },
   categoryCard: { backgroundColor: '#f8fafc', borderRadius: 14, padding: 12, marginBottom: 10, borderLeftWidth: 4 },
   categoryTitle: { fontWeight: '700', marginBottom: 6, fontSize: 13 },
   stockRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
