@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
-import { PieChart } from 'react-native-chart-kit';
+import { View, Text, StyleSheet, Pressable, ScrollView, useWindowDimensions } from 'react-native';
+import Svg, { G, Circle } from 'react-native-svg';
 import { INSIGHTS } from '../constants/insights';
 import { getUserStocks } from '../services/user';
 import { storage } from '../utils/storage';
@@ -17,292 +17,266 @@ type BackendStock = {
 export default function StockAllocationWidget() {
 	const [stocks, setStocks] = useState<BackendStock[]>([]);
 	const [selectedSector, setSelectedSector] = useState<string | null>(null);
+	const { width } = useWindowDimensions();
+	const isLargeScreen = width > 900;
 
-	const loadUserStocks = async () => {
-		try {
+	useEffect(() => {
+		(async () => {
 			const userJson = await storage.getItem('user');
 			if (userJson) {
 				const user = JSON.parse(userJson);
-				const loadedStocks = await getUserStocks(user.ID);
-				if (loadedStocks && Array.isArray(loadedStocks)) {
-					setStocks(loadedStocks);
-				} else {
-					setStocks([]);
-				}
+				const data = await getUserStocks(user.ID);
+				setStocks(Array.isArray(data) ? data : []);
 			}
-		} catch (err) {
-			setStocks([]);
-		}
-	};
-
-	useEffect(() => {
-		loadUserStocks();
+		})();
 	}, []);
 
 	const totalShares = useMemo(() => {
 		return stocks.reduce((sum, stock) => {
-			const totalStockShares = stock.entries?.reduce(
-				(s: number, e: any) => s + (e.quantity || 0),
-				0
-			) || 0;
-			return sum + totalStockShares;
+			return sum + (stock.entries?.reduce((s, e) => s + (e.quantity || 0), 0) || 0);
 		}, 0);
 	}, [stocks]);
 
-	const sectorData = useMemo(() => {
-		return stocks.reduce((acc, stock) => {
-			if (!acc[stock.sector]) acc[stock.sector] = 0;
-
-			const totalStockShares = stock.entries?.reduce(
-				(s: number, e: any) => s + (e.quantity || 0),
-				0
-			) || 0;
-
-			acc[stock.sector] += totalStockShares;
-			return acc;
-		}, {} as Record<string, number>);
-	}, [stocks]);
-
-	const sectorAllocations = useMemo(() => {
-		return Object.entries(sectorData).map(([sector, shares]) => ({
-			sector,
-			allocation: totalShares > 0 ? (shares / totalShares) * 100 : 0
-		}));
-	}, [sectorData, totalShares]);
-
-	const total = useMemo(
-		() => sectorAllocations.reduce((s, c) => s + c.allocation, 0),
-		[sectorAllocations]
-	);
-
-	const screenWidth = Dimensions.get('window').width;
-	const isLargeScreen = screenWidth > 600;
-
-	const chartWidth = isLargeScreen ? 300 : screenWidth - 80;
-
 	const chartData = useMemo(() => {
-		return sectorAllocations.map((item) => {
-			const sectorColor =
-				INSIGHTS.find(insight => insight.sector === item.sector)?.color || '#3b82f6';
-
-			return {
-				name: item.sector,
-				population: item.allocation,
-				color: sectorColor,
-				legendFontColor: '#444',
-				legendFontSize: 12
-			};
+		const map: Record<string, number> = {};
+		stocks.forEach(stock => {
+			if (!map[stock.sector]) map[stock.sector] = 0;
+			const shares = stock.entries?.reduce((s, e) => s + (e.quantity || 0), 0) || 0;
+			map[stock.sector] += shares;
 		});
-	}, [sectorAllocations]);
 
-	const chartConfig = {
-		backgroundGradientFrom: '#ffffff',
-		backgroundGradientTo: '#ffffff',
-		color: (opacity = 1) => `rgba(59,130,246,${opacity})`,
-		labelColor: (opacity = 1) => `rgba(0,0,0,${opacity})`
-	};
+		return Object.entries(map).map(([sector, shares]) => ({
+			sector,
+			value: totalShares > 0 ? (shares / totalShares) * 100 : 0,
+			color: INSIGHTS.find(i => i.sector === sector)?.color || '#3b82f6'
+		}));
+	}, [stocks, totalShares]);
 
 	const selectedSectorData = useMemo(() => {
 		if (!selectedSector) return null;
-
 		const sectorStocks = stocks.filter(stock => stock.sector === selectedSector);
-		const allocation =
-			sectorAllocations.find(s => s.sector === selectedSector)?.allocation || 0;
-
+		const allocation = chartData.find(s => s.sector === selectedSector)?.value || 0;
 		return { stocks: sectorStocks, allocation };
-	}, [selectedSector, stocks, sectorAllocations]);
+	}, [selectedSector, stocks, chartData]);
+
+	// Fixed chart size: small and consistent on mobile, capped on large screens
+	const size = 200;
+
+	const strokeWidth = 30;
+	const radius = size / 2 - strokeWidth / 2 - 4;
+	const circumference = 2 * Math.PI * radius;
+
+	let cumulativePercent = 0;
 
 	return (
 		<ScrollView>
 			<View style={styles.container}>
-				<View style={styles.header}>
-					<Text style={styles.subtitle}>
-						{`Total allocation: ${total.toFixed(1)}%`}
-					</Text>
-				</View>
 
-				<View style={styles.chartWrap}>
-					<View
-						style={[
-							styles.chartCard,
-							isLargeScreen && styles.chartCardLarge
-						]}
-					>
-						{stocks.length > 0 && chartData.length > 0 ? (
-							<View
-								style={[
-									styles.chartContent,
-									isLargeScreen && styles.chartContentLarge
-								]}
-							>
-								<PieChart
-									data={chartData}
-									width={chartWidth}
-									height={250}
-									chartConfig={chartConfig}
-									accessor={'population'}
-									backgroundColor={'transparent'}
-									paddingLeft={'10'}
-									hasLegend={false}
-								/>
+				<Text style={styles.title}>Sector Allocation</Text>
+				<Text style={styles.subtitle}>Explore your portfolio composition</Text>
 
-								<View
-									style={[
-										styles.legendContainer,
-										isLargeScreen && styles.legendContainerLarge
+				<View style={styles.card}>
+					<View style={styles.chartRow}>
+
+						{/* Donut Chart */}
+						<View style={styles.chartArea}>
+							<Svg width={size} height={size}>
+								<G rotation="-90" origin={`${size / 2}, ${size / 2}`}>
+									{chartData.map((item, i) => {
+										const percent = item.value / 100;
+										const dash = percent * circumference;
+										const gap = circumference;
+										const offset = cumulativePercent * circumference;
+										cumulativePercent += percent;
+
+										return (
+											<Circle
+												key={i}
+												cx={size / 2}
+												cy={size / 2}
+												r={radius}
+												stroke={item.color}
+												strokeWidth={strokeWidth}
+												fill="none"
+												strokeDasharray={`${dash} ${gap}`}
+												strokeDashoffset={-offset}
+											/>
+										);
+									})}
+								</G>
+							</Svg>
+						</View>
+
+						{/* Legend */}
+						<View style={styles.legend}>
+							{chartData.map((item, i) => (
+								<Pressable
+									key={i}
+									onPress={() =>
+										setSelectedSector(selectedSector === item.sector ? null : item.sector)
+									}
+									style={({ hovered }: { hovered?: boolean }) => [
+										styles.legendItem,
+										selectedSector === item.sector && styles.legendItemSelected,
+										hovered && { opacity: 0.8 }
 									]}
 								>
-									{chartData.map((item, index) => (
-										<TouchableOpacity
-											key={index}
-											style={[
-												styles.legendItem,
-												selectedSector === item.name && styles.legendItemSelected
-											]}
-											onPress={() =>
-												setSelectedSector(
-													selectedSector === item.name ? null : item.name
-												)
-											}
-										>
-											<View
-												style={[
-													styles.legendColor,
-													{ backgroundColor: item.color }
-												]}
-											/>
-											<Text style={styles.legendText}>
-												{item.name} ({item.population.toFixed(1)}%)
-											</Text>
-										</TouchableOpacity>
-									))}
-								</View>
-							</View>
-						) : (
-							<Text style={{ padding: 20, color: '#666' }}>
-								No stock data available
-							</Text>
-						)}
+									<View style={[styles.dot, { backgroundColor: item.color }]} />
+									<Text style={styles.legendText}>{item.sector}</Text>
+									<Text style={styles.legendPercent}>{item.value.toFixed(1)}%</Text>
+								</Pressable>
+							))}
+						</View>
+
 					</View>
 				</View>
 
+				{/* Sector Detail Panel */}
 				{selectedSector && selectedSectorData && (
-					<View style={styles.detailsContainer}>
+					<View style={styles.detailsCard}>
 						<View style={styles.detailsHeader}>
 							<Text style={styles.detailsTitle}>{selectedSector}</Text>
-							<TouchableOpacity onPress={() => setSelectedSector(null)}>
-								<Text style={styles.closeButton}> X </Text>
-							</TouchableOpacity>
+							<Pressable onPress={() => setSelectedSector(null)}>
+								<Text style={styles.closeText}>Close</Text>
+							</Pressable>
 						</View>
 
-						<Text style={styles.detailsAllocation}>
+						<Text style={styles.detailsSubtitle}>
 							{selectedSectorData.allocation.toFixed(1)}% of portfolio
 						</Text>
 
-						<ScrollView style={styles.stocksList}>
-							{selectedSectorData.stocks.map((stock) => (
-								<View key={stock.ID} style={styles.stockItem}>
-									<View style={styles.stockInfo}>
-										<Text style={styles.stockSymbol}>{stock.symbol}</Text>
-										<Text style={styles.stockCompany}>
-											{stock.company_name}
-										</Text>
-									</View>
-									<Text style={styles.stockQuantity}>
-										{stock.entries?.reduce(
-											(s, e) => s + (e.quantity || 0),
-											0
-										)} shares
-									</Text>
+						{selectedSectorData.stocks.map((stock) => (
+							<View key={stock.ID} style={styles.stockRow}>
+								<View>
+									<Text style={styles.stockSymbol}>{stock.symbol}</Text>
+									<Text style={styles.stockCompany}>{stock.company_name}</Text>
 								</View>
-							))}
-						</ScrollView>
+								<Text style={styles.stockShares}>
+									{stock.entries?.reduce((s, e) => s + (e.quantity || 0), 0)} shares
+								</Text>
+							</View>
+						))}
 					</View>
 				)}
+
 			</View>
 		</ScrollView>
 	);
 }
 
 const styles = StyleSheet.create({
-	container: { paddingVertical: 12 },
-	header: { paddingHorizontal: 16, paddingBottom: 8 },
-	subtitle: { fontSize: 13, color: '#666', marginTop: 4 },
-	chartWrap: { alignItems: 'center', paddingVertical: 12 },
-	chartCard: {
+	container: {
+		paddingVertical: 8,
+	},
+	title: {
+		fontSize: 16,
+		fontWeight: '700',
+		color: '#0f172a',
+		marginBottom: 2,
+	},
+	subtitle: {
+		fontSize: 12,
+		color: '#64748b',
+		marginBottom: 10,
+	},
+	card: {
 		backgroundColor: '#fff',
 		borderRadius: 16,
 		padding: 16,
-		width: '90%',
-		elevation: 4,
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.08,
-		shadowRadius: 8
+		borderWidth: 1,
+		borderColor: '#e7edf5',
 	},
-	chartCardLarge: {
-		width: 600
-	},
-	chartContent: {
-		alignItems: 'center'
-	},
-	chartContentLarge: {
-		flexDirection: 'row',
+	chartRow: {
+		flexDirection: 'column',
 		alignItems: 'center',
-		justifyContent: 'space-between'
+		gap: 16,
 	},
-	legendContainer: {
-		marginTop: 16,
-		width: '100%'
+	chartArea: {
+		alignItems: 'center',
+		justifyContent: 'center',
 	},
-	legendContainerLarge: {
-		marginTop: 0,
-		marginLeft: 20,
-		flex: 1
+	legend: {
+		width: '100%',
 	},
 	legendItem: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		marginBottom: 10
+		justifyContent: 'space-between',
+		paddingVertical: 5,
+		paddingHorizontal: 6,
+		borderRadius: 8,
 	},
 	legendItemSelected: {
-		backgroundColor: '#e0f2fe',
-		borderRadius: 6,
-		padding: 6
+		backgroundColor: '#eff6ff',
 	},
-	legendColor: {
-		width: 12,
-		height: 12,
-		borderRadius: 3,
-		marginRight: 8
+	dot: {
+		width: 10,
+		height: 10,
+		borderRadius: 5,
+		marginRight: 8,
+		flexShrink: 0,
 	},
 	legendText: {
 		fontSize: 13,
-		color: '#444'
+		fontWeight: '600',
+		color: '#334155',
+		flex: 1,
 	},
-	detailsContainer: {
-		marginHorizontal: 16,
-		marginTop: 12,
-		backgroundColor: '#fff',
-		borderRadius: 12,
-		padding: 16
+	legendPercent: {
+		fontWeight: '400',
+		color: '#64748b',
+		textAlign: 'right',
+	},
+	detailsCard: {
+		marginTop: 10,
+		backgroundColor: '#f8fafc',
+		borderRadius: 14,
+		padding: 14,
+		borderWidth: 1,
+		borderColor: '#e7edf5',
 	},
 	detailsHeader: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
-		marginBottom: 8
+		alignItems: 'center',
+		marginBottom: 4,
 	},
-	detailsTitle: { fontSize: 18, fontWeight: '700' },
-	closeButton: { fontSize: 20 },
-	detailsAllocation: { marginBottom: 10 },
-	stocksList: { maxHeight: 200 },
-	stockItem: {
+	detailsTitle: {
+		fontSize: 15,
+		fontWeight: '700',
+		color: '#0f172a',
+	},
+	closeText: {
+		color: '#2563eb',
+		fontWeight: '600',
+		fontSize: 13,
+	},
+	detailsSubtitle: {
+		fontSize: 12,
+		color: '#64748b',
+		marginBottom: 10,
+	},
+	stockRow: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
-		paddingVertical: 10
+		alignItems: 'center',
+		paddingVertical: 8,
+		borderBottomWidth: 1,
+		borderBottomColor: '#eef2f7',
 	},
-	stockInfo: { flex: 1 },
-	stockSymbol: { fontWeight: '600' },
-	stockCompany: { fontSize: 12, color: '#666' },
-	stockQuantity: { fontSize: 13 }
+	stockSymbol: {
+		fontWeight: '700',
+		color: '#0f172a',
+		fontSize: 13,
+	},
+	stockCompany: {
+		fontSize: 11,
+		color: '#64748b',
+		marginTop: 1,
+	},
+	stockShares: {
+		fontSize: 12,
+		fontWeight: '600',
+		color: '#475569',
+	},
 });
