@@ -29,8 +29,8 @@ class PerformanceMetricsResponse(BaseModel):
 	portfolio_value: float
 	total_invested: float
 	profit_loss: float
-	best_performer: str
-	worst_performer: str
+	best_performer: dict
+	worst_performer: dict
 
 @router.get("/")
 def root():
@@ -49,6 +49,7 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 	total_value = 0
 	returns = {}
 	price_returns = {}
+	profit_map = {}
 
 	for ticker, holding in portfolio.items():
 		features = feature_map.get(ticker)
@@ -57,29 +58,49 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 
 		shares = holding['shares']
 		purchase_price = holding['purchase_price']
-
 		current_price = features.get("Close", purchase_price)
 
-		value = current_price * shares
-		total_value += value
+		invested_value = purchase_price * shares
+		current_value = current_price * shares
 
-		pct_return = (current_price - purchase_price) / purchase_price if purchase_price else 0
+		total_value += current_value
+
+		pct_return = (
+			(current_value - invested_value) / invested_value
+			if invested_value else 0
+		)
+
+		profit = current_value - invested_value
 
 		returns[ticker] = pct_return
+		profit_map[ticker] = profit
+
 		price_returns[ticker] = {
 			"purchase_price": purchase_price,
 			"current_price": current_price,
 			"return_pct": pct_return
 		}
 
-		portfolio_value[ticker] = value
+		portfolio_value[ticker] = current_value
 
 	if not returns:
 		raise HTTPException(status_code=404, detail="No valid tickers in data")
 			
 	# calculating best and worst performer
-	best_performer = max(returns, key=returns.get)
-	worst_performer = min(returns, key=returns.get)
+	best_performer_symbol = max(profit_map, key=profit_map.get)
+	worst_performer_symbol = min(profit_map, key=profit_map.get)
+
+	best_performer = {
+		"symbol": best_performer_symbol,
+		"profit": round(profit_map[best_performer_symbol], 2),
+		"return_pct": round(returns[best_performer_symbol] * 100, 2)
+	}
+
+	worst_performer = {
+		"symbol": worst_performer_symbol,
+		"profit": round(profit_map[worst_performer_symbol], 2),
+		"return_pct": round(returns[worst_performer_symbol] * 100, 2)
+	}
 
 	# calculating the overall portfolio return 
 	total_invested = sum(holding['shares'] * holding['purchase_price'] for holding in portfolio.values())

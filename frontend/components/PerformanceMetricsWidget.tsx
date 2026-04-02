@@ -64,6 +64,9 @@ export default function PerformanceMetricsWidget() {
   const profitLoss = metrics.profit_loss;
   const isProfit = profitLoss >= 0;
 
+  const best = metrics.best_performer;
+  const worst = metrics.worst_performer;
+
   return (
     <View style={styles.card}>
       <View style={styles.valueRow}>
@@ -98,7 +101,7 @@ export default function PerformanceMetricsWidget() {
       {/* best and worst stock */}
       <View style={styles.performanceSection}>
         <Text style={styles.sectionTitle}>Performance Highlights</Text>
-        <Text style={styles.sectionSubtitle}>Based on annualised return</Text>
+        <Text style={styles.sectionSubtitle}>Based on your holdings performance</Text>
 
         <View style={styles.highlightRow}>
           <View style={[styles.highlightCard, { backgroundColor: '#dcfce7' }]}>
@@ -106,7 +109,10 @@ export default function PerformanceMetricsWidget() {
               Best Performer
             </Text>
             <Text style={styles.highlightValue}>
-              {metrics.best_performer}
+              {best?.symbol}
+            </Text>
+            <Text style={styles.highlightBestValue}>
+              {best?.profit >= 0 ? '+' : '-'}€{Math.abs(best?.profit || 0).toFixed(2)} ({best?.return_pct?.toFixed(2)}%)
             </Text>
           </View>
 
@@ -115,7 +121,10 @@ export default function PerformanceMetricsWidget() {
               Worst Performer
             </Text>
             <Text style={styles.highlightValue}>
-              {metrics.worst_performer}
+              {worst?.symbol}
+            </Text>
+            <Text style={styles.highlightWorstValue}>
+              {worst?.profit >= 0 ? '+' : '-'}€{Math.abs(worst?.profit || 0).toFixed(2)} ({worst?.return_pct?.toFixed(2)}%)
             </Text>
           </View>
         </View>
@@ -127,7 +136,7 @@ export default function PerformanceMetricsWidget() {
           <Text style={styles.sectionTitle}>Holdings Breakdown</Text>
           {Object.entries(metrics.metrics.price_comparison).map(([ticker, data]: [string, any]) => {
             const isPositive = !data.return_pct.startsWith('-');
-            const shares = metrics.metrics.returns_by_ticker?.[ticker]; // for display
+            const shares = metrics.metrics.returns_by_ticker?.[ticker];
             const profitLoss = (data.current_price - data.purchase_price);
 
             return (
@@ -193,6 +202,8 @@ const styles=StyleSheet.create({
   highlightCard:{width:'48%',borderRadius:10,padding:12},
   highlightLabel:{fontWeight:'700',marginBottom:4},
   highlightValue:{fontWeight:'700',fontSize:16,color:'#111'},
+  highlightWorstValue:{color: '#dc2626', fontWeight: '500', marginTop: 4, fontSize: 12},
+  highlightBestValue:{color: '#16a34a', fontWeight: '500', marginTop: 4, fontSize: 12},
   error:{color:'red'},
   sectionSubtitle:{fontSize:12,color:'#64748b',marginBottom:10},
   breakdownSection: { marginTop: 16 },

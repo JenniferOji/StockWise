@@ -26,6 +26,12 @@ type PriceComparison struct {
     ReturnPct     string  `json:"return_pct"`
 }
 
+type Performer struct {
+    Symbol    string  `json:"symbol"`
+    Profit    float64 `json:"profit"`
+    ReturnPct float64 `json:"return_pct"`
+}
+
 type PerformanceMetricsResponse struct {
     Success        bool    `json:"success"`
     Metrics        struct {
@@ -33,11 +39,11 @@ type PerformanceMetricsResponse struct {
         ReturnsByTicker  map[string]string          `json:"returns_by_ticker"`
         PriceComparison  map[string]PriceComparison `json:"price_comparison"`
     } `json:"metrics"`
-    PortfolioValue float64 `json:"portfolio_value"`
-    TotalInvested  float64 `json:"total_invested"`
-    ProfitLoss     float64 `json:"profit_loss"`
-    BestPerformer  string  `json:"best_performer"`
-    WorstPerformer string  `json:"worst_performer"`
+    PortfolioValue float64   `json:"portfolio_value"`
+    TotalInvested  float64   `json:"total_invested"`
+    ProfitLoss     float64   `json:"profit_loss"`
+    BestPerformer  Performer `json:"best_performer"`
+    WorstPerformer Performer `json:"worst_performer"`
 }
 
 // calls the FastAPI microservice for performance metrics
