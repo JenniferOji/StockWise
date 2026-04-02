@@ -78,11 +78,17 @@ function Accordian({ title, subtitle, icon, expanded, onToggle, isLargeScreen }:
                 </View>
             </TouchableOpacity>
 
-            {expanded && <View style={styles.parentHr} />}
-            {expanded && <View style={styles.content}>{title === 'Risk Metrics' && <RiskInsightsWidget />}</View>}
-            {expanded && <View style={styles.content}>{title == 'Stock Allocation' && <StockAllocationWidget />}</View>}
-            {expanded && <View style={styles.content}>{title == 'Diversification Suggestions' && <DiversificationWidget />}</View>}
-            {expanded && <View style={styles.content}>{title == 'Performance Analysis' && <PerformanceMetricsWidget />}</View>}
+            {expanded && (
+                <View style={styles.parentHr} />
+            )}
+            {expanded && (
+                <View style={styles.content}>
+                    {title === 'Performance Analysis' && <PerformanceMetricsWidget />}
+                    {title === 'Risk Metrics' && <RiskInsightsWidget />}
+                    {title === 'Stock Allocation' && <StockAllocationWidget />}
+                    {title === 'Diversification Suggestions' && <DiversificationWidget />}
+                </View>
+            )}
         </View>
     );
 }
