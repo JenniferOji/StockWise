@@ -178,43 +178,43 @@ export default function StockHoldings() {
         style={styles.listWrapper}
         renderItem={({ item }) => {
           return (
-          <View style={styles.card}>
-            <View style={styles.cardLeft}>
-              <Image
-                source={{
-                  uri: item.imageUrl,
-                  cache: 'reload'
-                }}
-                style={{ width: 44, height: 44 }}
-                resizeMode="contain"
-              />
-            </View>
-            <View style={styles.cardBody}>
-              <View>
-                <Text style={styles.symbol}>{item.symbol}</Text>
+            <View style={styles.card}>
+              <View style={styles.cardLeft}>
+                <Image
+                  source={{
+                    uri: item.imageUrl,
+                    cache: 'reload'
+                  }}
+                  style={{ width: 44, height: 44 }}
+                  resizeMode="contain"
+                />
               </View>
-              <Text style={styles.name}>{item.companyName}</Text>
+              <View style={styles.cardBody}>
+                <View>
+                  <Text style={styles.symbol}>{item.symbol}</Text>
+                </View>
+                <Text style={styles.name}>{item.companyName}</Text>
+              </View>
+              <View style={styles.cardRight}>
+                <Text style={styles.shares}>{item.shares} shares</Text>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => {
+                    setFormMode('edit');
+                    setSelected(item);
+                    const mapped = (item as any).entries?.map((e: any) => ({
+                      shares: String(e.quantity),
+                      price: String(e.purchase_price)
+                    })) || [{ shares: '', price: '' }];
+                    setEntries(mapped);
+                    setModalVisible(true);
+                  }}
+                >
+                  <Text style={styles.editText}>edit</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <View style={styles.cardRight}>
-              <Text style={styles.shares}>{item.shares} shares</Text>
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={() => {
-                  setFormMode('edit');
-                  setSelected(item);
-                  const mapped = (item as any).entries?.map((e: any) => ({
-                    shares: String(e.quantity),
-                    price: String(e.purchase_price)
-                  })) || [{ shares: '', price: '' }];
-                  setEntries(mapped);
-                  setModalVisible(true);
-                }}
-              >
-                <Text style={styles.editText}>edit</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        );
+          );
         }}
       />
 
@@ -394,51 +394,51 @@ export default function StockHoldings() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f3f6fb', paddingTop: NAV_HEIGHT },
+  container: { flex: 1, backgroundColor: '#f3f6fb', paddingTop: NAV_HEIGHT, paddingBottom: NAV_HEIGHT},
   listWrapper: { flex: 1 },
-  list: { paddingVertical: 12, paddingHorizontal: 16, paddingBottom: 24 },
-  card: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 3 },
-  cardLeft: { width: 52, height: 52, marginRight: 12, justifyContent: 'center', alignItems: 'center' },
+  list:{ paddingVertical: 8, paddingHorizontal: 14, paddingBottom: 24 },
+  card: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius:12, padding:14, marginBottom:6, shadowColor:'#000', shadowOffset:{ width:0, height:6 }, shadowOpacity:0.06, shadowRadius:10, elevation:3 },
+  cardLeft: { width: 52, height: 52, marginRight: 12, justifyContent: 'center', alignItems:'center' },
   logo: { width: 44, height: 44, borderRadius: 8 },
-  cardBody: { flex: 1 },
-  symbol: { fontSize: 16, fontWeight: '700', color: '#0b3d91' },
+  cardBody:{ flex: 1 },
+  symbol:{ fontSize: 16, fontWeight: '700', color: '#0b3d91' },
   name: { fontSize: 13, color: '#6b7280', marginTop: 2 },
   cardRight: { marginLeft: 8, alignItems: 'flex-end' },
   shares: { fontSize: 14, fontWeight: '600', color: '#111' },
-  searchContainer: { paddingHorizontal: 16, paddingTop: 12 , color: '#111' },
+  searchContainer: { paddingHorizontal: 16, paddingTop:12, paddingBottom: 5,color:'#111' },
   searchInputContainer: { flex: 1, position: 'relative' },
-  searchInput: { width: '100%', backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, elevation: 1, color: '#111' },
-  searchRow: { position: 'relative', flexDirection: 'row', alignItems: 'center' },
+  searchInput: { width:'100%', backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, elevation: 1, color: '#111' },
+  searchRow: { position:'relative', flexDirection: 'row', alignItems: 'center' },
   searchInputWithIcon: { paddingRight: 44 },
-  searchIcon: { position: 'absolute', right: 12, top: 0, bottom: 0, justifyContent: 'center', alignItems: 'center', padding: 8 },
-  addButton: { marginLeft: 8, backgroundColor: '#0b3d91', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, justifyContent: 'center', alignItems: 'center' },
-  addButtonText: { color: '#fff', fontWeight: '700', fontSize: 14 },
-  editButton: { marginTop: 8, backgroundColor: '#eef2ff', paddingHorizontal: 8, paddingVertical: 6, borderRadius: 8 },
-  editText: { color: '#0b3d91', fontWeight: '700', fontSize: 12 },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
-  modalCard: { width: '80%', backgroundColor: '#fff', padding: 20, borderRadius: 12, alignItems: 'center' },
-  modalText: { fontSize: 18, fontWeight: '700', marginBottom: 12 },
-  modalInputContainer: { width: '100%', marginBottom: 4 },
-  entriesScrollView: { width: '100%', maxHeight: 280 },
-  entriesScrollContent: { paddingBottom: 8 },
-  modalLabel: { fontSize: 14, fontWeight: '600', marginBottom: 6, color: '#333' },
-  modalInput: { width: '100%', borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10, fontSize: 16, color: '#333', marginBottom: 8 },
-  addList: { width: '100%', maxHeight: 240, marginBottom: 8 },
-  addListItem: { paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#f0f0f0', width: '100%' },
-  ddSymbol: { fontSize: 14, fontWeight: '700' },
-  ddName: { fontSize: 12, color: '#6b7280' },
-  modalSave: { width: '100%', marginTop: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#10b981', alignItems: 'center' },
-  modalSaveDisabled: { backgroundColor: '#9ca3af' },
-  modalSaveText: { color: '#fff', fontWeight: '700' },
-  modalClose: { width: '100%', marginTop: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#0b3d91', alignItems: 'center' },
-  modalCloseText: { color: '#fff', fontWeight: '700' },
-  modalDelete: { width: '100%', marginTop: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 8, backgroundColor: '#ef4444', alignItems: 'center' },
-  modalDeleteText: { color: '#fff', fontWeight: '700' },
-  entryBlock: { width: '100%', borderTopWidth: 1, borderTopColor: '#f0f0f0', paddingTop: 10, marginBottom: 4 },
-  entryHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  entryLabel: { fontSize: 13, fontWeight: '700', color: '#0b3d91' },
-  removeBtn: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#fee2e2', justifyContent: 'center', alignItems: 'center' },
-  removeBtnText: { color: '#dc2626', fontSize: 18, fontWeight: '700', lineHeight: 22 },
-  addEntryBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#0b3d91', justifyContent: 'center', alignItems: 'center', marginTop: 4, marginBottom: 8 },
-  addEntryBtnText: { color: '#fff', fontSize: 22, fontWeight: '700', lineHeight: 26 },
+  searchIcon:{ position:'absolute', right:12, top:0, bottom:0, justifyContent:'center', alignItems:'center', padding:8 },
+  addButton:{ marginLeft:8, backgroundColor:'#0b3d91', borderRadius:10, paddingHorizontal:14, paddingVertical:10, justifyContent:'center', alignItems:'center' },
+  addButtonText:{ color:'#fff', fontWeight:'700', fontSize:14 },
+  editButton:{ marginTop:8, backgroundColor:'#eef2ff', paddingHorizontal:8, paddingVertical:6, borderRadius:8 },
+  editText:{ color:'#0b3d91', fontWeight:'700', fontSize:12 },
+  modalOverlay:{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' },
+  modalCard:{ width:'80%', backgroundColor:'#fff', padding:20, borderRadius:12, alignItems:'center' },
+  modalText:{ fontSize:18, fontWeight:'700', marginBottom:12 },
+  modalInputContainer:{ width:'100%', marginBottom:4 },
+  entriesScrollView:{ width:'100%', maxHeight:280 },
+  entriesScrollContent:{ paddingBottom:8 },
+  modalLabel:{ fontSize:14, fontWeight:'600', marginBottom:6, color:'#333' },
+  modalInput:{ width:'100%', borderWidth:1, borderColor:'#ddd', borderRadius:8, padding:10, fontSize:16, color:'#333', marginBottom:8 },
+  addList:{ width:'100%', maxHeight:240, marginBottom:8 },
+  addListItem:{ paddingHorizontal:12, paddingVertical:10, borderBottomWidth:1, borderBottomColor:'#f0f0f0', width:'100%' },
+  ddSymbol:{ fontSize:14, fontWeight:'700' },
+  ddName:{ fontSize:12, color:'#6b7280' },
+  modalSave:{ width:'100%', marginTop:8, paddingVertical:10, paddingHorizontal:14, borderRadius:8, backgroundColor:'#10b981', alignItems:'center' },
+  modalSaveDisabled:{ backgroundColor:'#9ca3af' },
+  modalSaveText:{ color:'#fff', fontWeight:'700' },
+  modalClose:{ width:'100%', marginTop:8, paddingVertical:10, paddingHorizontal:14, borderRadius:8, backgroundColor:'#0b3d91', alignItems:'center' },
+  modalCloseText:{ color:'#fff', fontWeight:'700' },
+  modalDelete:{ width:'100%', marginTop:8, paddingVertical:10, paddingHorizontal:14, borderRadius:8, backgroundColor:'#ef4444', alignItems:'center' },
+  modalDeleteText:{ color:'#fff', fontWeight:'700' },
+  entryBlock:{ width:'100%', borderTopWidth:1, borderTopColor:'#f0f0f0', paddingTop:10, marginBottom:4 },
+  entryHeaderRow:{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:8 },
+  entryLabel:{ fontSize:13, fontWeight:'700', color:'#0b3d91' },
+  removeBtn:{ width:26, height:26, borderRadius:13, backgroundColor:'#fee2e2', justifyContent:'center', alignItems:'center' },
+  removeBtnText:{ color:'#dc2626', fontSize:18, fontWeight:'700', lineHeight:22 },
+  addEntryBtn:{ width:36, height:36, borderRadius:18, backgroundColor:'#0b3d91', justifyContent:'center', alignItems:'center', marginTop:4, marginBottom:8 },
+  addEntryBtnText:{ color:'#fff', fontSize:22, fontWeight:'700', lineHeight:26 },
 });

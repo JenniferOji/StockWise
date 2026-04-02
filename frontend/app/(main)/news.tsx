@@ -164,9 +164,9 @@ export default function News() {
                 
                 <View style={styles.topRow}>
                   <View style={styles.publisherRow}>
-                    <Text style={styles.source}>{item.name}</Text>
+                    <Text style={styles.stockName}>{item.name}</Text>
                     <Text style={styles.dot}>•</Text>
-                    <Text style={styles.stockName}>{item.source}</Text>
+                    <Text style={styles.source}>{item.source}</Text>
                   </View>
 
                   <View style={[
@@ -205,9 +205,9 @@ const styles = StyleSheet.create({
   card: { backgroundColor: '#ffffff', borderRadius: 18, padding: 16, marginBottom: 12, borderWidth: 1, borderColor: '#e7edf5' },
   topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   publisherRow: { flexDirection: 'row', alignItems: 'center' },
-  source: { fontSize: 14, fontWeight: '700', color: '#0f172a' },
+  stockName: { fontSize: 14, fontWeight: '700', color: '#0f172a' },
   dot: { marginHorizontal: 6, color: '#94a3b8' },
-  stockName: { fontSize: 13, color: '#64748b' },
+  source: { fontSize: 13, color: '#64748b' },
   headline: { fontSize: 13, fontWeight: '500', color: '#181e2b', marginTop: 8, lineHeight: 20 },
   sentimentBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   error: { color: 'red' },
