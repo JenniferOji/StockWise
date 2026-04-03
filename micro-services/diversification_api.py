@@ -288,3 +288,95 @@ def get_diversification_suggestions(request: DiversificationRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/api/random-suggestions")
+def get_random_suggestions(request: DiversificationRequest):
+    try:
+        current_stock_symbols = [stock.symbol for stock in request.current_stocks]
+
+        risk_levels = [
+            "Very Low Risk",
+            "Low Risk",
+            "Moderate Risk",
+            "High Risk",
+            "Very High Risk",
+        ]
+
+        if request.user_risk_preference not in risk_levels:
+            raise HTTPException(status_code=400, detail="Invalid risk preference")
+
+        user_index = risk_levels.index(request.user_risk_preference)
+
+        df_runtime = df_features.copy()
+
+        df_runtime = df_runtime.dropna(subset=["Log_Variances", "Volatility", "VaR_95"])
+
+        df_runtime["Cluster_labels"] = [
+            predict_cluster({
+                "Log_Variances": row["Log_Variances"],
+                "Volatility": row["Volatility"],
+                "VaR_95": row["VaR_95"],
+            })
+            for _, row in df_runtime.iterrows()
+        ]
+
+        target_clusters = []
+
+        # determine which clusters match the user's risk preference
+        for cluster_idx, risk_label in cluster_risk.items():
+            cluster_index = risk_levels.index(risk_label)
+
+            # allowing stock suggestions within a +/- 1 risk band
+            if abs(cluster_index - user_index) <= 1:
+                target_clusters.append(cluster_idx)
+
+        # only considers stocks the user doesnt currently hold 
+        available_stocks = df_runtime[
+            ~df_runtime['ticker'].isin(current_stock_symbols)
+        ].copy()
+
+        # keep only stocks belonging to the selected clusters
+        suggested_stocks = available_stocks[
+            available_stocks['Cluster_labels'].isin(target_clusters)
+        ]
+
+        if len(suggested_stocks) == 0:
+            return {
+                "success": False,
+                "message": "No stocks match your risk preference",
+                "suggestions": [],
+                "risk_preference": request.user_risk_preference,
+            }
+
+        # sort candidate pool based on user risk preference
+        if request.user_risk_preference in ["High Risk", "Very High Risk"]:
+            candidate_pool = suggested_stocks.sort_values(by="Volatility", ascending=False).head(5)
+        else:
+            candidate_pool = suggested_stocks.sort_values(by="Volatility", ascending=True).head(5)
+
+        suggestions = []
+
+        for _, row in candidate_pool.iterrows():
+            symbol = row["ticker"]
+
+            lookup_symbol = symbol.replace("-", ".")
+            company = STOCK_LOOKUP.get(lookup_symbol)
+
+            if not company:
+                continue
+
+            suggestions.append({
+                "symbol": symbol,
+                "company_name": company["companyName"],
+                "sector": company["sector"],
+                "reason": f"Matches your {request.user_risk_preference} risk preference",
+            })
+
+        return {
+            "success": True,
+            "risk_preference": request.user_risk_preference,
+            "suggestions": suggestions,
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

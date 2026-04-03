@@ -6,8 +6,8 @@ import { NAV_HEIGHT } from '@/constants/layout';
 
 import StockAllocationWidget from '@/components/StockAllocationWidget';
 import RiskInsightsWidget from '@/components/RiskInsightsWidget';
-import DiversificationWidget from '@/components/DiversificationWidget';
 import PerformanceMetricsWidget from '@/components/PerformanceMetricsWidget';
+import DiversificationWidget from '@/components/DiversificationWidget';
 
 // accordion tutorial i used: https://sanjanahumanintech.medium.com/accordion-in-react-native-95586a738aee
 
