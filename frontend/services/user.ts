@@ -320,3 +320,15 @@ export const getPerformanceMetrics = async (userId: number, days: number = 365) 
         return null;
     }
 };
+
+export const checkStockRisk = async (symbol: string) => {
+    try {
+        const response = await axios.post(endpoints.getStockRisk, {
+            symbol,
+        });
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+};

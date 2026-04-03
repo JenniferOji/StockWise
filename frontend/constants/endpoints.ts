@@ -27,5 +27,6 @@ export const endpoints = {
   getRandomSuggestions: userEndpoint + "/random-suggestions",
   getStockNews: userEndpoint + "/stock-news",
   getStockSentiment: userEndpoint + "/stock-sentiment",
-  getPerformanceMetrics: servicesEndpoint + "/performance-metrics"
+  getPerformanceMetrics: servicesEndpoint + "/performance-metrics",
+  getStockRisk: servicesEndpoint + "/check-stock-risk",
 };

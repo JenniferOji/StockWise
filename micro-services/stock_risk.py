@@ -21,14 +21,17 @@ with open(SCALER_PATH, "rb") as f:
 with open(GMM_PATH, "rb") as f:
     gmm = pickle.load(f)
 
-# the cluster risk mapping is needed to assign the risk category to the stocks based on the predicted cluster label from the gmm model
 CLUSTER_RISK_PATH = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
 with open(CLUSTER_RISK_PATH, "rb") as f:
     CLUSTER_CATEGORY = pickle.load(f)
 
 
 def predict_cluster(row_dict: dict[str, float]) -> int:
-    features = np.array([[row_dict["Log_Variances"], row_dict["Volatility"], row_dict["VaR_95"]]])
+    features = np.array([[
+        row_dict["Log_Variances"],
+        row_dict["Volatility"],
+        row_dict["VaR_95"]
+    ]])
     scaled_features = scaler.transform(features)
     return int(gmm.predict(scaled_features)[0])
 
@@ -45,19 +48,21 @@ def calculate_dynamic_features(symbol: str):
     if len(close_prices) < 30:
         raise ValueError("Not enough price history to calculate risk metrics")
 
+    # IMPORTANT: must match training pipeline exactly
     simple_returns = close_prices.pct_change().dropna()
-    log_returns = np.log(close_prices / close_prices.shift(1)).dropna()
 
-    if len(simple_returns) == 0 or len(log_returns) == 0:
+    if len(simple_returns) == 0:
         raise ValueError("Could not calculate returns for this ticker")
 
-    variance = float(log_returns.var())
+    # match training exactly
+    variance = float(simple_returns.var() * 252)
+
     if variance <= 0:
         raise ValueError("Variance must be greater than zero")
 
-    log_variances = float(np.log(variance))
+    log_variances = float(np.log1p(np.clip(variance, 0, 2)))
     volatility = float(simple_returns.std() * np.sqrt(252))
-    var_95 = float(np.percentile(simple_returns, 5))
+    var_95 = float(abs(np.percentile(simple_returns, 5)))
 
     info = {}
     try:
@@ -77,6 +82,7 @@ def calculate_dynamic_features(symbol: str):
 
 def map_cluster_to_risk(cluster_label: int):
     return CLUSTER_CATEGORY.get(cluster_label, "Unknown")
+
 
 @router.post("/api/check-stock-risk")
 def check_stock_risk(request: StockRiskCheckRequest):

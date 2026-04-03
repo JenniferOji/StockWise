@@ -28,6 +28,15 @@ type StockRiskCheckResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
+type UpstreamHTTPError struct {
+	StatusCode int
+	Body       string
+}
+
+func (e *UpstreamHTTPError) Error() string {
+	return fmt.Sprintf("ML API error (%d): %s", e.StatusCode, e.Body)
+}
+
 func CheckStockRisk(symbol string) (*StockRiskCheckResponse, error) {
 	mlApiUrl := os.Getenv("ML_API_URL")
 	endpoint := "/api/check-stock-risk"
@@ -63,7 +72,10 @@ func CheckStockRisk(symbol string) (*StockRiskCheckResponse, error) {
 	}
 
 	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("ML API error: %s", string(body))
+		return nil, &UpstreamHTTPError{
+			StatusCode: resp.StatusCode,
+			Body:       string(body),
+		}
 	}
 
 	var stockRiskResp StockRiskCheckResponse

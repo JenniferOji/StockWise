@@ -52,7 +52,7 @@ func main() {
 		service.Post("/risk-metrics", routes.GetRiskMetrics)
 		service.Post("/stock-risk-categories", routes.GetStockRiskCategories)
 		service.Post("/performance-metrics", routes.GetPerformanceMetrics)
-		service.Post("/check-stock-risk", routes.CheckStockRisk)
+		service.Post("/check-stock-risk", routes.GetStockRisk)
 	}
 
 	// app.Listen(":4000")

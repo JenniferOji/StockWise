@@ -9,6 +9,7 @@ import RiskInsightsWidget from '@/components/RiskInsightsWidget';
 import PerformanceMetricsWidget from '@/components/PerformanceMetricsWidget';
 import DiversificationWidget from '@/components/DiversificationWidget';
 import RandomSuggestionsWidget from '@/components/RandomSuggestions';   
+import StockRiskWidget from '@/components/StockRiskWidget';
 
 // accordion tutorial i used: https://sanjanahumanintech.medium.com/accordion-in-react-native-95586a738aee
 
@@ -44,6 +45,11 @@ const menu: MenuSection[] = [
         title: "Explore Opportunities",
         subtitle: "Discover stocks within your risk profile to expand your portfolio",
         icon: "lightbulb",
+    },
+    { 
+        title: "Stock Risk Checker",
+        subtitle: "Analyse the risk level of any stock ticker",
+        icon: "search",
     },
 ];
 
@@ -94,6 +100,7 @@ function Accordian({ title, subtitle, icon, expanded, onToggle, isLargeScreen }:
                     {title === 'Stock Allocation' && <StockAllocationWidget />}
                     {title === 'Portfolio Optimisation Suggestion' && <DiversificationWidget />}
                     {title === 'Explore Opportunities' && <RandomSuggestionsWidget />}
+                    {title === 'Stock Risk Checker' && <StockRiskWidget />}
                 </View>
             )}
         </View>
