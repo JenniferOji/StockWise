@@ -276,35 +276,6 @@ func hashAndSaltPassword(password string) (hashedPassword string, err error) {
 	return string(bytes), nil
 }
 
-// func UpdateStock(ctx iris.Context) {
-// 	var updateInput UpdateStockInput
-// 	err := ctx.ReadJSON(&updateInput)
-// 	if err != nil {
-// 		utils.HandleValidationErrors(err, ctx)
-// 		return
-// 	}
-
-// 	var stock models.Stock
-// 	result := storage.DB.First(&stock, updateInput.StockID)
-// 	if result.Error != nil {
-// 		utils.CreateError(iris.StatusNotFound, "Not Found", "Stock not found", ctx)
-// 		return
-// 	}
-
-// 	stock.Quantity = updateInput.Quantity
-// 	stock.PurchasePrice = updateInput.PurchasePrice
-// 	storage.DB.Save(&stock)
-
-// 	ctx.JSON(iris.Map{
-// 		"ID":            stock.ID,
-// 		"Symbol":        stock.Symbol,
-// 		"CompanyName":   stock.CompanyName,
-// 		"Quantity":      stock.Quantity,
-// 		"PurchasePrice": stock.PurchasePrice,
-// 		"Sector":        stock.Sector,
-// 	})
-// }
-
 func AddStock(ctx iris.Context) {
 	var stockInput AddStockInput
 	err := ctx.ReadJSON(&stockInput)
@@ -362,35 +333,6 @@ func UpdateStock(ctx iris.Context) {
 
 	ctx.JSON(stock)
 }
-// handles when the users adds a stock to their portfolio
-// func AddStock(ctx iris.Context) {
-// 	var stockInput AddStockInput
-// 	err := ctx.ReadJSON(&stockInput)
-// 	if err != nil {
-// 		utils.HandleValidationErrors(err, ctx)
-// 		return
-// 	}
-
-// 	newStock := models.Stock{
-// 		UserID:        stockInput.UserID,
-// 		Symbol:        stockInput.Symbol,
-// 		CompanyName:   stockInput.CompanyName,
-// 		Quantity:      stockInput.Quantity,
-// 		PurchasePrice: stockInput.PurchasePrice,
-// 		Sector:        stockInput.Sector,
-// 	}
-
-// 	storage.DB.Create(&newStock)
-
-// 	ctx.JSON(iris.Map{
-// 		"ID":            newStock.ID,
-// 		"Symbol":        newStock.Symbol,
-// 		"CompanyName":   newStock.CompanyName,
-// 		"Quantity":      newStock.Quantity,
-// 		"PurchasePrice": newStock.PurchasePrice,
-// 		"Sector":        newStock.Sector,
-// 	})
-// }
 
 // handles when the user updates their risk profile
 func UpdateRisk(ctx iris.Context) {

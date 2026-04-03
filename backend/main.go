@@ -45,7 +45,6 @@ func main() {
 		user.Post("/random-suggestions", routes.GetRandomSuggestions)
 		user.Post("/stock-news", routes.GetStockNews)
 		user.Post("/stock-sentiment", routes.GetStockSentiment)
-
 	}
 
 	service := app.Party("/api/services")
@@ -53,6 +52,7 @@ func main() {
 		service.Post("/risk-metrics", routes.GetRiskMetrics)
 		service.Post("/stock-risk-categories", routes.GetStockRiskCategories)
 		service.Post("/performance-metrics", routes.GetPerformanceMetrics)
+		service.Post("/check-stock-risk", routes.CheckStockRisk)
 	}
 
 	// app.Listen(":4000")

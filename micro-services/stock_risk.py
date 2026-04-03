@@ -10,7 +10,6 @@ router = APIRouter()
 class StockRiskCheckRequest(BaseModel):
     symbol: str
 
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 SCALER_PATH = os.path.join(BASE_DIR, "models", "stock_scaler.pkl")
