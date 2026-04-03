@@ -41,8 +41,8 @@ func main() {
 		user.Delete("/stock", routes.DeleteStock)
 		user.Put("/risk", routes.UpdateRisk)
 		user.Get("/risk-preference", routes.GetRiskPreference)
-		// user.Get("/news", routes.GetNews)
 		user.Post("/diversification-suggestions", routes.GetDiversificationSuggestions)
+		user.Post("/random-suggestions", routes.GetRandomSuggestions)
 		user.Post("/stock-news", routes.GetStockNews)
 		user.Post("/stock-sentiment", routes.GetStockSentiment)
 

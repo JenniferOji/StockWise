@@ -49,6 +49,13 @@ type DiversificationResponse struct {
 	Message        string            `json:"message,omitempty"`
 }
 
+type RandomSuggestionResponse struct {
+	Success        bool              `json:"success"`
+	Suggestions    []StockSuggestion `json:"suggestions"`
+	RiskPreference string            `json:"risk_preference"`
+	Message        string            `json:"message,omitempty"`
+}
+
 // GetDiversificationSuggestions handles HTTP requests.
 func GetDiversificationSuggestions(ctx iris.Context) {
 	mlApiUrl := os.Getenv("ML_API_URL")
@@ -113,4 +120,62 @@ func GetDiversificationSuggestions(ctx iris.Context) {
 	}
 
 	ctx.JSON(diversificationResp)
+}
+
+
+func GetRandomSuggestions(ctx iris.Context) {
+	mlApiUrl := os.Getenv("ML_API_URL")
+	endpoint := "/api/random-suggestions"
+
+	if mlApiUrl == "" {
+		ctx.StatusCode(500)
+		ctx.JSON(map[string]string{"error": "ML_API_URL not set"})
+		return
+	}
+
+	var req DiversificationRequest
+
+	if err := ctx.ReadJSON(&req); err != nil {
+		ctx.StatusCode(400)
+		ctx.JSON(map[string]string{"error": "Invalid body"})
+		return
+	}
+
+	reqBody, err := json.Marshal(req)
+	if err != nil {
+		ctx.StatusCode(500)
+		ctx.JSON(map[string]string{"error": "Failed to marshal"})
+		return
+	}
+
+	url := mlApiUrl + endpoint
+
+	resp, err := http.Post(
+		url,
+		"application/json",
+		bytes.NewBuffer(reqBody),
+	)
+
+	if err != nil {
+		ctx.StatusCode(500)
+		ctx.JSON(map[string]string{"error": err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		ctx.StatusCode(500)
+		ctx.JSON(map[string]string{"error": "Failed to read resp"})
+		return
+	}
+
+	var randomResp RandomSuggestionResponse
+	if err := json.Unmarshal(body, &randomResp); err != nil {
+		ctx.StatusCode(500)
+		ctx.JSON(map[string]string{"error": "Failed to parse res"})
+		return
+	}
+
+	ctx.JSON(randomResp)
 }
