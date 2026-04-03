@@ -218,6 +218,30 @@ export const getDiversificationSuggestions = async (userID: number) => {
     }
 };
 
+export const getRandomSuggestions = async (userID: number) => {
+    try {        
+        const stocks = await getUserStocks(userID);
+        if (!stocks) throw new Error("No stocks found");
+
+        const risk = await getRiskPreference(userID);
+        
+        const currentStocks = stocks.map((s: any) => {
+            const { totalShares, avgPrice } = aggregateEntries(s);
+            return { symbol: s.symbol, sector: s.sector, quantity: totalShares, purchase_price: avgPrice };
+        });
+        
+        const response = await axios.post(endpoints.getRandomSuggestions, {
+            current_stocks: currentStocks,
+            user_risk_preference: risk
+        });
+
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+};
+
 export const getStockNews = async (userID: number) => {
     try {        
         const stocks = await getUserStocks(userID);

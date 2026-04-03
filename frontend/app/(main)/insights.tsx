@@ -8,6 +8,7 @@ import StockAllocationWidget from '@/components/StockAllocationWidget';
 import RiskInsightsWidget from '@/components/RiskInsightsWidget';
 import PerformanceMetricsWidget from '@/components/PerformanceMetricsWidget';
 import DiversificationWidget from '@/components/DiversificationWidget';
+import RandomSuggestionsWidget from '@/components/RandomSuggestions';   
 
 // accordion tutorial i used: https://sanjanahumanintech.medium.com/accordion-in-react-native-95586a738aee
 
@@ -19,26 +20,31 @@ type MenuSection = {
 
 // list of all the sections that will show up on the insights page
 const menu: MenuSection[] = [
-  { 
-    title: "Performance Analysis",
-    subtitle: "Track returns, gains and portfolio performance",
-    icon: "show-chart",
-  }, 
-  { 
-    title: "Risk Metrics",
-    subtitle: "Understand volatility, drawdowns and risk profile",
-    icon: "warning-amber",
-  },
-  { 
-    title: "Stock Allocation",
-    subtitle: "View sector exposure and portfolio composition",
-    icon: "pie-chart-outline",
-  },
-  { 
-    title: "Diversification Suggestions",
-    subtitle: "Discover ideas to improve balance across holdings",
-    icon: "auto-graph",
-  },
+    { 
+        title: "Performance Analysis",
+        subtitle: "Track returns, gains and portfolio performance",
+        icon: "show-chart",
+    }, 
+    { 
+        title: "Risk Metrics",
+        subtitle: "Understand volatility, drawdowns and risk profile",
+        icon: "warning-amber",
+    },
+    { 
+        title: "Stock Allocation",
+        subtitle: "View sector exposure and portfolio composition",
+        icon: "pie-chart-outline",
+    },
+    { 
+        title: "Portfolio Optimisation Suggestion",
+        subtitle: "Discover the stocks that imrpoves your portfolio based on your risk preferece",
+        icon: "auto-graph",
+    },
+    { 
+        title: "Explore Opportunities",
+        subtitle: "Discover stocks within your risk profile to expand your portfolio",
+        icon: "lightbulb",
+    },
 ];
 
 // props for each accordion section
@@ -86,7 +92,8 @@ function Accordian({ title, subtitle, icon, expanded, onToggle, isLargeScreen }:
                     {title === 'Performance Analysis' && <PerformanceMetricsWidget />}
                     {title === 'Risk Metrics' && <RiskInsightsWidget />}
                     {title === 'Stock Allocation' && <StockAllocationWidget />}
-                    {title === 'Diversification Suggestions' && <DiversificationWidget />}
+                    {title === 'Portfolio Optimisation Suggestion' && <DiversificationWidget />}
+                    {title === 'Explore Opportunities' && <RandomSuggestionsWidget />}
                 </View>
             )}
         </View>
@@ -95,7 +102,7 @@ function Accordian({ title, subtitle, icon, expanded, onToggle, isLargeScreen }:
 
 // main insights screen component
 export default function InsightsScreen() {
-    const [expandedTitle, setExpandedTitle] = useState<string | null>('Performance Analysis');
+    const [expandedTitle, setExpandedTitle] = useState<string | null>(null);
     const { width } = useWindowDimensions();
     const isLargeScreen = width >= 900;
 

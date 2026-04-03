@@ -349,10 +349,7 @@ def get_random_suggestions(request: DiversificationRequest):
             }
 
         # sort candidate pool based on user risk preference
-        if request.user_risk_preference in ["High Risk", "Very High Risk"]:
-            candidate_pool = suggested_stocks.sort_values(by="Volatility", ascending=False).head(5)
-        else:
-            candidate_pool = suggested_stocks.sort_values(by="Volatility", ascending=True).head(5)
+        candidate_pool = suggested_stocks.sample(n=min(5, len(suggested_stocks)))
 
         suggestions = []
 
@@ -369,7 +366,7 @@ def get_random_suggestions(request: DiversificationRequest):
                 "symbol": symbol,
                 "company_name": company["companyName"],
                 "sector": company["sector"],
-                "reason": f"Matches your {request.user_risk_preference} risk preference",
+                "reason": f"Diversifies your sector exposure {request.user_risk_preference} within your risk range",
             })
 
         return {
