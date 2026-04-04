@@ -332,3 +332,31 @@ export const checkStockRisk = async (symbol: string) => {
         return null;
     }
 };
+
+export const simulateStockImpact = async (userId: number, symbol: string, quantity: number) => {
+    try {
+        const stocks = await getUserStocks(userId);
+        if (!stocks) throw new Error("No stocks found");
+
+        const currentStocks = stocks.map((s: any) => {
+            const { totalShares } = aggregateEntries(s);
+            return {
+                symbol: s.symbol,
+                quantity: totalShares
+            };
+        });
+
+        const response = await axios.post(endpoints.simulateStock, {
+            current_stocks: currentStocks,
+            new_stock: {
+                symbol,
+                quantity
+            }
+        });
+
+        return response.data;
+    } catch (error) {
+        handleError(error);
+        return null;
+    }
+};

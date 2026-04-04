@@ -19,13 +19,22 @@ type SimulateStockRequest struct {
 	NewStock      PortfolioStock   `json:"new_stock"`
 }
 
+type MetricChange struct {
+	Before float64 `json:"before"`
+	After  float64 `json:"after"`
+	Change float64 `json:"change"`
+}
+
 type SimulateStockResponse struct {
 	Success  bool   `json:"success"`
 	Symbol   string `json:"symbol"`
 	Quantity float64 `json:"quantity"`
 	Impact   struct {
-		VolatilityChange float64 `json:"volatility_change"`
-		Var95Change      float64 `json:"var_95_change"`
+		Volatility   MetricChange `json:"volatility"`
+		Var95        MetricChange `json:"var_95"`
+		MaxDrawdown  MetricChange `json:"max_drawdown"`
+		AnnualReturn MetricChange `json:"annual_return"`
+		Sharpe       MetricChange `json:"sharpe"`
 	} `json:"impact"`
 }
 

@@ -4,6 +4,7 @@ from typing import List, Optional
 import yfinance as yf
 import os
 import numpy as np
+import pandas as pd
 import pickle
 
 router = APIRouter()
@@ -45,6 +46,13 @@ def predict_cluster(row_dict: dict[str, float]) -> int:
     return int(gmm.predict(scaled_features)[0])
 
 
+def calculate_max_drawdown_from_returns(simple_returns: pd.Series) -> float:
+    cumulative = (1 + simple_returns).cumprod()
+    peak = cumulative.cummax()
+    drawdown = (cumulative - peak) / peak
+    return float(drawdown.min())
+
+
 def calculate_dynamic_features(symbol: str):
     ticker = yf.Ticker(symbol)
     history = ticker.history(period="1y", auto_adjust=True)
@@ -73,6 +81,15 @@ def calculate_dynamic_features(symbol: str):
     volatility = float(simple_returns.std() * np.sqrt(252))
     var_95 = float(abs(np.percentile(simple_returns, 5)))
 
+    max_drawdown = calculate_max_drawdown_from_returns(simple_returns)
+
+    annual_return = float(simple_returns.mean() * 252)
+
+    risk_free_rate = 0.02
+    sharpe = 0.0
+    if volatility != 0:
+        sharpe = float((annual_return - risk_free_rate) / volatility)
+
     info = {}
     try:
         info = ticker.info or {}
@@ -86,6 +103,10 @@ def calculate_dynamic_features(symbol: str):
         "Log_Variances": log_variances,
         "Volatility": volatility,
         "VaR_95": var_95,
+        "max_drawdown": max_drawdown,
+        "annual_return": annual_return,
+        "sharpe": sharpe,
+        "simple_returns": simple_returns,
     }
 
 
@@ -99,7 +120,11 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
 
     vols = []
     vars_ = []
+    drawdowns = []
+    returns = []
+    sharpes = []
     weights = []
+    return_series = []
 
     for stock in stocks:
         try:
@@ -111,21 +136,45 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
 
         vols.append(features["Volatility"])
         vars_.append(features["VaR_95"])
+        drawdowns.append(features["max_drawdown"])
+        returns.append(features["annual_return"])
+        sharpes.append(features["sharpe"])
         weights.append(qty)
+        return_series.append(features["simple_returns"].rename(stock.symbol))
 
     if not vols:
         return None
 
-    weights = np.array(weights) / np.sum(weights)
+    total_weight = np.sum(weights)
+    if total_weight <= 0:
+        return None
+
+    weights = np.array(weights) / total_weight
+
     vols = np.array(vols)
     vars_ = np.array(vars_)
+    drawdowns = np.array(drawdowns)
+    returns = np.array(returns)
+    sharpes = np.array(sharpes)
 
     portfolio_vol = float(np.sum(vols * weights))
     portfolio_var = float(np.sum(vars_ * weights))
+    portfolio_drawdown = float(np.min(drawdowns))
+
+    if return_series:
+        aligned_returns = pd.concat(return_series, axis=1, join="inner").dropna()
+        if not aligned_returns.empty:
+            weighted_portfolio_returns = aligned_returns.mul(weights, axis=1).sum(axis=1)
+            portfolio_drawdown = calculate_max_drawdown_from_returns(weighted_portfolio_returns)
+    portfolio_return = float(np.sum(returns * weights))
+    portfolio_sharpe = float(np.sum(sharpes * weights))
 
     return {
         "volatility": round(portfolio_vol * 100, 2),
         "var_95": round(portfolio_var * 100, 2),
+        "max_drawdown": round(portfolio_drawdown * 100, 2),
+        "annual_return": round(portfolio_return * 100, 2),
+        "sharpe": round(portfolio_sharpe, 3),
     }
 
 
@@ -175,16 +224,36 @@ def simulate_stock(request: SimulateStockRequest):
         if not current_metrics or not new_metrics:
             raise HTTPException(status_code=400, detail="Could not calculate portfolio metrics")
 
-        vol_change = round(new_metrics["volatility"] - current_metrics["volatility"], 2)
-        var_change = round(new_metrics["var_95"] - current_metrics["var_95"], 2)
-
         return {
             "success": True,
             "symbol": request.new_stock.symbol,
             "quantity": request.new_stock.quantity,
             "impact": {
-                "volatility_change": vol_change,
-                "var_95_change": var_change,
+                "volatility": {
+                    "before": current_metrics["volatility"],
+                    "after": new_metrics["volatility"],
+                    "change": round(new_metrics["volatility"] - current_metrics["volatility"], 2),
+                },
+                "var_95": {
+                    "before": current_metrics["var_95"],
+                    "after": new_metrics["var_95"],
+                    "change": round(new_metrics["var_95"] - current_metrics["var_95"], 2),
+                },
+                "max_drawdown": {
+                    "before": current_metrics["max_drawdown"],
+                    "after": new_metrics["max_drawdown"],
+                    "change": round(new_metrics["max_drawdown"] - current_metrics["max_drawdown"], 2),
+                },
+                "annual_return": {
+                    "before": current_metrics["annual_return"],
+                    "after": new_metrics["annual_return"],
+                    "change": round(new_metrics["annual_return"] - current_metrics["annual_return"], 2),
+                },
+                "sharpe": {
+                    "before": current_metrics["sharpe"],
+                    "after": new_metrics["sharpe"],
+                    "change": round(new_metrics["sharpe"] - current_metrics["sharpe"], 3),
+                },
             },
         }
 
