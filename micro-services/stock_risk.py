@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from typing import List, Optional
 import yfinance as yf
 import os
 import numpy as np
@@ -9,6 +10,14 @@ router = APIRouter()
 
 class StockRiskCheckRequest(BaseModel):
     symbol: str
+
+class PortfolioStock(BaseModel):
+    symbol: str
+    quantity: Optional[float] = None
+
+class SimulateStockRequest(BaseModel):
+    current_stocks: List[PortfolioStock]
+    new_stock: PortfolioStock
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -84,6 +93,42 @@ def map_cluster_to_risk(cluster_label: int):
     return CLUSTER_CATEGORY.get(cluster_label, "Unknown")
 
 
+def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
+    if not stocks:
+        return None
+
+    vols = []
+    vars_ = []
+    weights = []
+
+    for stock in stocks:
+        try:
+            features = calculate_dynamic_features(stock.symbol)
+        except Exception:
+            continue
+
+        qty = stock.quantity if stock.quantity else 1
+
+        vols.append(features["Volatility"])
+        vars_.append(features["VaR_95"])
+        weights.append(qty)
+
+    if not vols:
+        return None
+
+    weights = np.array(weights) / np.sum(weights)
+    vols = np.array(vols)
+    vars_ = np.array(vars_)
+
+    portfolio_vol = float(np.sum(vols * weights))
+    portfolio_var = float(np.sum(vars_ * weights))
+
+    return {
+        "volatility": round(portfolio_vol * 100, 2),
+        "var_95": round(portfolio_var * 100, 2),
+    }
+
+
 @router.post("/api/check-stock-risk")
 def check_stock_risk(request: StockRiskCheckRequest):
     try:
@@ -114,3 +159,34 @@ def check_stock_risk(request: StockRiskCheckRequest):
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+# this endpoint simulates adding a new stock to the portfolio and shows the change in risk metrics - useful for users to understand the impact of adding a new stock
+@router.post("/api/simulate-stock")
+def simulate_stock(request: SimulateStockRequest):
+    try:
+        current_metrics = calculate_portfolio_metrics(request.current_stocks)
+
+        projected_portfolio = list(request.current_stocks)
+        projected_portfolio.append(request.new_stock)
+
+        new_metrics = calculate_portfolio_metrics(projected_portfolio)
+
+        if not current_metrics or not new_metrics:
+            raise HTTPException(status_code=400, detail="Could not calculate portfolio metrics")
+
+        vol_change = round(new_metrics["volatility"] - current_metrics["volatility"], 2)
+        var_change = round(new_metrics["var_95"] - current_metrics["var_95"], 2)
+
+        return {
+            "success": True,
+            "symbol": request.new_stock.symbol,
+            "quantity": request.new_stock.quantity,
+            "impact": {
+                "volatility_change": vol_change,
+                "var_95_change": var_change,
+            },
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
