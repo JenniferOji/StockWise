@@ -67,7 +67,14 @@ export default function StockRiskWidget() {
   };
 
   const renderMetric = (label: string, data: any) => {
+    const increaseIsGood =
+      label === "Annual Return" ||
+      label === "Sharpe Ratio" ||
+      label === "Max Drawdown";
+
     const isPositive = data.change >= 0;
+    const isImprovement = increaseIsGood ? isPositive : !isPositive;
+
     return (
       <View style={styles.metricRow}>
         <View style={styles.metricLeft}>
@@ -76,7 +83,7 @@ export default function StockRiskWidget() {
             {data.before}% → {data.after}%
           </Text>
         </View>
-        <Text style={[styles.metricChange, isPositive ? styles.up : styles.down]}>
+        <Text style={[styles.metricChange, isImprovement ? styles.down : styles.up]}>
           {isPositive ? "↑" : "↓"} {data.change}%
         </Text>
       </View>

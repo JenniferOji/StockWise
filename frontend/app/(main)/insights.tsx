@@ -123,7 +123,7 @@ export default function InsightsScreen() {
             <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
                 <View style={[styles.pageShell, isLargeScreen && styles.pageShellLarge]}>
                     <View style={styles.pageHeader}>
-                        <Text style={styles.pageTitle}>Portfolio Insights</Text>
+                        {/* <Text style={styles.pageTitle}>Portfolio Insights</Text> */}
                         <Text style={styles.pageSubtitle}>
                             Explore performance, risk, allocation and diversification in one place
                         </Text>

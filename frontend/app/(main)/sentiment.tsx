@@ -133,12 +133,9 @@ export default function SentimentPage() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
 
-        <View style={styles.purposeBox}>
-          {/* <Text style={styles.purposeTitle}>What this page shows</Text> */}
-          <Text style={styles.purposeText}>
-            See the overall market mood for your holdings, classified by machine learning model: positive, neutral, or negative.
-          </Text>
-        </View>
+        <Text style={styles.pageSubtitle}>
+          See the overall market mood for your holdings, classified by machine learning model: positive, neutral, or negative.
+        </Text>
 
         {/* Sentiment Gradient bar for the user to visually gather the sentiment towards their stock */}
         <View style={styles.heatmapBox}>
@@ -253,6 +250,7 @@ export default function SentimentPage() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f7fa", paddingTop: NAV_HEIGHT },
   scrollContent: { padding: 12, paddingBottom: 100 },
+  pageSubtitle: { fontSize: 14, color: '#64748b', marginTop: 4, marginBottom: 12 },
   purposeBox: {
     backgroundColor: '#eaf0ff',
     borderRadius: 10,

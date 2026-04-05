@@ -1,7 +1,6 @@
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { DrawerActions, useNavigation, useNavigationState } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
 import { Text } from 'react-native';
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -24,9 +23,9 @@ export default function TopNavBar() {
   // mapping the route names to different titles to be displayed 
   const pageTitles: { [key: string]: string } = {
     'stock-holdings': 'Stock Holdings',
-    'news': 'News',
+    'news': 'Market News',
     'sentiment': 'Stock Sentiment',
-    'insights': 'Insights',
+    'insights': 'Portfolio Insights',
     'settings': 'Settings',
   };
   const displayTitle = pageTitles[pageName] || pageName;
@@ -36,7 +35,7 @@ export default function TopNavBar() {
       <Pressable style={styles.tab} onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
         <IconSymbol name="menubar.rectangle" size={30} color={tint} />
       </Pressable>
-      <Text style={{ fontSize: 22, fontWeight: 'bold', color: tint, marginLeft: 16 }}>{displayTitle}</Text>
+      <Text numberOfLines={1} ellipsizeMode="tail" style={styles.title}>{displayTitle}</Text>
     </View>
   );
 }
@@ -49,16 +48,29 @@ const styles = StyleSheet.create({
     right: 0,
     height: 80,
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     zIndex: 50, // neccessary to be displayed otherwise it will sit under the screen
     borderBottomWidth: 1,
+    paddingHorizontal: 16,
   },
   tab: {
-    alignItems: 'flex-start',
-    paddingLeft: 40,
-    paddingTop: 25,
-    paddingRight: 300,
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+    marginTop: 25,
+  },
+  title: {
+    marginTop: 25,
+    flex: 1,
+    flexShrink: 1,
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#0f172a',
+    letterSpacing: -0.3,
+    paddingLeft: 6,
   },
   overlay: {
     position: 'absolute',

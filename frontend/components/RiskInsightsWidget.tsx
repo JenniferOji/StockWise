@@ -22,12 +22,14 @@ type StockRiskCategories = StockRiskCategoriesLike & {
   total: number
 }
 
+
 export default function RiskInsightsWidget() {
   const [riskData, setRiskData] = useState<RiskMetrics | null>(null)
   const [stockRiskData, setStockRiskData] = useState<StockRiskCategories | null>(null)
   const [riskPreference, setRiskPreference] = useState('Moderate Risk')
   const [selectedMetric, setSelectedMetric] = useState<any>(null)
-  const [filter, setFilter] = useState('All')
+  const [sortMetric, setSortMetric] = useState<'Volatility' | 'Drawdown' | 'Return' | null>(null)
+  const [sortDirection, setSortDirection] = useState<'High to Low' | 'Low to High'>('High to Low')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -98,6 +100,28 @@ export default function RiskInsightsWidget() {
   if (error) return (<View style={styles.card}><Text style={styles.error}>{error}</Text></View>)
   if (!riskData) return (<View style={styles.card}><Text style={styles.emptyText}>No risk metrics available.</Text></View>)
 
+  const sortSummary = sortMetric === null
+    ? 'Showing default order.'
+    : `Sorted by ${sortMetric} (${sortDirection}).`
+  const hasMetricSelected = sortMetric !== null
+
+  function getSortedStocks(stocks: StockRiskLike[]) {
+    const sortedStocks = [...stocks]
+    if (sortMetric === null) return sortedStocks
+
+    const isHighToLow = sortDirection === 'High to Low'
+
+    if (sortMetric === 'Volatility') {
+      sortedStocks.sort((a, b) => isHighToLow ? b.volatility - a.volatility : a.volatility - b.volatility)
+    } else if (sortMetric === 'Drawdown') {
+      sortedStocks.sort((a, b) => isHighToLow ? b.max_drawdown - a.max_drawdown : a.max_drawdown - b.max_drawdown)
+    } else {
+      sortedStocks.sort((a, b) => isHighToLow ? b.annual_return - a.annual_return : a.annual_return - b.annual_return)
+    }
+
+    return sortedStocks
+  }
+
   return (
     <View style={styles.card}>
       <View style={styles.valueRow}><Text style={styles.valueLabel}>Calculated over a one year period using historical data</Text></View>
@@ -137,23 +161,113 @@ export default function RiskInsightsWidget() {
         <Text style={styles.sectionTitle}>Stock Risk Categories</Text>
         <Text style={styles.sectionSubtitle}>Grouped by machine-learned risk profile.</Text>
 
-        <View style={styles.filterRow}>
-          {['All','High Volatility','Worst Drawdown','Best Returns'].map(f => (
-            <Pressable key={f} onPress={() => setFilter(f)} style={[styles.filterButton, filter === f && styles.filterButtonActive]}>
-              <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>{f}</Text>
-            </Pressable>
-          ))}
-        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sortRow}>
+          <Pressable
+            onPress={() => setSortMetric('Volatility')}
+            style={({ hovered, pressed }) => [
+              styles.sortChip,
+              hovered && styles.sortChipHover,
+              pressed && { opacity: 0.9 },
+              sortMetric === 'Volatility' && styles.sortChipActive,
+            ]}
+          >
+            <Text style={[styles.sortChipText, sortMetric === 'Volatility' && styles.sortChipTextActive]}>
+              {sortMetric === 'Volatility' ? `Volatility ${sortDirection === 'High to Low' ? '↓' : '↑'}` : 'Volatility'}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setSortMetric('Drawdown')}
+            style={({ hovered, pressed }) => [
+              styles.sortChip,
+              hovered && styles.sortChipHover,
+              pressed && { opacity: 0.9 },
+              sortMetric === 'Drawdown' && styles.sortChipActive,
+            ]}
+          >
+            <Text style={[styles.sortChipText, sortMetric === 'Drawdown' && styles.sortChipTextActive]}>
+              {sortMetric === 'Drawdown' ? `Drawdown ${sortDirection === 'High to Low' ? '↓' : '↑'}` : 'Drawdown'}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setSortMetric('Return')}
+            style={({ hovered, pressed }) => [
+              styles.sortChip,
+              hovered && styles.sortChipHover,
+              pressed && { opacity: 0.9 },
+              sortMetric === 'Return' && styles.sortChipActive,
+            ]}
+          >
+            <Text style={[styles.sortChipText, sortMetric === 'Return' && styles.sortChipTextActive]}>
+              {sortMetric === 'Return' ? `Return ${sortDirection === 'High to Low' ? '↓' : '↑'}` : 'Return'}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setSortDirection('High to Low')}
+            style={({ hovered, pressed }) => [
+              styles.directionChip,
+              hovered && styles.directionChipHover,
+              pressed && { opacity: 0.9 },
+              !hasMetricSelected && styles.directionChipIdle,
+              hasMetricSelected && sortDirection === 'High to Low' && styles.directionChipActive,
+            ]}
+          >
+            <Text
+              style={[
+                styles.directionChipText,
+                !hasMetricSelected && styles.directionChipTextIdle,
+                hasMetricSelected && sortDirection === 'High to Low' && styles.directionChipTextActive,
+              ]}
+            >
+              High to Low
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setSortDirection('Low to High')}
+            style={({ hovered, pressed }) => [
+              styles.directionChip,
+              hovered && styles.directionChipHover,
+              pressed && { opacity: 0.9 },
+              !hasMetricSelected && styles.directionChipIdle,
+              hasMetricSelected && sortDirection === 'Low to High' && styles.directionChipActive,
+            ]}
+          >
+            <Text
+              style={[
+                styles.directionChipText,
+                !hasMetricSelected && styles.directionChipTextIdle,
+                hasMetricSelected && sortDirection === 'Low to High' && styles.directionChipTextActive,
+              ]}
+            >
+              Low to High
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => {
+              setSortMetric(null)
+              setSortDirection('High to Low')
+            }}
+            style={({ hovered, pressed }) => [
+              styles.resetChip,
+              hovered && styles.resetChipHover,
+              pressed && { opacity: 0.9 },
+            ]}
+          >
+            <Text style={styles.resetChipText}>Reset</Text>
+          </Pressable>
+        </ScrollView>
+
+        <Text style={styles.sortMicrocopy}>{sortSummary}</Text>
         
         {CATEGORY_ORDER.map((category) => {
-          let stocks = stockRiskData?.categories?.[category] || []
-          if (filter === 'High Volatility') stocks = stocks.filter(s => s.volatility > 25)
-          if (filter === 'Worst Drawdown') stocks = stocks.filter(s => s.max_drawdown > 20)
-          if (filter === 'Best Returns') stocks = stocks.filter(s => s.annual_return > 10)
+          const categoryStocks = stockRiskData?.categories?.[category] || []
+          const stocks = getSortedStocks(categoryStocks)
 
           const color = CATEGORY_COLORS[category as keyof typeof CATEGORY_COLORS] || '#fff'
-
-          if (!stocks.length && filter !== 'All') return null
 
           return (
             <View key={category} style={[styles.categoryCard, { borderLeftColor: color }]}>
@@ -212,11 +326,23 @@ const styles = StyleSheet.create({
   riskCategorySection: { marginTop: 8 },
   sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 2, color: '#0f172a' },
   sectionSubtitle: { fontSize: 12, color: '#64748b', marginBottom: 10 },
-  filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 },
-  filterButton: { paddingVertical: 6, paddingHorizontal: 10, borderRadius: 20, backgroundColor: '#f1f5f9' },
-  filterButtonActive: { backgroundColor: '#dbeafe' },
-  filterText: { fontSize: 12, color: '#475569', fontWeight: '600' },
-  filterTextActive: { color: '#0b3d91' },
+  sortRow: { flexDirection: 'row', gap: 8, paddingBottom: 4 },
+  sortChip: { paddingVertical: 6, paddingHorizontal: 10, borderRadius: 20, backgroundColor: '#f1f5f9' },
+  sortChipHover: { backgroundColor: '#e6eef9' },
+  sortChipActive: { backgroundColor: '#dbeafe' },
+  sortChipText: { fontSize: 12, color: '#475569', fontWeight: '600' },
+  sortChipTextActive: { color: '#0b3d91' },
+  directionChip: { paddingVertical: 6, paddingHorizontal: 10, borderRadius: 20, backgroundColor: '#f8fafc', borderWidth: 1, borderColor: '#cbd5e1' },
+  directionChipHover: { backgroundColor: '#eef2ff', borderColor: '#a5b4fc' },
+  directionChipActive: { backgroundColor: '#e0e7ff', borderColor: '#818cf8' },
+  directionChipIdle: { backgroundColor: '#f8fafc', borderColor: '#e2e8f0' },
+  directionChipText: { fontSize: 12, color: '#334155', fontWeight: '600' },
+  directionChipTextActive: { color: '#3730a3' },
+  directionChipTextIdle: { color: '#94a3b8' },
+  resetChip: { paddingVertical: 6, paddingHorizontal: 10, borderRadius: 20, backgroundColor: '#fff1f2', borderWidth: 1, borderColor: '#fecdd3' },
+  resetChipHover: { backgroundColor: '#ffe4e6' },
+  resetChipText: { fontSize: 12, color: '#be123c', fontWeight: '700' },
+  sortMicrocopy: { fontSize: 11, color: '#64748b', marginBottom: 8, marginTop: 4 },
   categoryCard: { backgroundColor: '#f8fafc', borderRadius: 14, padding: 12, marginBottom: 10, borderLeftWidth: 4 },
   categoryTitle: { fontWeight: '700', marginBottom: 6, fontSize: 13 },
   stockRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },

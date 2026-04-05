@@ -111,7 +111,7 @@ export default function News() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
 
         <View style={styles.header}>
-          <Text style={styles.pageTitle}>Market News</Text>
+          {/* <Text style={styles.pageTitle}>Market News</Text> */}
           <Text style={styles.pageSubtitle}>
             Your stock news with machine-learned classified sentiment.
           </Text>
