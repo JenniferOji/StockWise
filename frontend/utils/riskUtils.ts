@@ -117,7 +117,7 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 		const score = scoreMap[riskPref][band.label]
 		const showTip = band.label === 'Poor' || band.label === 'Fair'
 		const tip = showTip
-			? 'In the Stock Risk Categories below, filter by "Best Returns" to see which stocks are earning the most and consider whether your high-risk holdings justify their place.'
+			? 'In the Stock Risk Categories below, filter by "High Returns" to see which stocks are earning the most and consider whether your high-risk holdings justify their place.'
 			: ''
 
 		return { what, score, tip }
@@ -162,7 +162,7 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 		const score = scoreMap[riskPref][band.label]
 		const showTip = band.label !== 'Good' && band.label !== 'Expected'
 		const tip = showTip
-			? 'In the Stock Risk Categories below, filter by "Worst Drawdown" to see which of your stocks have had the biggest historical drops.'
+			? 'In the Stock Risk Categories below, filter by "High Drawdown" to see which of your stocks have had the biggest historical drops.'
 			: ''
 
 		return { what, score, tip }
