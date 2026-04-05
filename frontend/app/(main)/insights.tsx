@@ -32,7 +32,7 @@ const menu: MenuSection[] = [
         icon: "warning-amber",
     },
     { 
-        title: "Stock Allocation",
+        title: "Sector Allocation",
         subtitle: "Break down your holdings by sector and allocation percentage",
         icon: "pie-chart-outline",
     },
@@ -97,7 +97,7 @@ function Accordian({ title, subtitle, icon, expanded, onToggle, isLargeScreen }:
                 <View style={styles.content}>
                     {title === 'Performance Analysis' && <PerformanceMetricsWidget />}
                     {title === 'Risk Metrics' && <RiskInsightsWidget />}
-                    {title === 'Stock Allocation' && <StockAllocationWidget />}
+                    {title === 'Sector Allocation' && <StockAllocationWidget />}
                     {title === 'Portfolio Optimisation Suggestion' && <DiversificationWidget />}
                     {title === 'Explore Opportunities' && <RandomSuggestionsWidget />}
                     {title === 'Stock Risk Checker' && <StockRiskWidget />}

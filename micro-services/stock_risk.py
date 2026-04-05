@@ -143,7 +143,7 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
 
     portfolio_vol = float(np.sum(vols * weights))
     portfolio_var = float(np.sum(vars_ * weights))
-    portfolio_drawdown = float(np.min(drawdowns))
+    portfolio_drawdown = float(np.sum(drawdowns * weights))
     portfolio_return = float(np.sum(returns * weights))
     portfolio_sharpe = float(np.sum(sharpes * weights))
 

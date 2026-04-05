@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Pressable, ScrollView } from 'react-native';
 import { checkStockRisk, simulateStockImpact } from '@/services/user';
+import STOCKS from '../constants/stocks.json';
 
 type StockRiskResponse = {
   success: boolean;
@@ -31,6 +32,7 @@ const getRiskColor = (riskLevel: string) => {
 
 export default function StockRiskWidget() {
   const [symbol, setSymbol] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
   const [shares, setShares] = useState('');
   const [loading, setLoading] = useState(false);
   const [simLoading, setSimLoading] = useState(false);
@@ -38,11 +40,23 @@ export default function StockRiskWidget() {
   const [result, setResult] = useState<StockRiskResponse | null>(null);
   const [impact, setImpact] = useState<any>(null);
 
+  const filteredSuggestions = useMemo(() => {
+    const q = symbol.trim().toLowerCase();
+    if (!q) return [];
+
+    return STOCKS.filter((s) =>
+      s.symbol.toLowerCase().includes(q) ||
+      s.companyName.toLowerCase().includes(q)
+    ).slice(0, 8);
+  }, [symbol]);
+
   const handleCheckRisk = async () => {
     if (!symbol.trim()) {
       setError('Please enter a stock ticker');
       return;
     }
+
+    setShowDropdown(false);
 
     setLoading(true);
     setError('');
@@ -81,8 +95,7 @@ export default function StockRiskWidget() {
   const renderMetric = (label: string, data: any) => {
     const increaseIsGood =
       label === "Annual Return" ||
-      label === "Sharpe Ratio" ||
-      label === "Max Drawdown";
+      label === "Sharpe Ratio";
 
     const isPositive = data.change >= 0;
     const isImprovement = increaseIsGood ? isPositive : !isPositive;
@@ -110,13 +123,42 @@ export default function StockRiskWidget() {
       <Text style={styles.subtitle}>Analyse the risk level of any stock ticker</Text>
 
       <View style={styles.inputRow}>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter ticker e.g. AAPL"
-          value={symbol}
-          onChangeText={setSymbol}
-          autoCapitalize="characters"
-        />
+        <View style={styles.inputWrap}>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter ticker e.g. AAPL"
+            value={symbol}
+            onChangeText={(text) => {
+              setSymbol(text.toUpperCase());
+              setShowDropdown(true);
+            }}
+            autoCapitalize="characters"
+            onFocus={() => setShowDropdown(true)}
+            onSubmitEditing={handleCheckRisk}
+          />
+
+          {showDropdown && filteredSuggestions.length > 0 && (
+            <ScrollView style={styles.dropdown} nestedScrollEnabled keyboardShouldPersistTaps="handled">
+              {filteredSuggestions.map((item, index) => (
+                <Pressable
+                  key={item.symbol}
+                  style={[
+                    styles.dropdownItem,
+                    index === filteredSuggestions.length - 1 && styles.dropdownItemLast,
+                  ]}
+                  onPress={() => {
+                    setSymbol(item.symbol);
+                    setShowDropdown(false);
+                  }}
+                >
+                  <Text style={styles.dropdownSymbol}>{item.symbol}</Text>
+                  <Text style={styles.dropdownName}>{item.companyName}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          )}
+        </View>
+
         <TouchableOpacity style={styles.button} onPress={handleCheckRisk}>
           <Text style={styles.buttonText}>Analyse</Text>
         </TouchableOpacity>
@@ -190,10 +232,16 @@ const styles = StyleSheet.create({
   card: { backgroundColor: '#f8fafc', borderRadius: 16, padding: 20, marginVertical: 12, borderWidth: 1, borderColor: '#e0e7ef' },
   title: { fontSize: 22, fontWeight: '700', color: '#0b3d91', marginBottom: 5, textAlign: 'center' },
   subtitle: { fontSize: 15, fontWeight: '600', color: '#404348', marginBottom: 16, textAlign: 'center' },
-  inputRow: { flexDirection: 'row', gap: 10, marginBottom: 14 },
+  inputRow: { flexDirection: 'row', gap: 10, marginBottom: 14, alignItems: 'flex-start' },
+  inputWrap: { flex: 1, position: 'relative' },
   input: { flex: 1, backgroundColor: '#fff', borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14 },
-  button: { backgroundColor: '#0b3d91', borderRadius: 10, paddingHorizontal: 16, justifyContent: 'center' },
-  buttonText: { color: '#fff', fontWeight: '700' },
+  dropdown: { marginTop: 6, backgroundColor: '#fff', borderWidth: 1, borderColor: '#dbe4ee', borderRadius: 10, maxHeight: 180 },
+  dropdownItem: { paddingVertical: 10, paddingHorizontal: 12, borderBottomWidth: 1, borderBottomColor: '#eef2f7' },
+  dropdownItemLast: { borderBottomWidth: 0 },
+  dropdownSymbol: { fontSize: 13, fontWeight: '700', color: '#0f172a' },
+  dropdownName: { fontSize: 12, color: '#64748b', marginTop: 1 },
+  button: { backgroundColor: '#0b3d91', borderRadius: 10, paddingHorizontal: 16, justifyContent: 'center', alignItems: 'center', alignSelf: 'flex-start', height: 46, minWidth: 104 },
+  buttonText: { color: '#fff', fontWeight: '700', textAlign: 'center' },
   loadingWrap: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   loadingText: { color: '#64748b' },
   error: { color: '#dc2626', textAlign: 'center', marginTop: 8 },

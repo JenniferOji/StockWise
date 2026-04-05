@@ -26,9 +26,11 @@ type ChartItem = {
 function DonutChart({
 	chartData,
 	selectedSector,
+	onSelectSector,
 }: {
 	chartData: ChartItem[];
 	selectedSector: string | null;
+	onSelectSector: (s: string | null) => void;
 }) {
 	const size = 200;
 	const strokeWidth = 30;
@@ -48,6 +50,7 @@ function DonutChart({
 							const gap = circumference;
 							const offset = cumulativePercent * circumference;
 							cumulativePercent += percent;
+							const isSelected = selectedSector === item.sector;
 							return (
 								<Circle
 									key={i}
@@ -56,6 +59,7 @@ function DonutChart({
 									r={radius}
 									stroke={item.color}
 									strokeWidth={strokeWidth}
+									onPress={() => onSelectSector(isSelected ? null : item.sector)}
 									strokeOpacity={selectedSector && selectedSector !== item.sector ? 0.25 : 1}
 									fill="none"
 									strokeDasharray={`${dash} ${gap}`}
@@ -198,7 +202,8 @@ export default function StockAllocationWidget() {
 		if (!selectedSector) return null;
 		const sectorStocks = stocks.filter(stock => stock.sector === selectedSector);
 		const allocation = chartData.find(s => s.sector === selectedSector)?.value || 0;
-		return { stocks: sectorStocks, allocation };
+		const sectorInfo = INSIGHTS.find(item => item.sector === selectedSector);
+		return { stocks: sectorStocks, allocation, description: sectorInfo?.description || '' };
 	}, [selectedSector, stocks, chartData]);
 
 	const pageWidth = width - 32;
@@ -218,13 +223,13 @@ export default function StockAllocationWidget() {
 			<View style={styles.container}>
 
 				{/* <Text style={styles.title}>Sector Allocation</Text> */}
-				<Text style={styles.subtitle}>Explore your portfolio composition - tap a sector to view its details</Text>
+				<Text style={styles.subtitle}>Explore your portfolio composition - tap a sector to view sector holdings</Text>
 
 				{isLargeScreen ? (
 					// side by side display for large paegs 
 					<View style={styles.sideBySide}>
 						<View style={styles.sideItem}>
-							<DonutChart chartData={chartData} selectedSector={selectedSector} />
+							<DonutChart chartData={chartData} selectedSector={selectedSector} onSelectSector={setSelectedSector} />
 						</View>
 						<View style={styles.sideItem}>
 							<BarChart
@@ -246,7 +251,7 @@ export default function StockAllocationWidget() {
 							style={{ width: '100%' }}
 						>
 							<View style={{ width: width - 32 }}>
-								<DonutChart chartData={chartData} selectedSector={selectedSector} />
+								<DonutChart chartData={chartData} selectedSector={selectedSector} onSelectSector={setSelectedSector} />
 							</View>
 							<View style={{ width: width - 32 }}>
 								<BarChart
@@ -279,7 +284,14 @@ export default function StockAllocationWidget() {
 				{selectedSector && selectedSectorData && (
 					<View style={styles.detailsCard}>
 						<View style={styles.detailsHeader}>
-							<Text style={styles.detailsTitle}>{selectedSector}</Text>
+								<View style={styles.detailsTitleWrap}>
+									<Text style={styles.detailsTitle}>{selectedSector}</Text>
+									{selectedSectorData.description ? (
+										<Text style={styles.detailsInlineDescription}>
+											{selectedSectorData.description}
+										</Text>
+									) : null}
+								</View>
 							<Pressable onPress={() => setSelectedSector(null)}>
 								<Text style={styles.closeText}>Close</Text>
 							</Pressable>
@@ -340,8 +352,10 @@ const styles = StyleSheet.create({
 	pageDotActive: { width: 18, backgroundColor: '#2563eb' },
 
 	detailsCard: { marginTop: 10, backgroundColor: '#f8fafc', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: '#e7edf5' },
-	detailsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+	detailsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4, gap: 12 },
+	detailsTitleWrap: { flex: 1 },
 	detailsTitle: { fontSize: 15, fontWeight: '700', color: '#0f172a' },
+	detailsInlineDescription: { fontSize: 11, color: '#64748b', lineHeight: 16, marginTop: 2 },
 	closeText: { color: '#2563eb', fontWeight: '600', fontSize: 13 },
 	detailsSubtitle: { fontSize: 12, color: '#64748b', marginBottom: 10 },
 	stockRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#eef2f7' },

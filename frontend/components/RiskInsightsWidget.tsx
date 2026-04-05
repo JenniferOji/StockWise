@@ -106,7 +106,7 @@ export default function RiskInsightsWidget() {
   if (!riskData) return (<View style={styles.card}><Text style={styles.emptyText}>No risk metrics available.</Text></View>)
 
   const sortSummary = sortMetric === null
-    ? 'Showing default order.'
+    ? 'Showing default order - sorting applies within each risk category.'
     : `Sorted by ${sortMetric} (${sortDirection}).`
   const hasMetricSelected = sortMetric !== null
   const portfolioRiskColor = CATEGORY_COLORS[portfolioRisk as keyof typeof CATEGORY_COLORS] || '#0b3d91'
@@ -192,7 +192,8 @@ export default function RiskInsightsWidget() {
 
       <View style={styles.riskCategorySection}>
         <Text style={styles.sectionTitle}>Stock Risk Categories</Text>
-        <Text style={styles.sectionSubtitle}>Grouped by machine-learned risk profile.</Text>
+        <Text style={styles.sectionSubtitle}>Grouped by machine-learned risk profile</Text>
+          {/* <Text style={styles.sectionSubtitle}>Sorting applies within each risk category.</Text></Text> */}
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sortRow}>
           <Pressable
@@ -359,7 +360,7 @@ const styles = StyleSheet.create({
   closeText: { color: '#2563eb', fontWeight: '600' },
   riskCategorySection: { marginTop: 8 },
   sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 2, color: '#0f172a' },
-  sectionSubtitle: { fontSize: 12, color: '#64748b', marginBottom: 10 },
+  sectionSubtitle: { fontSize: 11, color: '#64748b', marginBottom: 10, fontWeight: '400' },
   sortRow: { flexDirection: 'row', gap: 8, paddingBottom: 4 },
   sortChip: { paddingVertical: 6, paddingHorizontal: 10, borderRadius: 20, backgroundColor: '#f1f5f9' },
   sortChipHover: { backgroundColor: '#e6eef9' },
