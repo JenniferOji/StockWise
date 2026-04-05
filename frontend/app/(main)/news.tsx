@@ -109,6 +109,7 @@ export default function News() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.pageShell}>
 
         <View style={styles.header}>
           {/* <Text style={styles.pageTitle}>Market News</Text> */}
@@ -186,6 +187,7 @@ export default function News() {
           />
         )}
 
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -193,7 +195,8 @@ export default function News() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f7fa', paddingTop: NAV_HEIGHT },
-  scrollContainer: { paddingHorizontal: 14, paddingBottom: 96 },
+  scrollContainer: { flexGrow: 1, paddingHorizontal: 12, paddingTop: 12, paddingBottom: 96 },
+  pageShell: { width: '100%', maxWidth: 1120, alignSelf: 'center' },
   header: { marginBottom: 14 },
   pageTitle: { fontSize: 26, fontWeight: '800', color: '#0f172a' },
   pageSubtitle: { fontSize: 14, color: '#64748b', marginTop: 4 },

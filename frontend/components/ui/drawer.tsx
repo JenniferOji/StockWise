@@ -9,7 +9,6 @@ import { useRouter } from 'expo-router';
 export default function DrawerContent(props: DrawerContentComponentProps) {
   const { navigation } = props;
   const scheme = useColorScheme();
-  const tint = Colors[scheme ?? 'light'].tint;
   const router = useRouter();
 
   const handleLogout = () => {
@@ -26,13 +25,13 @@ export default function DrawerContent(props: DrawerContentComponentProps) {
   return (
     <View style={[styles.container, { backgroundColor: Colors[scheme ?? 'light'].background }]}>
       <Pressable style={styles.item} onPress={handleSettings} accessibilityRole="button" accessibilityLabel="Settings">
-        <IconSymbol name="gearshape.fill" size={20} color={tint} />
-        <Text style={[styles.label, { color: tint }]}>Settings</Text>
+        <IconSymbol name="gearshape.fill" size={20} color="#0b3d91" />
+        <Text style={styles.label}>Settings</Text>
       </Pressable>
       
       <Pressable style={styles.item} onPress={handleLogout} accessibilityRole="button" accessibilityLabel="Log out">
-        <IconSymbol name="arrow.right.square" size={20} color={tint} />
-        <Text style={[styles.label, { color: tint }]}>Logout</Text>
+        <IconSymbol name="arrow.right.square" size={20} color="#0b3d91" />
+        <Text style={styles.label}>Logout</Text>
       </Pressable>
     </View>
   );
@@ -57,5 +56,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 12,
     fontWeight: '600',
+    color: '#0b3d91',
   },
 });

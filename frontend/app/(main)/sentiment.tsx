@@ -132,6 +132,7 @@ export default function SentimentPage() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.pageShell}>
 
         <Text style={styles.pageSubtitle}>
           See the overall market mood for your holdings, classified by machine learning model: positive, neutral, or negative.
@@ -242,6 +243,7 @@ export default function SentimentPage() {
             );
           })
         )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -249,7 +251,8 @@ export default function SentimentPage() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f5f7fa", paddingTop: NAV_HEIGHT },
-  scrollContent: { padding: 12, paddingBottom: 100 },
+  scrollContent: { flexGrow: 1, paddingHorizontal: 12, paddingTop: 12, paddingBottom: 96 },
+  pageShell: { width: '100%', maxWidth: 1120, alignSelf: 'center' },
   pageSubtitle: { fontSize: 14, color: '#64748b', marginTop: 4, marginBottom: 12 },
   purposeBox: {
     backgroundColor: '#eaf0ff',

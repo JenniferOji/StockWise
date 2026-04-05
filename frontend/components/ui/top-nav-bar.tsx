@@ -31,9 +31,9 @@ export default function TopNavBar() {
   const displayTitle = pageTitles[pageName] || pageName;
 
   return (
-    <View style={[styles.container, { backgroundColor: Colors[scheme ?? 'medium'].background, borderBottomColor: '#e6e6e6'}]}>
+    <View style={[styles.container, { backgroundColor: Colors[scheme ?? 'medium'].background, borderBottomColor: '#e2e8f0' }]}>
       <Pressable style={styles.tab} onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
-        <IconSymbol name="menubar.rectangle" size={30} color={tint} />
+        <IconSymbol name="person.crop.circle.fill" size={28} color="#0b3d91" />
       </Pressable>
       <Text numberOfLines={1} ellipsizeMode="tail" style={styles.title}>{displayTitle}</Text>
     </View>
@@ -46,31 +46,33 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     right: 0,
-    height: 80,
+    height: 72,
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
     zIndex: 50, // neccessary to be displayed otherwise it will sit under the screen
     borderBottomWidth: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
   },
   tab: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
-    marginTop: 25,
+    marginRight: 10,
   },
   title: {
-    marginTop: 25,
     flex: 1,
     flexShrink: 1,
-    fontSize: 24,
-    fontWeight: '800',
+    fontSize: 21,
+    fontWeight: '700',
     color: '#0f172a',
-    letterSpacing: -0.3,
-    paddingLeft: 6,
+    letterSpacing: -0.2,
   },
   overlay: {
     position: 'absolute',

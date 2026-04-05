@@ -142,8 +142,14 @@ export default function StockHoldings() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={[styles.pageShell, styles.pageHeader]}>
+        <Text style={styles.pageSubtitle}>
+          View, search, and manage the stocks currently in your portfolio to enable insights.
+        </Text>
+      </View>
+
       {/* search input - typing shows matches below */}
-      <View style={styles.searchContainer}>
+      <View style={[styles.pageShell, styles.searchContainer]}>
         <View style={styles.searchRow}>
           <View style={styles.searchInputContainer}>
             <TextInput
@@ -175,7 +181,7 @@ export default function StockHoldings() {
         data={filteredDisplayed}
         keyExtractor={(item) => (item as any).dbId?.toString() || item.symbol}
         contentContainerStyle={styles.list}
-        style={styles.listWrapper}
+        style={[styles.pageShell, styles.listWrapper]}
         renderItem={({ item }) => {
           return (
             <View style={styles.card}>
@@ -226,7 +232,12 @@ export default function StockHoldings() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalText}>Add Stock</Text>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalText}>Add Stock</Text>
+              <Pressable style={styles.modalIconClose} onPress={() => setAddModalVisible(false)}>
+                <Text style={styles.modalIconCloseText}>×</Text>
+              </Pressable>
+            </View>
 
             <View style={styles.modalInputContainer}>
               <TextInput
@@ -241,6 +252,7 @@ export default function StockHoldings() {
               data={stocksToAdd}
               keyExtractor={(item) => item.symbol}
               style={styles.addList}
+              showsVerticalScrollIndicator={false}
               renderItem={({ item }) => (
                 <Pressable
                   style={styles.addListItem}
@@ -260,7 +272,7 @@ export default function StockHoldings() {
             />
 
             <Pressable style={styles.modalClose} onPress={() => setAddModalVisible(false)}>
-              <Text style={styles.modalCloseText}>close</Text>
+              <Text style={styles.modalCloseText}>Close</Text>
             </Pressable>
           </View>
         </View>
@@ -269,7 +281,19 @@ export default function StockHoldings() {
       <Modal visible={modalVisible} transparent animationType="fade" onRequestClose={() => { setModalVisible(false); setSelected(null); }}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalText}>{selected ? `${selected.symbol} - ${selected.companyName}` : 'Edit'}</Text>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalText}>{selected ? `${selected.symbol} - ${selected.companyName}` : 'Edit'}</Text>
+              <Pressable
+                style={styles.modalIconClose}
+                onPress={() => {
+                  setModalVisible(false);
+                  setSelected(null);
+                  setEntries([{ shares: '', price: '' }]);
+                }}
+              >
+                <Text style={styles.modalIconCloseText}>×</Text>
+              </Pressable>
+            </View>
             
             <View style={styles.modalInputContainer}>
               <ScrollView
@@ -384,7 +408,7 @@ export default function StockHoldings() {
                 setEntries([{ shares: '', price: '' }]);
               }}
             >
-              <Text style={styles.modalCloseText}>close</Text>
+              <Text style={styles.modalCloseText}>Close</Text>
             </Pressable>
           </View>
         </View>
@@ -395,8 +419,11 @@ export default function StockHoldings() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f3f6fb', paddingTop: NAV_HEIGHT, paddingBottom: NAV_HEIGHT},
+  pageShell: { width: '100%', maxWidth: 1120, alignSelf: 'center' },
+  pageHeader: { paddingHorizontal: 12, paddingTop: 12, marginBottom: 2 },
+  pageSubtitle: { fontSize: 14, color: '#64748b', lineHeight: 20 },
   listWrapper: { flex: 1 },
-  list:{ paddingVertical: 8, paddingHorizontal: 14, paddingBottom: 24 },
+  list:{ paddingVertical: 8, paddingHorizontal: 12, paddingBottom: 24 },
   card: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius:12, padding:14, marginBottom:6, shadowColor:'#000', shadowOffset:{ width:0, height:6 }, shadowOpacity:0.06, shadowRadius:10, elevation:3 },
   cardLeft: { width: 52, height: 52, marginRight: 12, justifyContent: 'center', alignItems:'center' },
   logo: { width: 44, height: 44, borderRadius: 8 },
@@ -405,35 +432,38 @@ const styles = StyleSheet.create({
   name: { fontSize: 13, color: '#6b7280', marginTop: 2 },
   cardRight: { marginLeft: 8, alignItems: 'flex-end' },
   shares: { fontSize: 14, fontWeight: '600', color: '#111' },
-  searchContainer: { paddingHorizontal: 16, paddingTop:12, paddingBottom: 5,color:'#111' },
+  searchContainer: { paddingHorizontal: 12, paddingTop:12, paddingBottom: 5,color:'#111' },
   searchInputContainer: { flex: 1, position: 'relative' },
   searchInput: { width:'100%', backgroundColor: '#fff', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, elevation: 1, color: '#111' },
   searchRow: { position:'relative', flexDirection: 'row', alignItems: 'center' },
   searchInputWithIcon: { paddingRight: 44 },
   searchIcon:{ position:'absolute', right:12, top:0, bottom:0, justifyContent:'center', alignItems:'center', padding:8 },
-  addButton:{ marginLeft:8, backgroundColor:'#0b3d91', borderRadius:10, paddingHorizontal:14, paddingVertical:10, justifyContent:'center', alignItems:'center' },
-  addButtonText:{ color:'#fff', fontWeight:'700', fontSize:14 },
+  addButton:{ marginLeft:10, backgroundColor:'#0b3d91', borderRadius:12, minWidth:112, paddingHorizontal:22, paddingVertical:10, justifyContent:'center', alignItems:'center' },
+  addButtonText:{ color:'#fff', fontWeight:'800', fontSize:15 },
   editButton:{ marginTop:8, backgroundColor:'#eef2ff', paddingHorizontal:8, paddingVertical:6, borderRadius:8 },
   editText:{ color:'#0b3d91', fontWeight:'700', fontSize:12 },
-  modalOverlay:{ flex:1, backgroundColor:'rgba(0,0,0,0.4)', justifyContent:'center', alignItems:'center' },
-  modalCard:{ width:'80%', backgroundColor:'#fff', padding:20, borderRadius:12, alignItems:'center' },
-  modalText:{ fontSize:18, fontWeight:'700', marginBottom:12 },
-  modalInputContainer:{ width:'100%', marginBottom:4 },
-  entriesScrollView:{ width:'100%', maxHeight:280 },
+  modalOverlay:{ flex:1, backgroundColor:'rgba(15,23,42,0.45)', justifyContent:'center', alignItems:'center', padding:16 },
+  modalCard:{ width:'100%', maxWidth:520, backgroundColor:'#fff', padding:18, borderRadius:18, borderWidth:1, borderColor:'#e7edf5', shadowColor:'#0f172a', shadowOffset:{ width:0, height:14 }, shadowOpacity:0.12, shadowRadius:24, elevation:8 },
+  modalHeader:{ width:'100%', flexDirection:'row', alignItems:'center', justifyContent:'space-between', marginBottom:12 },
+  modalIconClose:{ width:32, height:32, borderRadius:16, backgroundColor:'#f1f5f9', alignItems:'center', justifyContent:'center' },
+  modalIconCloseText:{ color:'#475569', fontSize:20, fontWeight:'700', lineHeight:24 },
+  modalText:{ fontSize:18, fontWeight:'800', color:'#0f172a' },
+  modalInputContainer:{ width:'100%', marginBottom:8 },
+  entriesScrollView:{ width:'100%', maxHeight:300 },
   entriesScrollContent:{ paddingBottom:8 },
-  modalLabel:{ fontSize:14, fontWeight:'600', marginBottom:6, color:'#333' },
-  modalInput:{ width:'100%', borderWidth:1, borderColor:'#ddd', borderRadius:8, padding:10, fontSize:16, color:'#333', marginBottom:8 },
-  addList:{ width:'100%', maxHeight:240, marginBottom:8 },
-  addListItem:{ paddingHorizontal:12, paddingVertical:10, borderBottomWidth:1, borderBottomColor:'#f0f0f0', width:'100%' },
-  ddSymbol:{ fontSize:14, fontWeight:'700' },
-  ddName:{ fontSize:12, color:'#6b7280' },
-  modalSave:{ width:'100%', marginTop:8, paddingVertical:10, paddingHorizontal:14, borderRadius:8, backgroundColor:'#10b981', alignItems:'center' },
-  modalSaveDisabled:{ backgroundColor:'#9ca3af' },
-  modalSaveText:{ color:'#fff', fontWeight:'700' },
-  modalClose:{ width:'100%', marginTop:8, paddingVertical:10, paddingHorizontal:14, borderRadius:8, backgroundColor:'#0b3d91', alignItems:'center' },
-  modalCloseText:{ color:'#fff', fontWeight:'700' },
-  modalDelete:{ width:'100%', marginTop:8, paddingVertical:10, paddingHorizontal:14, borderRadius:8, backgroundColor:'#ef4444', alignItems:'center' },
-  modalDeleteText:{ color:'#fff', fontWeight:'700' },
+  modalLabel:{ fontSize:13, fontWeight:'700', marginBottom:6, color:'#334155' },
+  modalInput:{ width:'100%', borderWidth:1, borderColor:'#dbe4ee', borderRadius:12, paddingHorizontal:12, paddingVertical:10, fontSize:15, color:'#0f172a', marginBottom:8, backgroundColor:'#f8fafc' },
+  addList:{ width:'100%', maxHeight:250, marginBottom:10 },
+  addListItem:{ paddingHorizontal:12, paddingVertical:11, borderWidth:1, borderColor:'#edf2f7', borderRadius:10, width:'100%', backgroundColor:'#f8fafc', marginBottom:8 },
+  ddSymbol:{ fontSize:14, fontWeight:'800', color:'#0f172a' },
+  ddName:{ fontSize:12, color:'#64748b', marginTop:2 },
+  modalSave:{ width:'100%', marginTop:8, paddingVertical:12, paddingHorizontal:14, borderRadius:12, backgroundColor:'#0b3d91', alignItems:'center' },
+  modalSaveDisabled:{ backgroundColor:'#94a3b8' },
+  modalSaveText:{ color:'#fff', fontWeight:'800' },
+  modalClose:{ width:'100%', marginTop:8, paddingVertical:12, paddingHorizontal:14, borderRadius:12, backgroundColor:'#f1f5f9', borderWidth:1, borderColor:'#dbe4ee', alignItems:'center' },
+  modalCloseText:{ color:'#334155', fontWeight:'700' },
+  modalDelete:{ width:'100%', marginTop:8, paddingVertical:12, paddingHorizontal:14, borderRadius:12, backgroundColor:'#fff1f2', borderWidth:1, borderColor:'#fecdd3', alignItems:'center' },
+  modalDeleteText:{ color:'#be123c', fontWeight:'700' },
   entryBlock:{ width:'100%', borderTopWidth:1, borderTopColor:'#f0f0f0', paddingTop:10, marginBottom:4 },
   entryHeaderRow:{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:8 },
   entryLabel:{ fontSize:13, fontWeight:'700', color:'#0b3d91' },
