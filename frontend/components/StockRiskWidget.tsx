@@ -10,11 +10,23 @@ type StockRiskResponse = {
   cluster: number;
   risk_level: string;
   metrics: {
-    log_variances: number;
     volatility: number;
-    var_95: number;
+    max_drawdown: number;
+    annual_return: number;
   };
   message?: string;
+};
+
+export const CATEGORY_COLORS = {
+	'Very Low Risk': '#22c55e',
+	'Low Risk': '#84cc16',
+	'Moderate Risk': '#eab308',
+	'High Risk': '#f97316',
+	'Very High Risk': '#ef4444',
+}
+
+const getRiskColor = (riskLevel: string) => {
+  return CATEGORY_COLORS[riskLevel.trim() as keyof typeof CATEGORY_COLORS];
 };
 
 export default function StockRiskWidget() {
@@ -90,6 +102,8 @@ export default function StockRiskWidget() {
     );
   };
 
+  const riskColor = result ? getRiskColor(result.risk_level) : '#0b3d91';
+
   return (
     <View style={styles.card}>
       <Text style={styles.title}>Stock Risk Checker</Text>
@@ -118,15 +132,16 @@ export default function StockRiskWidget() {
       {!!error && <Text style={styles.error}>{error}</Text>}
 
       {result && (
-        <View style={styles.resultCard}>
+        <View style={[styles.resultCard, { borderLeftColor: riskColor }]}>
           <Text style={styles.stockTitle}>
             {result.symbol} - {result.company_name}
           </Text>
-          <Text style={styles.riskLevel}>{result.risk_level}</Text>
+          <Text style={[styles.riskLevel, { color: riskColor }]}>{result.risk_level}</Text>
           <Text style={styles.meta}>Sector: {result.sector}</Text>
+
           <Text style={styles.meta}>Annualised Volatility: {result.metrics.volatility}%</Text>
-          <Text style={styles.meta}>VaR 95: {result.metrics.var_95}%</Text>
-          <Text style={styles.meta}>Cluster: {result.cluster}</Text>
+          <Text style={styles.meta}>Max Drawdown: {result.metrics.max_drawdown}%</Text>
+          <Text style={styles.meta}>Annual Returns: {result.metrics.annual_return}%</Text>
 
           <View style={styles.simSection}>
             <Text style={styles.simTitle}>Simulate Impact</Text>
@@ -160,7 +175,7 @@ export default function StockRiskWidget() {
                 {renderMetric("Volatility", impact.impact.volatility)}
                 {renderMetric("VaR (95%)", impact.impact.var_95)}
                 {renderMetric("Max Drawdown", impact.impact.max_drawdown)}
-                {renderMetric("Annual Return", impact.impact.annual_return)}
+                {/* {renderMetric("Annual Return", impact.impact.annual_return)} */}
                 {renderMetric("Sharpe Ratio", impact.impact.sharpe)}
               </View>
             )}

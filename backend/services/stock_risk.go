@@ -21,9 +21,9 @@ type StockRiskCheckResponse struct {
 	Cluster     int    `json:"cluster"`
 	RiskLevel   string `json:"risk_level"`
 	Metrics     struct {
-		LogVariances float64 `json:"log_variances"`
 		Volatility   float64 `json:"volatility"`
-		Var95        float64 `json:"var_95"`
+		MaxDrawdown  float64 `json:"max_drawdown"`
+		AnnualReturn float64 `json:"annual_return"`
 	} `json:"metrics"`
 	Message string `json:"message,omitempty"`
 }

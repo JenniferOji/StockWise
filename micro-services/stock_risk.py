@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
-import yfinance as yf
 import os
 import numpy as np
 import pandas as pd
 import pickle
+import json
 
 router = APIRouter()
 
@@ -24,6 +24,24 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 SCALER_PATH = os.path.join(BASE_DIR, "models", "stock_scaler.pkl")
 GMM_PATH = os.path.join(BASE_DIR, "models", "gmm_model.pkl")
+CLUSTER_RISK_PATH = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
+FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
+STOCK_META_PATH = os.path.join(BASE_DIR, "data", "stocks.json")
+
+df_features = pd.read_csv(FEATURES_PATH)
+df_features["ticker"] = df_features["ticker"].str.upper()
+feature_map = df_features.set_index("ticker").to_dict(orient="index")
+
+with open(STOCK_META_PATH, "r") as f:
+    stock_list = json.load(f)
+
+stock_meta = {
+    item["symbol"].upper(): {
+        "company_name": item["companyName"],
+        "sector": item["sector"],
+    }
+    for item in stock_list
+}
 
 with open(SCALER_PATH, "rb") as f:
     scaler = pickle.load(f)
@@ -31,10 +49,8 @@ with open(SCALER_PATH, "rb") as f:
 with open(GMM_PATH, "rb") as f:
     gmm = pickle.load(f)
 
-CLUSTER_RISK_PATH = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
 with open(CLUSTER_RISK_PATH, "rb") as f:
     CLUSTER_CATEGORY = pickle.load(f)
-
 
 def predict_cluster(row_dict: dict[str, float]) -> int:
     features = np.array([[
@@ -45,74 +61,31 @@ def predict_cluster(row_dict: dict[str, float]) -> int:
     scaled_features = scaler.transform(features)
     return int(gmm.predict(scaled_features)[0])
 
-
-def calculate_max_drawdown_from_returns(simple_returns: pd.Series) -> float:
-    cumulative = (1 + simple_returns).cumprod()
-    peak = cumulative.cummax()
-    drawdown = (cumulative - peak) / peak
-    return float(drawdown.min())
-
-
 def calculate_dynamic_features(symbol: str):
-    ticker = yf.Ticker(symbol)
-    history = ticker.history(period="1y", auto_adjust=True)
+    symbol = symbol.upper().strip()
 
-    if history.empty or "Close" not in history.columns:
-        raise ValueError("No price history found for this ticker")
+    features = feature_map.get(symbol)
+    if not features:
+        raise ValueError("Ticker not found in dataset")
 
-    close_prices = history["Close"].dropna()
-
-    if len(close_prices) < 30:
-        raise ValueError("Not enough price history to calculate risk metrics")
-
-    # IMPORTANT: must match training pipeline exactly
-    simple_returns = close_prices.pct_change().dropna()
-
-    if len(simple_returns) == 0:
-        raise ValueError("Could not calculate returns for this ticker")
-
-    # match training exactly
-    variance = float(simple_returns.var() * 252)
-
-    if variance <= 0:
-        raise ValueError("Variance must be greater than zero")
-
-    log_variances = float(np.log1p(np.clip(variance, 0, 2)))
-    volatility = float(simple_returns.std() * np.sqrt(252))
-    var_95 = float(abs(np.percentile(simple_returns, 5)))
-
-    max_drawdown = calculate_max_drawdown_from_returns(simple_returns)
-
-    annual_return = float(simple_returns.mean() * 252)
-
-    risk_free_rate = 0.02
-    sharpe = 0.0
-    if volatility != 0:
-        sharpe = float((annual_return - risk_free_rate) / volatility)
-
-    info = {}
-    try:
-        info = ticker.info or {}
-    except Exception:
-        info = {}
+    meta = stock_meta.get(symbol)
+    if not meta:
+        raise ValueError("Ticker metadata not found")
 
     return {
-        "symbol": symbol.upper(),
-        "company_name": info.get("longName") or info.get("shortName") or symbol.upper(),
-        "sector": info.get("sector") or "Unknown",
-        "Log_Variances": log_variances,
-        "Volatility": volatility,
-        "VaR_95": var_95,
-        "max_drawdown": max_drawdown,
-        "annual_return": annual_return,
-        "sharpe": sharpe,
-        "simple_returns": simple_returns,
+        "symbol": symbol,
+        "company_name": meta["company_name"],
+        "sector": meta["sector"],
+        "Log_Variances": float(features["Log_Variances"]),
+        "Volatility": float(features["Volatility"]),
+        "VaR_95": float(features["VaR_95"]),
+        "max_drawdown": float(features["max_drawdown"]),
+        "annual_return": float(features["returns"]),
+        "sharpe": float(features["Sharpe"]),
     }
-
 
 def map_cluster_to_risk(cluster_label: int):
     return CLUSTER_CATEGORY.get(cluster_label, "Unknown")
-
 
 def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
     if not stocks:
@@ -124,7 +97,6 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
     returns = []
     sharpes = []
     weights = []
-    return_series = []
 
     for stock in stocks:
         try:
@@ -140,7 +112,6 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
         returns.append(features["annual_return"])
         sharpes.append(features["sharpe"])
         weights.append(qty)
-        return_series.append(features["simple_returns"].rename(stock.symbol))
 
     if not vols:
         return None
@@ -160,12 +131,6 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
     portfolio_vol = float(np.sum(vols * weights))
     portfolio_var = float(np.sum(vars_ * weights))
     portfolio_drawdown = float(np.min(drawdowns))
-
-    if return_series:
-        aligned_returns = pd.concat(return_series, axis=1, join="inner").dropna()
-        if not aligned_returns.empty:
-            weighted_portfolio_returns = aligned_returns.mul(weights, axis=1).sum(axis=1)
-            portfolio_drawdown = calculate_max_drawdown_from_returns(weighted_portfolio_returns)
     portfolio_return = float(np.sum(returns * weights))
     portfolio_sharpe = float(np.sum(sharpes * weights))
 
@@ -177,11 +142,12 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
         "sharpe": round(portfolio_sharpe, 3),
     }
 
-
 @router.post("/api/check-stock-risk")
 def check_stock_risk(request: StockRiskCheckRequest):
     try:
-        stock_features = calculate_dynamic_features(request.symbol)
+        symbol = request.symbol.upper().strip()
+
+        stock_features = calculate_dynamic_features(symbol)
 
         cluster_label = predict_cluster({
             "Log_Variances": stock_features["Log_Variances"],
@@ -199,9 +165,9 @@ def check_stock_risk(request: StockRiskCheckRequest):
             "cluster": cluster_label,
             "risk_level": risk_label,
             "metrics": {
-                "log_variances": round(stock_features["Log_Variances"], 6),
                 "volatility": round(stock_features["Volatility"] * 100, 2),
-                "var_95": round(stock_features["VaR_95"] * 100, 2),
+                "max_drawdown": round(stock_features["max_drawdown"] * 100, 2),
+                "annual_return": round(stock_features["annual_return"] * 100, 2),
             },
             "message": f"{stock_features['symbol']} is classified as {risk_label}",
         }
@@ -209,8 +175,6 @@ def check_stock_risk(request: StockRiskCheckRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
-# this endpoint simulates adding a new stock to the portfolio and shows the change in risk metrics - useful for users to understand the impact of adding a new stock
 @router.post("/api/simulate-stock")
 def simulate_stock(request: SimulateStockRequest):
     try:
