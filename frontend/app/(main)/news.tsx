@@ -27,6 +27,7 @@ export default function News() {
   const [selectedStock, setSelectedStock] = useState<string>('all');
   const prevParamRef = useRef<string | undefined>(undefined);
   const hasMountedRef = useRef(false);
+  const [lastFetched, setLastFetched] = useState<number>(0);
 
   const getSentimentColor = (sentiment: string) => {
     const value = (sentiment || '').toLowerCase();
@@ -35,17 +36,24 @@ export default function News() {
     return '#f59e0b';
   };
 
-  // function to open the article in browser when the card is pressed
   const openArticle = (url: string) => {
     if (url) {
       Linking.openURL(url);
     }
   };
 
-  // function to load news from the backend  
-  const loadStockNews = async () => {
+  const loadStockNews = async (force = false) => {
     try {
-      setLoading(true);
+      const now = Date.now();
+
+      if (!force && now - lastFetched < 30000) {
+        return;
+      }
+
+      if (force || news.length === 0) {
+        setLoading(true);
+      }
+
       const userJson = await storage.getItem('user');
 
       if (userJson) {
@@ -62,30 +70,37 @@ export default function News() {
         );
 
         setHoldings(uniqueStocks);
-
       } else {
         setNews([]);
         setHoldings([]);
       }
+
+      setLastFetched(now);
+
     } catch (err) {
       setError('Failed to load news');
       setNews([]);
       setHoldings([]);
     } finally {
-      setLoading(false);
+      if (force || news.length === 0) {
+        setLoading(false);
+      }
     }
   };
 
+  useEffect(() => {
+    loadStockNews(true);
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
-      loadStockNews();
-    }, [])
+      loadStockNews(false);
+    }, [lastFetched])
   );
 
   useEffect(() => {
     const routeSymbol = route.params?.selectedStock;
 
-    // ignoring the first render to prevent stale parameters
     if (!hasMountedRef.current) {
       hasMountedRef.current = true;
       return;
@@ -100,7 +115,6 @@ export default function News() {
     setSelectedStock(routeSymbol);
   }, [route.params?.selectedStock]);
 
-  // filtering the news by the selected stock
   const filteredNews = selectedStock === 'all'
     ? news
     : news.filter((item) => item.symbol === selectedStock);
@@ -112,7 +126,6 @@ export default function News() {
         <View style={styles.pageShell}>
 
         <View style={styles.header}>
-          {/* <Text style={styles.pageTitle}>Market News</Text> */}
           <Text style={styles.pageSubtitle}>
             Your stock news with machine-learned classified sentiment.
           </Text>
@@ -142,7 +155,7 @@ export default function News() {
           </View>
         </View>
 
-        {loading ? (
+        {loading && news.length === 0 ? (
           <View style={{ alignItems: 'center', marginTop: 32 }}>
             <Text style={{ color: '#0b3d91', fontSize: 16, fontWeight: '600' }}>
               Loading news articles...

@@ -21,6 +21,7 @@ export default function SentimentPage() {
   const [sentiment, setSentiment] = useState<SentimentMap>({});
   const [loading, setLoading] = useState(true);
   const [userHasStocks, setUserHasStocks] = useState(false);
+  const [lastFetched, setLastFetched] = useState<number>(0);
 
   const getSentimentColor = (label?: string) => {
     if (label === "positive") return "#00c853";
@@ -28,9 +29,16 @@ export default function SentimentPage() {
     return "#ff9100";
   };
 
-  const loadData = async () => {
+  const loadData = async (force = false) => {
     try {
+      const now = Date.now();
+
+      if (!force && now - lastFetched < 30000) {
+        return;
+      }
+
       setLoading(true);
+
       const userJson = await storage.getItem("user");
       if (!userJson) {
         setUserHasStocks(false);
@@ -67,6 +75,8 @@ export default function SentimentPage() {
         .filter(Boolean);
 
       setHoldings(mappedStocks);
+      setLastFetched(now);
+
     } catch (error) {
       console.error("Failed to load sentiment data", error);
     } finally {
@@ -74,11 +84,15 @@ export default function SentimentPage() {
     }
   };
 
-    useFocusEffect(
-      useCallback(() => {
-        loadData();
-      }, [])
-    );
+  useEffect(() => {
+    loadData(true);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData(false);
+    }, [lastFetched])
+  );
 
   const groupedStocks = useMemo(() => {
     const groups: any = {

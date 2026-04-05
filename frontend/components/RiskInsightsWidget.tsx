@@ -20,13 +20,14 @@ type RiskMetrics = {
 type StockRiskCategories = StockRiskCategoriesLike & {
   success: boolean
   total: number
+  portfolio_risk: string
 }
-
 
 export default function RiskInsightsWidget() {
   const [riskData, setRiskData] = useState<RiskMetrics | null>(null)
   const [stockRiskData, setStockRiskData] = useState<StockRiskCategories | null>(null)
   const [riskPreference, setRiskPreference] = useState('Moderate Risk')
+  const [portfolioRisk, setPortfolioRisk] = useState<string>('')
   const [selectedMetric, setSelectedMetric] = useState<any>(null)
   const [sortMetric, setSortMetric] = useState<'Volatility' | 'Drawdown' | 'Return' | null>(null)
   const [sortDirection, setSortDirection] = useState<'High to Low' | 'Low to High'>('High to Low')
@@ -86,9 +87,13 @@ export default function RiskInsightsWidget() {
       if (userJson) {
         const user = JSON.parse(userJson)
         const [metricsData, categoriesData] = await Promise.all([getRiskMetrics(user.ID), getStockRiskCategories(user.ID)])
+        
         if (metricsData?.success) setRiskData(metricsData)
         else setError('Failed to load risk metrics')
-        if (categoriesData?.success) setStockRiskData(categoriesData)
+        if (categoriesData?.success) {
+          setStockRiskData(categoriesData)
+          setPortfolioRisk(categoriesData.portfolio_risk)
+        }
         setRiskPreference(user.Risk)
       } else setError('User not found')
       setLoading(false)
@@ -104,6 +109,7 @@ export default function RiskInsightsWidget() {
     ? 'Showing default order.'
     : `Sorted by ${sortMetric} (${sortDirection}).`
   const hasMetricSelected = sortMetric !== null
+  const portfolioRiskColor = CATEGORY_COLORS[portfolioRisk as keyof typeof CATEGORY_COLORS] || '#0b3d91'
 
   function getSortedStocks(stocks: StockRiskLike[]) {
     const sortedStocks = [...stocks]
@@ -125,6 +131,33 @@ export default function RiskInsightsWidget() {
   return (
     <View style={styles.card}>
       <View style={styles.valueRow}><Text style={styles.valueLabel}>Calculated over a one year period using historical data</Text></View>
+      {portfolioRisk && (
+        <View
+          style={[
+            styles.portfolioRiskCard,
+            {
+              borderLeftColor: portfolioRiskColor,
+              shadowColor: portfolioRiskColor,
+            },
+          ]}
+        >
+          <View style={styles.portfolioRiskTop}>
+            {/* <View style={[styles.portfolioRiskDot, { backgroundColor: portfolioRiskColor }]} /> */}
+            <Text style={styles.portfolioRiskLabel}>Overall Portfolio Risk</Text>
+          </View>
+          <View
+            style={[
+              styles.portfolioRiskBadge,
+              {
+                backgroundColor: `${portfolioRiskColor}1A`,
+                borderColor: `${portfolioRiskColor}55`,
+              },
+            ]}
+          >
+            <Text style={[styles.portfolioRiskValue, { color: portfolioRiskColor }]}>{portfolioRisk}</Text>
+          </View>
+        </View>
+      )}
 
       <View style={styles.metricsGrid}>
         <MetricBox label="Volatility" value={riskData.metrics.volatility} desc="How much your portfolio value changes over time." onPress={() => setSelectedMetric({ label: 'Volatility', value: riskData.metrics.volatility })} />
@@ -351,4 +384,53 @@ const styles = StyleSheet.create({
   stockMetric: { fontSize: 11, color: '#475569', fontWeight: '600' },
   emptyCategoryText: { fontSize: 12, color: '#94a3b8' },
   error: { color: '#ef4444', fontWeight: '600' },
+  portfolioRiskCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 14,
+    borderLeftWidth: 4,
+    borderLeftColor: '#0b3d91',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 3,
+  },
+
+  portfolioRiskTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    gap: 8,
+  },
+
+  portfolioRiskDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+
+  portfolioRiskLabel: {
+    fontSize: 11,
+    color: '#475569',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+
+  portfolioRiskBadge: {
+    alignSelf: 'flex-start',
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+
+  portfolioRiskValue: {
+    fontSize: 18,
+    fontWeight: '800',
+  },
+
 })

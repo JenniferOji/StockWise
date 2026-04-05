@@ -128,7 +128,7 @@ export default function DiversificationWidget() {
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>Diversification Suggestions</Text>
+      {/* <Text style={styles.title}>Diversification Suggestions</Text> */}
       <Text style={styles.subtitle}>{risk} Preference</Text>
 
       {volatilityDifference != null && (
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   scrollContainer: { flex: 1 },
   card: { backgroundColor: '#f8fafc', borderRadius: 16, padding: 20, marginVertical: 12, shadowColor: '#0b3d91', shadowOpacity: 0.08, shadowRadius: 8, elevation: 3, borderWidth: 1, borderColor: '#e0e7ef' },
   title: { fontSize: 22, fontWeight: '700', color: '#0b3d91', marginBottom: 5, textAlign: 'center', letterSpacing: 0.2 },
-  subtitle: { fontSize: 15, fontWeight: '600', color: '#404348', marginBottom: 20, textAlign: 'center', letterSpacing: 0.2 },
+  subtitle: { fontSize: 22, fontWeight: '600', color: '#000000', marginBottom: 24, textAlign: 'center', letterSpacing: 0.2 },
   loadingText: { marginTop: 10, fontSize: 14, color: '#64748b', textAlign: 'center' },
   error: { color: '#dc2626', fontSize: 14, textAlign: 'center', padding: 10 },
   noDataText: { fontSize: 14, color: '#64748b', textAlign: 'center', marginTop: 10 },

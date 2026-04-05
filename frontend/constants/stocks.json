@@ -1598,5 +1598,405 @@
     "purchasePrice":0,
     "sector":"Financial Services",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FITB.png"
+  },
+  {
+    "symbol":"ALNY",
+    "companyName":"Alnylam Pharmaceuticals, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Healthcare",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ALNY.png"
+  },
+  {
+    "symbol":"ARM",
+    "companyName":"Arm Holdings plc",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ARM.png"
+  },
+  {
+    "symbol":"ASML",
+    "companyName":"ASML Holding N.V.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ASML.png"
+  },
+  {
+    "symbol":"TEAM",
+    "companyName":"Atlassian Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TEAM.png"
+  },
+  {
+    "symbol":"CCEP",
+    "companyName":"Coca-Cola Europacific Partners PLC",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Defensive",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CCEP.png"
+  },
+  {
+    "symbol":"FER",
+    "companyName":"Ferrovial SE",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FER.png"
+  },
+  {
+    "symbol":"FTNT",
+    "companyName":"Fortinet, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FTNT.png"
+  },
+  {
+    "symbol":"GEHC",
+    "companyName":"GE HealthCare Technologies Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Healthcare",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GEHC.png"
+  },
+  {
+    "symbol":"GILD",
+    "companyName":"Gilead Sciences, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Healthcare",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GILD.png"
+  },
+  {
+    "symbol":"HON",
+    "companyName":"Honeywell International Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HON.png"
+  },
+  {
+    "symbol":"IDXX",
+    "companyName":"IDEXX Laboratories, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Healthcare",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/IDXX.png"
+  },
+  {
+    "symbol":"INSM",
+    "companyName":"Insmed Incorporated",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Healthcare",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/INSM.png"
+  },
+  {
+    "symbol":"INTC",
+    "companyName":"Intel Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/INTC.png"
+  },
+  {
+    "symbol":"INTU",
+    "companyName":"Intuit Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/INTU.png"
+  },
+  {
+    "symbol":"ISRG",
+    "companyName":"Intuitive Surgical, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Healthcare",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ISRG.png"
+  },
+  {
+    "symbol":"KDP",
+    "companyName":"Keurig Dr Pepper Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Defensive",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KDP.png"
+  },
+  {
+    "symbol":"KLAC",
+    "companyName":"KLA Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KLAC.png"
+  },
+  {
+    "symbol":"KHC",
+    "companyName":"The Kraft Heinz Company",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Defensive",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KHC.png"
+  },
+  {
+    "symbol":"LRCX",
+    "companyName":"Lam Research Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LRCX.png"
+  },
+  {
+    "symbol":"LIN",
+    "companyName":"Linde plc",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Basic Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LIN.png"
+  },
+  {
+    "symbol":"MAR",
+    "companyName":"Marriott International, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Cyclical",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MAR.png"
+  },
+  {
+    "symbol":"MRVL",
+    "companyName":"Marvell Technology, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MRVL.png"
+  },
+  {
+    "symbol":"MELI",
+    "companyName":"MercadoLibre, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Cyclical",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MELI.png"
+  },
+  {
+    "symbol":"META",
+    "companyName":"Meta Platforms, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/META.png"
+  },
+  {
+    "symbol":"MCHP",
+    "companyName":"Microchip Technology Incorporated",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MCHP.png"
+  },
+  {
+    "symbol":"MU",
+    "companyName":"Micron Technology, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MU.png"
+  },
+  {
+    "symbol":"MSFT",
+    "companyName":"Microsoft Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MSFT.png"
+  },
+  {
+    "symbol":"MSTR",
+    "companyName":"Strategy Inc",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MSTR.png"
+  },
+  {
+    "symbol":"MDLZ",
+    "companyName":"Mondelez International, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Defensive",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MDLZ.png"
+  },
+  {
+    "symbol":"MPWR",
+    "companyName":"Monolithic Power Systems, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MPWR.png"
+  },
+  {
+    "symbol":"MNST",
+    "companyName":"Monster Beverage Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Defensive",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MNST.png"
+  },
+  {
+    "symbol":"NFLX",
+    "companyName":"Netflix, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NFLX.png"
+  },
+  {
+    "symbol":"NVDA",
+    "companyName":"NVIDIA Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NVDA.png"
+  },
+  {
+    "symbol":"NXPI",
+    "companyName":"NXP Semiconductors N.V.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NXPI.png"
+  },
+  {
+    "symbol":"ORLY",
+    "companyName":"O'Reilly Automotive, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Cyclical",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ORLY.png"
+  },
+  {
+    "symbol":"ODFL",
+    "companyName":"Old Dominion Freight Line, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ODFL.png"
+  },
+  {
+    "symbol":"PCAR",
+    "companyName":"PACCAR Inc",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PCAR.png"
+  },
+  {
+    "symbol":"PLTR",
+    "companyName":"Palantir Technologies Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PLTR.png"
+  },
+  {
+    "symbol":"PANW",
+    "companyName":"Palo Alto Networks, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PANW.png"
+  },
+  {
+    "symbol":"PAYX",
+    "companyName":"Paychex, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PAYX.png"
+  },
+  {
+    "symbol":"PYPL",
+    "companyName":"PayPal Holdings, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financial Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PYPL.png"
+  },
+  {
+    "symbol":"PDD",
+    "companyName":"PDD Holdings Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Cyclical",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PDD.png"
+  },
+  {
+    "symbol":"PEP",
+    "companyName":"PepsiCo, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Defensive",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PEP.png"
+  },
+  {
+    "symbol":"QCOM",
+    "companyName":"QUALCOMM Incorporated",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/QCOM.png"
+  },
+  {
+    "symbol":"REGN",
+    "companyName":"Regeneron Pharmaceuticals, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Healthcare",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/REGN.png"
+  },
+  {
+    "symbol":"ROP",
+    "companyName":"Roper Technologies, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ROP.png"
+  },
+  {
+    "symbol":"ROST",
+    "companyName":"Ross Stores, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Cyclical",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ROST.png"
+  },
+  {
+    "symbol":"STX",
+    "companyName":"Seagate Technology Holdings plc",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/STX.png"
+  },
+  {
+    "symbol":"SHOP",
+    "companyName":"Shopify Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SHOP.png"
+  },
+  {
+    "symbol":"SBUX",
+    "companyName":"Starbucks Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Cyclical",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SBUX.png"
   }
 ]

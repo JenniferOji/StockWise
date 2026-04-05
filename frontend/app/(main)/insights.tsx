@@ -23,32 +23,32 @@ type MenuSection = {
 const menu: MenuSection[] = [
     { 
         title: "Performance Analysis",
-        subtitle: "Track returns, gains and portfolio performance",
+        subtitle: "Review annual return, drawdown, and overall portfolio growth trends",
         icon: "show-chart",
     }, 
     { 
         title: "Risk Metrics",
-        subtitle: "Understand volatility, drawdowns and risk profile",
+        subtitle: "Measure volatility, drawdown, and value-at-risk across your holdings",
         icon: "warning-amber",
     },
     { 
         title: "Stock Allocation",
-        subtitle: "View sector exposure and portfolio composition",
+        subtitle: "Break down your holdings by sector and allocation percentage",
         icon: "pie-chart-outline",
     },
     { 
         title: "Portfolio Optimisation Suggestion",
-        subtitle: "Discover the stocks that imrpoves your portfolio based on your risk preferece",
+        subtitle: "Get model-driven stock additions aligned to your selected risk preference",
         icon: "auto-graph",
     },
     { 
         title: "Explore Opportunities",
-        subtitle: "Discover stocks within your risk profile to expand your portfolio",
+        subtitle: "Find additional stocks in your risk band to diversify your portfolio",
         icon: "lightbulb",
     },
     { 
         title: "Stock Risk Checker",
-        subtitle: "Analyse the risk level of any stock ticker",
+        subtitle: "Check a ticker's computed risk tier, volatility, and drawdown metrics",
         icon: "search",
     },
 ];

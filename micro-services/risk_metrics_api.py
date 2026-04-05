@@ -55,6 +55,7 @@ class StockRiskCategoryResponse(BaseModel):
     success: bool
     categories: dict[str, List[StockRiskCategory]]
     total: int
+    portfolio_risk: str
 
 # predicts the cluster label for a stock using the 3 features the model was trained on
 def predict_cluster_label(log_variance, volatility, var_95):
@@ -112,7 +113,6 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
             "max_drawdown": f"{portfolio_drawdown:.2f}%",
             "sharpe": f"{portfolio_sharpe:.3f}",
             "var_95": f"{portfolio_var_95:.2f}%"
-
         },
         "portfolio_value": 0
     }
@@ -137,6 +137,8 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
         "Very High Risk": [],
     }
 
+    cluster_counts = {}
+
     # predict the cluster label for each stock and assign the risk category
     for ticker in tickers:
 
@@ -152,8 +154,9 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
             features["VaR_95"],
         )
 
-        # mapping the cluster label (0,1,2...) to the label mapping  to low/moderate 
         category = CLUSTER_CATEGORY.get(cluster_label, "Moderate Risk")
+
+        cluster_counts[category] = cluster_counts.get(category, 0) + 1
 
         categories[category].append(
             StockRiskCategory(
@@ -169,10 +172,16 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
         
     total = sum(len(v) for v in categories.values())
 
+    if not cluster_counts:
+        overall_risk = "Unknown"
+    else:
+        overall_risk = max(cluster_counts, key=cluster_counts.get)
+
     print("API returning categories:", categories)
 
     return {
         "success": True,
         "categories": categories,
         "total": total,
+        "portfolio_risk": overall_risk,
     }

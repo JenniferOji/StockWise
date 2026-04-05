@@ -39,9 +39,10 @@ type StockRiskCategory struct {
 }
 
 type StockRiskCategoriesResponse struct {
-	Success    bool                           `json:"success"`
-	Categories map[string][]StockRiskCategory `json:"categories"`
-	Total      int                            `json:"total"`
+	Success        bool                           `json:"success"`
+	Categories     map[string][]StockRiskCategory `json:"categories"`
+	Total          int                            `json:"total"`
+	PortfolioRisk  string                         `json:"portfolio_risk"`
 }
 
 // either returns the risk metrics respinse or an error
