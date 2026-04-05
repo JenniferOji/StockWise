@@ -23,7 +23,7 @@ type MenuSection = {
 const menu: MenuSection[] = [
     { 
         title: "Performance Analysis",
-        subtitle: "Review annual return, drawdown, and overall portfolio growth trends",
+        subtitle: "Review overall portfolio return, and an individual stock breakdown",
         icon: "show-chart",
     }, 
     { 
@@ -38,7 +38,7 @@ const menu: MenuSection[] = [
     },
     { 
         title: "Portfolio Optimisation Suggestion",
-        subtitle: "Get model-driven stock additions aligned to your selected risk preference",
+        subtitle: "Get model-driven stock additions to optimise your portfolio aligned with your selected risk preference",
         icon: "auto-graph",
     },
     { 

@@ -106,7 +106,7 @@ export default function StockRiskWidget() {
 
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>Stock Risk Checker</Text>
+      {/* <Text style={styles.title}>Stock Risk Checker</Text> */}
       <Text style={styles.subtitle}>Analyse the risk level of any stock ticker</Text>
 
       <View style={styles.inputRow}>

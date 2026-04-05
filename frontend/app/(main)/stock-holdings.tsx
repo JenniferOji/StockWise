@@ -172,7 +172,10 @@ export default function StockHoldings() {
               setAddModalVisible(true);
             }}
           >
-            <Text style={styles.addButtonText}>+ Add</Text>
+            <View style={styles.addButtonContent}>
+              <IconSymbol name="plus" size={14} color="#fff" />
+              <Text style={styles.addButtonText}>Add</Text>
+            </View>
           </Pressable>
         </View>
       </View>
@@ -182,6 +185,18 @@ export default function StockHoldings() {
         keyExtractor={(item) => (item as any).dbId?.toString() || item.symbol}
         contentContainerStyle={styles.list}
         style={[styles.pageShell, styles.listWrapper]}
+        ListEmptyComponent={
+          <View style={styles.emptyStateCard}>
+            <Text style={styles.emptyStateTitle}>
+              {displayed.length === 0 ? 'No stocks in your portfolio yet.' : 'No matching stocks found.'}
+            </Text>
+            <Text style={styles.emptyStateSubtitle}>
+              {displayed.length === 0
+                ? 'Click the + Add button to get started.'
+                : 'Try searching with a different ticker or company name.'}
+            </Text>
+          </View>
+        }
         renderItem={({ item }) => {
           return (
             <View style={styles.card}>
@@ -296,6 +311,10 @@ export default function StockHoldings() {
             </View>
             
             <View style={styles.modalInputContainer}>
+              <Text style={styles.entryHelperText}>
+                If you bought this stock in multiple installments, add each purchase using the + button.
+                You can also enter your average purchase price with your total shares to date.
+              </Text>
               <ScrollView
                 style={styles.entriesScrollView}
                 contentContainerStyle={styles.entriesScrollContent}
@@ -354,7 +373,7 @@ export default function StockHoldings() {
               style={styles.addEntryBtn}
               onPress={() => setEntries([...entries, { shares: '', price: '' }])}
             >
-              <Text style={styles.addEntryBtnText}>+</Text>
+              <IconSymbol name="plus" size={18} color="#fff" />
             </Pressable>
 
             <Pressable
@@ -439,6 +458,7 @@ const styles = StyleSheet.create({
   searchInputWithIcon: { paddingRight: 44 },
   searchIcon:{ position:'absolute', right:12, top:0, bottom:0, justifyContent:'center', alignItems:'center', padding:8 },
   addButton:{ marginLeft:10, backgroundColor:'#0b3d91', borderRadius:12, minWidth:112, paddingHorizontal:22, paddingVertical:10, justifyContent:'center', alignItems:'center' },
+  addButtonContent:{ flexDirection:'row', alignItems:'center', gap:6 },
   addButtonText:{ color:'#fff', fontWeight:'800', fontSize:15 },
   editButton:{ marginTop:8, backgroundColor:'#eef2ff', paddingHorizontal:8, paddingVertical:6, borderRadius:8 },
   editText:{ color:'#0b3d91', fontWeight:'700', fontSize:12 },
@@ -464,11 +484,14 @@ const styles = StyleSheet.create({
   modalCloseText:{ color:'#334155', fontWeight:'700' },
   modalDelete:{ width:'100%', marginTop:8, paddingVertical:12, paddingHorizontal:14, borderRadius:12, backgroundColor:'#fff1f2', borderWidth:1, borderColor:'#fecdd3', alignItems:'center' },
   modalDeleteText:{ color:'#be123c', fontWeight:'700' },
+  entryHelperText:{ fontSize:12, color:'#64748b', lineHeight:18, marginBottom:10 },
   entryBlock:{ width:'100%', borderTopWidth:1, borderTopColor:'#f0f0f0', paddingTop:10, marginBottom:4 },
   entryHeaderRow:{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:8 },
   entryLabel:{ fontSize:13, fontWeight:'700', color:'#0b3d91' },
   removeBtn:{ width:26, height:26, borderRadius:13, backgroundColor:'#fee2e2', justifyContent:'center', alignItems:'center' },
   removeBtnText:{ color:'#dc2626', fontSize:18, fontWeight:'700', lineHeight:22 },
   addEntryBtn:{ width:36, height:36, borderRadius:18, backgroundColor:'#0b3d91', justifyContent:'center', alignItems:'center', marginTop:4, marginBottom:8 },
-  addEntryBtnText:{ color:'#fff', fontSize:22, fontWeight:'700', lineHeight:26 },
+  emptyStateCard:{ backgroundColor:'#ffffff', borderRadius:12, borderWidth:1, borderColor:'#e2e8f0', padding:16, alignItems:'center', marginTop:6 },
+  emptyStateTitle:{ fontSize:15, fontWeight:'700', color:'#0f172a', textAlign:'center' },
+  emptyStateSubtitle:{ fontSize:13, color:'#64748b', textAlign:'center', marginTop:6, lineHeight:19 },
 });

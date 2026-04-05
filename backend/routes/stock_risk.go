@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/kataras/iris/v12"
@@ -32,8 +33,15 @@ func GetStockRisk(ctx iris.Context) {
 	if err != nil {
 		var upstreamErr *services.UpstreamHTTPError
 		if errors.As(err, &upstreamErr) {
+			var upstreamBody map[string]any
+			if unmarshalErr := json.Unmarshal([]byte(upstreamErr.Body), &upstreamBody); unmarshalErr == nil {
+				ctx.StatusCode(upstreamErr.StatusCode)
+				ctx.JSON(upstreamBody)
+				return
+			}
+
 			ctx.StatusCode(upstreamErr.StatusCode)
-			ctx.JSON(map[string]string{"error": upstreamErr.Body})
+			ctx.JSON(map[string]string{"detail": upstreamErr.Body})
 			return
 		}
 

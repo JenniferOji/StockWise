@@ -6,8 +6,10 @@ import numpy as np
 import pandas as pd
 import pickle
 import json
+import logging
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 class StockRiskCheckRequest(BaseModel):
     symbol: str
@@ -29,18 +31,19 @@ FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
 STOCK_META_PATH = os.path.join(BASE_DIR, "data", "stocks.json")
 
 df_features = pd.read_csv(FEATURES_PATH)
-df_features["ticker"] = df_features["ticker"].str.upper()
+df_features["ticker"] = df_features["ticker"].astype(str).str.strip().str.upper()
 feature_map = df_features.set_index("ticker").to_dict(orient="index")
 
 with open(STOCK_META_PATH, "r") as f:
     stock_list = json.load(f)
 
 stock_meta = {
-    item["symbol"].upper(): {
-        "company_name": item["companyName"],
-        "sector": item["sector"],
+    str(item.get("symbol", "")).strip().upper(): {
+        "company_name": item.get("companyName", ""),
+        "sector": item.get("sector", ""),
     }
     for item in stock_list
+    if str(item.get("symbol", "")).strip()
 }
 
 with open(SCALER_PATH, "rb") as f:
@@ -61,16 +64,26 @@ def predict_cluster(row_dict: dict[str, float]) -> int:
     scaled_features = scaler.transform(features)
     return int(gmm.predict(scaled_features)[0])
 
+def normalize_symbol(raw_symbol: str) -> str:
+    if raw_symbol is None:
+        return ""
+
+    cleaned = "".join(ch for ch in str(raw_symbol).upper().strip() if ch.isalnum() or ch in {".", "-"})
+    return cleaned
+
 def calculate_dynamic_features(symbol: str):
-    symbol = symbol.upper().strip()
+    symbol = normalize_symbol(symbol)
+
+    if not symbol:
+        raise ValueError("Symbol is required")
 
     features = feature_map.get(symbol)
     if not features:
-        raise ValueError("Ticker not found in dataset")
+        raise ValueError(f"Ticker '{symbol}' not found in dataset")
 
     meta = stock_meta.get(symbol)
     if not meta:
-        raise ValueError("Ticker metadata not found")
+        raise ValueError(f"Ticker metadata not found for '{symbol}'")
 
     return {
         "symbol": symbol,
@@ -145,7 +158,7 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
 @router.post("/api/check-stock-risk")
 def check_stock_risk(request: StockRiskCheckRequest):
     try:
-        symbol = request.symbol.upper().strip()
+        symbol = normalize_symbol(request.symbol)
 
         stock_features = calculate_dynamic_features(symbol)
 
@@ -173,6 +186,7 @@ def check_stock_risk(request: StockRiskCheckRequest):
         }
 
     except ValueError as e:
+        logger.warning("Stock risk validation failed for symbol '%s': %s", request.symbol, str(e))
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/api/simulate-stock")

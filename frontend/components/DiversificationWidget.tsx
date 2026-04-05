@@ -38,6 +38,24 @@ export default function DiversificationWidget() {
   const [currentVolatility, setCurrentVolatility] = useState<number | null>(null);
   const [withSuggestionsVolatility, setWithSuggestionsVolatility] = useState<number | null>(null);
 
+  const getSuggestionSummary = (riskPreference: string) => {
+    const riskLevel = riskPreference.trim().toLowerCase();
+
+    if (riskLevel.includes('low')) {
+      return 'These stocks are selected because they have the lowest volatility in the dataset, helping reduce portfolio volatility for your low risk preference.';
+    }
+
+    if (riskLevel.includes('moderate')) {
+      return 'These stocks are selected to balance stability and return potential, aligning with your moderate risk preference.';
+    }
+
+    if (riskLevel.includes('high')) {
+      return 'These stocks are selected for higher return potential, accepting higher volatility in line with your high risk preference.';
+    }
+
+    return 'These stocks are selected to best align with your risk preference using the portfolio optimization model.';
+  };
+
   useEffect(() => {
     async function fetchDiversificationSuggestions() {
       setError('');
@@ -190,6 +208,12 @@ export default function DiversificationWidget() {
           </>
         </View>
       )}
+
+      <View style={styles.suggestionSummaryBox}>
+        <Text style={styles.suggestionSummaryTitle}>Why these stocks were selected</Text>
+        <Text style={styles.suggestionSummaryText}>{getSuggestionSummary(risk)}</Text>
+      </View>
+
       <FlatList
         data={suggestions}
         keyExtractor={(item, index) => index.toString()}
@@ -212,7 +236,7 @@ const styles = StyleSheet.create({
   scrollContainer: { flex: 1 },
   card: { backgroundColor: '#f8fafc', borderRadius: 16, padding: 20, marginVertical: 12, shadowColor: '#0b3d91', shadowOpacity: 0.08, shadowRadius: 8, elevation: 3, borderWidth: 1, borderColor: '#e0e7ef' },
   title: { fontSize: 22, fontWeight: '700', color: '#0b3d91', marginBottom: 5, textAlign: 'center', letterSpacing: 0.2 },
-  subtitle: { fontSize: 22, fontWeight: '600', color: '#000000', marginBottom: 24, textAlign: 'center', letterSpacing: 0.2 },
+  subtitle: { fontSize: 20, fontWeight: '700', color: '#000000', marginBottom: 24, textAlign: 'center', letterSpacing: 0.2 },
   loadingText: { marginTop: 10, fontSize: 14, color: '#64748b', textAlign: 'center' },
   error: { color: '#dc2626', fontSize: 14, textAlign: 'center', padding: 10 },
   noDataText: { fontSize: 14, color: '#64748b', textAlign: 'center', marginTop: 10 },
@@ -234,6 +258,9 @@ const styles = StyleSheet.create({
   sectorBarContainer: { flex: 1, height: 20, backgroundColor: '#e0e7ef', borderRadius: 10, overflow: 'hidden' },
   sectorBar: { height: '100%', backgroundColor: '#0b3d91', borderRadius: 10 },
   sectorPercentage: { fontSize: 12, color: '#0b3d91', fontWeight: '700', width: 45, textAlign: 'right' },
+  suggestionSummaryBox: { backgroundColor: '#eef4ff', borderRadius: 12, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: '#dbeafe' },
+  suggestionSummaryTitle: { fontSize: 13, fontWeight: '700', color: '#0b3d91', marginBottom: 6 },
+  suggestionSummaryText: { fontSize: 13, color: '#334155', lineHeight: 18 },
   suggestionItem: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 10, borderLeftWidth: 4, borderLeftColor: '#0b3d91', shadowColor: '#0b3d91', shadowOpacity: 0.05, shadowRadius: 4, elevation: 1 },
   suggestionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   suggestionSymbol: { fontSize: 16, fontWeight: '700', color: '#0b3d91', flex: 1 },

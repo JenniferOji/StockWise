@@ -32,10 +32,10 @@ export default function TopNavBar() {
 
   return (
     <View style={[styles.container, { backgroundColor: Colors[scheme ?? 'medium'].background, borderBottomColor: '#e2e8f0' }]}>
+      <Text numberOfLines={1} ellipsizeMode="tail" style={styles.title}>{displayTitle}</Text>
       <Pressable style={styles.tab} onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
         <IconSymbol name="person.crop.circle.fill" size={28} color="#0b3d91" />
       </Pressable>
-      <Text numberOfLines={1} ellipsizeMode="tail" style={styles.title}>{displayTitle}</Text>
     </View>
   );
 }

@@ -30,6 +30,7 @@ const MAPPING = {
   'gearshape.fill': 'settings',
   'chart.bar': 'insert-chart',
   'face.smiling': 'sentiment-satisfied',
+  'plus': 'add',
 } as IconMapping;
 
 /**

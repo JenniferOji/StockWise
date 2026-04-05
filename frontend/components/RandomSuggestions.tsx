@@ -56,7 +56,7 @@ export default function RandomSuggestionsWidget() {
       {/* Header with refresh */}
       <View style={styles.headerRow}>
         <View>
-          <Text style={styles.title}>Explore Opportunities</Text>
+          {/* <Text style={styles.title}>Explore Opportunities</Text> */}
           <Text style={styles.subtitle}>{risk} Preference</Text>
         </View>
 
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   },
 
   title: { fontSize: 22, fontWeight: '700', color: '#0b3d91' },
-  subtitle: { fontSize: 15, fontWeight: '600', color: '#404348', marginTop: 2 },
+  subtitle: { fontSize: 15, fontWeight: '600', color: '#2b2c2e', marginTop: 2 },
 
   loadingText: { marginTop: 10, fontSize: 14, color: '#64748b', textAlign: 'center' },
   error: { color: '#dc2626', fontSize: 14, textAlign: 'center', padding: 10 },

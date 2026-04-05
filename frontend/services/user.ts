@@ -329,7 +329,10 @@ export const checkStockRisk = async (symbol: string) => {
         return response.data;
     } catch (error) {
         handleError(error);
-        return null;
+        if (axios.isAxiosError(error)) {
+            return error.response?.data || { detail: error.message };
+        }
+        return { detail: 'Failed to analyse stock' };
     }
 };
 

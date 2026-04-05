@@ -217,8 +217,8 @@ export default function StockAllocationWidget() {
 		<ScrollView>
 			<View style={styles.container}>
 
-				<Text style={styles.title}>Sector Allocation</Text>
-				<Text style={styles.subtitle}>Explore your portfolio composition</Text>
+				{/* <Text style={styles.title}>Sector Allocation</Text> */}
+				<Text style={styles.subtitle}>Explore your portfolio composition - tap a sector to view its details</Text>
 
 				{isLargeScreen ? (
 					// side by side display for large paegs 

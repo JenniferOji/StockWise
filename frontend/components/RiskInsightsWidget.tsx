@@ -295,6 +295,7 @@ export default function RiskInsightsWidget() {
         </ScrollView>
 
         <Text style={styles.sortMicrocopy}>{sortSummary}</Text>
+        <Text style={styles.metricLegend}>Vol = Volatility • DD = Max Drawdown • Ret = Annual Return</Text>
         
         {CATEGORY_ORDER.map((category) => {
           const categoryStocks = stockRiskData?.categories?.[category] || []
@@ -376,6 +377,7 @@ const styles = StyleSheet.create({
   resetChipHover: { backgroundColor: '#ffe4e6' },
   resetChipText: { fontSize: 12, color: '#be123c', fontWeight: '700' },
   sortMicrocopy: { fontSize: 11, color: '#64748b', marginBottom: 8, marginTop: 4 },
+  metricLegend: { fontSize: 11, color: '#475569', marginBottom: 10, marginTop: -2, fontWeight: '600' },
   categoryCard: { backgroundColor: '#f8fafc', borderRadius: 14, padding: 12, marginBottom: 10, borderLeftWidth: 4 },
   categoryTitle: { fontWeight: '700', marginBottom: 6, fontSize: 13 },
   stockRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
