@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	models "github.com/YourGitHubUser/StockWise/backend/schemas"
-	"github.com/YourGitHubUser/StockWise/backend/services"
 	"github.com/YourGitHubUser/StockWise/backend/storage"
 	"github.com/YourGitHubUser/StockWise/backend/utils"
 	"github.com/kataras/iris/v12"
@@ -31,16 +30,16 @@ type StockEntryInput struct {
 }
 
 type AddStockInput struct {
-	UserID        uint               `json:"user_id" validate:"required"`
-	Symbol        string             `json:"symbol" validate:"required"`
-	CompanyName   string             `json:"company_name" validate:"required"`
-	Sector        string             `json:"sector" validate:"required"`
-	Entries       []StockEntryInput  `json:"entries" validate:"required"`
+	UserID      uint              `json:"user_id" validate:"required"`
+	Symbol      string            `json:"symbol" validate:"required"`
+	CompanyName string            `json:"company_name" validate:"required"`
+	Sector      string            `json:"sector" validate:"required"`
+	Entries     []StockEntryInput `json:"entries" validate:"required"`
 }
 
 type UpdateStockInput struct {
-	StockID uint               `json:"stock_id" validate:"required"`
-	Entries []StockEntryInput  `json:"entries" validate:"required"`
+	StockID uint              `json:"stock_id" validate:"required"`
+	Entries []StockEntryInput `json:"entries" validate:"required"`
 }
 
 type UpdateRiskInput struct {
@@ -53,104 +52,6 @@ type NewsItem struct {
 	Headline    string `json:"headline"`
 	ImageUrl    string `json:"imageUrl"`
 	Date        string `json:"date"`
-}
-
-func GetRiskMetrics(ctx iris.Context) {
-	log.Println("[RiskMetrics] Incoming request to /api/services/risk-metrics")
-	var req services.RiskMetricsRequest
-	if err := ctx.ReadJSON(&req); err != nil {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.JSON(iris.Map{"error": "Invalid request", "details": err.Error()})
-		return
-	}
-	log.Printf("[RiskMetrics] Request body: %+v\n", req)
-	if req.Stocks == nil || len(req.Stocks) == 0 {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.JSON(iris.Map{"error": "No stocks provided"})
-		return
-	}
-	result, err := services.CalculateRiskMetrics(req.Stocks)
-	if err != nil {
-		ctx.StatusCode(iris.StatusInternalServerError)
-		ctx.JSON(iris.Map{"error": err.Error()})
-		return
-	}
-	ctx.JSON(result)
-}
-
-func GetStockRiskCategories(ctx iris.Context) {
-	log.Println("[StockRiskCategories] Incoming request to /api/services/stock-risk-categories")
-	var req services.StockRiskCategoriesRequest
-	if err := ctx.ReadJSON(&req); err != nil {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.JSON(iris.Map{"error": "Invalid request", "details": err.Error()})
-		return
-	}
-
-	if req.Stocks == nil || len(req.Stocks) == 0 {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.JSON(iris.Map{"error": "No stocks provided"})
-		return
-	}
-
-	result, err := services.CalculateStockRiskCategories(req.Stocks)
-	if err != nil {
-		ctx.StatusCode(iris.StatusInternalServerError)
-		ctx.JSON(iris.Map{"error": err.Error()})
-		return
-	}
-
-	ctx.JSON(result)
-}
-
-func GetRiskPreference(ctx iris.Context) {
-	userID := ctx.URLParam("user_id")
-	if userID == "" {
-		utils.CreateError(iris.StatusBadRequest, "Bad Request", "User ID is required", ctx)
-		return
-	}
-	var user models.Users
-	result := storage.DB.Where("id = ?", userID).First(&user)
-	if result.Error != nil {
-		utils.CreateInternalServerError(ctx)
-		return
-	}
-
-	ctx.JSON(iris.Map{"risk": user.Risk})
-}
-
-func GetUserStocks(ctx iris.Context) {
-	userID := ctx.URLParam("user_id")
-	if userID == "" {
-		utils.CreateError(iris.StatusBadRequest, "Bad Request", "User ID is required", ctx)
-		return
-	}
-
-	var stocks []models.Stock
-	result := storage.DB.Preload("Entries").Where("user_id = ?", userID).Find(&stocks)
-	if result.Error != nil {
-		log.Printf("[GetUserStocks] failed for user_id=%s: %v", userID, result.Error)
-		utils.CreateInternalServerError(ctx)
-		return
-	}
-
-	ctx.JSON(stocks)
-}
-
-func DeleteStock(ctx iris.Context) {
-	stockID := ctx.URLParam("stock_id")
-	if stockID == "" {
-		utils.CreateError(iris.StatusBadRequest, "Bad Request", "Stock ID is required", ctx)
-		return
-	}
-
-	result := storage.DB.Delete(&models.Stock{}, stockID)
-	if result.Error != nil {
-		utils.CreateInternalServerError(ctx)
-		return
-	}
-
-	ctx.JSON(iris.Map{"message": "Stock deleted successfully"})
 }
 
 func Register(ctx iris.Context) {
@@ -334,6 +235,56 @@ func UpdateStock(ctx iris.Context) {
 	ctx.JSON(stock)
 }
 
+func GetUserStocks(ctx iris.Context) {
+	userID := ctx.URLParam("user_id")
+	if userID == "" {
+		utils.CreateError(iris.StatusBadRequest, "Bad Request", "User ID is required", ctx)
+		return
+	}
+
+	var stocks []models.Stock
+	result := storage.DB.Preload("Entries").Where("user_id = ?", userID).Find(&stocks)
+	if result.Error != nil {
+		log.Printf("[GetUserStocks] failed for user_id=%s: %v", userID, result.Error)
+		utils.CreateInternalServerError(ctx)
+		return
+	}
+
+	ctx.JSON(stocks)
+}
+
+func DeleteStock(ctx iris.Context) {
+	stockID := ctx.URLParam("stock_id")
+	if stockID == "" {
+		utils.CreateError(iris.StatusBadRequest, "Bad Request", "Stock ID is required", ctx)
+		return
+	}
+
+	result := storage.DB.Delete(&models.Stock{}, stockID)
+	if result.Error != nil {
+		utils.CreateInternalServerError(ctx)
+		return
+	}
+
+	ctx.JSON(iris.Map{"message": "Stock deleted successfully"})
+}
+
+func GetRiskPreference(ctx iris.Context) {
+	userID := ctx.URLParam("user_id")
+	if userID == "" {
+		utils.CreateError(iris.StatusBadRequest, "Bad Request", "User ID is required", ctx)
+		return
+	}
+	var user models.Users
+	result := storage.DB.Where("id = ?", userID).First(&user)
+	if result.Error != nil {
+		utils.CreateInternalServerError(ctx)
+		return
+	}
+
+	ctx.JSON(iris.Map{"risk": user.Risk})
+}
+
 // handles when the user updates their risk profile
 func UpdateRisk(ctx iris.Context) {
 	var riskInput UpdateRiskInput
@@ -359,26 +310,4 @@ func UpdateRisk(ctx iris.Context) {
 		"Email":    user.Email,
 		"Risk":     user.Risk,
 	})
-}
-
-func GetPerformanceMetrics(ctx iris.Context) {
-	log.Println("[PerformanceMetrics] Incoming request to /api/services/performance-metrics")
-	var req services.PerformanceMetricsRequest
-	if err := ctx.ReadJSON(&req); err != nil {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.JSON(iris.Map{"error": "Invalid request", "details": err.Error()})
-		return
-	}
-	if req.Stocks == nil || len(req.Stocks) == 0 {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.JSON(iris.Map{"error": "No stocks provided"})
-		return
-	}
-	result, err := services.CalculatePerformanceMetrics(req)
-	if err != nil {
-		ctx.StatusCode(iris.StatusInternalServerError)
-		ctx.JSON(iris.Map{"error": err.Error()})
-		return
-	}
-	ctx.JSON(result)
 }

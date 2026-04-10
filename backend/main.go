@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+
 	"github.com/YourGitHubUser/StockWise/backend/routes"
 	"github.com/YourGitHubUser/StockWise/backend/storage"
 	"github.com/go-playground/validator/v10"
@@ -41,10 +42,7 @@ func main() {
 		user.Delete("/stock", routes.DeleteStock)
 		user.Put("/risk", routes.UpdateRisk)
 		user.Get("/risk-preference", routes.GetRiskPreference)
-		user.Post("/diversification-suggestions", routes.GetDiversificationSuggestions)
-		user.Post("/random-suggestions", routes.GetRandomSuggestions)
-		user.Post("/stock-news", routes.GetStockNews)
-		user.Post("/stock-sentiment", routes.GetStockSentiment)
+
 	}
 
 	service := app.Party("/api/services")
@@ -52,6 +50,10 @@ func main() {
 		service.Post("/risk-metrics", routes.GetRiskMetrics)
 		service.Post("/stock-risk-categories", routes.GetStockRiskCategories)
 		service.Post("/performance-metrics", routes.GetPerformanceMetrics)
+		service.Post("/diversification-suggestions", routes.GetDiversificationSuggestions)
+		service.Post("/random-suggestions", routes.GetRandomSuggestions)
+		service.Post("/stock-news", routes.GetStockNews)
+		service.Post("/stock-sentiment", routes.GetStockSentiment)
 		service.Post("/check-stock-risk", routes.GetStockRisk)
 		service.Post("/simulate-stock", routes.SimulateStock)
 	}

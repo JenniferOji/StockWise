@@ -9,12 +9,6 @@ import (
     "os"
 )
 
-type StockHolding struct {
-    Ticker        string  `json:"ticker"`
-    Shares        float64 `json:"shares"`
-    PurchasePrice float64 `json:"purchase_price"`
-}
-
 type PerformanceMetricsRequest struct {
        Stocks []StockHolding `json:"stocks"`
        Days   int            `json:"days"`
