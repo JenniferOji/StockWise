@@ -3,11 +3,13 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from diversification_api import router as diversification_router
-from risk_metrics_api import router as risk_metrics_router
-from news_api import router as news_router
-from performance_metrics_api import router as performance_metrics_router
-from stock_risk import router as stock_risk_router
+
+from endpoints.diversification_api import router as diversification_router
+from endpoints.risk_metrics_api import router as risk_metrics_router
+from endpoints.news_api import router as news_router
+from endpoints.performance_metrics_api import router as performance_metrics_router
+from endpoints.stock_risk import router as stock_risk_router
+
 # resource used: https://fastapi.tiangolo.com/#example-upgrade
 
 app = FastAPI()

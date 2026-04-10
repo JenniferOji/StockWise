@@ -9,7 +9,7 @@ import pandas as pd
 
 router = APIRouter() 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
 SCALER_PATH = os.path.join(BASE_DIR, "models", "stock_scaler.pkl")
@@ -139,7 +139,7 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
 
     cluster_counts = {}
 
-    # predict the cluster label for each stock and assign the risk category
+    # assigning the risk categegory for each stock 
     for ticker in tickers:
 
         features = feature_map.get(ticker)
@@ -147,12 +147,8 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
         if not features:
             continue
 
-        # passes the 3 features the model was trained on to get the cluster label
-        cluster_label = predict_cluster_label(
-            features["Log_Variances"],
-            features["Volatility"],
-            features["VaR_95"],
-        )
+        # using the precomputed cluster label from the features CSV
+        cluster_label = int(features["Cluster_labels"])
 
         category = CLUSTER_CATEGORY.get(cluster_label, "Moderate Risk")
 
@@ -165,8 +161,8 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
                 volatility=round(features["Volatility"] * 100, 2),
                 max_drawdown=round(features["max_drawdown"] * 100, 2),
                 annual_return=round(features["returns"] * 100, 2),
-                sharpe=round(features["Sharpe"], 3),         
-                var_95=round(features["VaR_95"] * 100, 2), 
+                sharpe=round(features["Sharpe"], 3),
+                var_95=round(features["VaR_95"] * 100, 2),
             )
         )
         

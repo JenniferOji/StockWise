@@ -22,7 +22,7 @@ class SimulateStockRequest(BaseModel):
     current_stocks: List[PortfolioStock]
     new_stock: PortfolioStock
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SCALER_PATH = os.path.join(BASE_DIR, "models", "stock_scaler.pkl")
 GMM_PATH = os.path.join(BASE_DIR, "models", "gmm_model.pkl")

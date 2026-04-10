@@ -10,22 +10,13 @@ from typing import List
 
 from dotenv import load_dotenv
 import re
-import nltk
-from nltk.stem import WordNetLemmatizer
-from nltk.tokenize import word_tokenize
-# from transformers import AutoTokenizer
 import onnxruntime as ort
 
-# nltk.download("punkt")
-# nltk.download("punkt_tab")
-# nltk.download("wordnet")
-
 load_dotenv()
-lemm = WordNetLemmatizer()
 router = APIRouter()
 
 # load the onnx models from the file path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # paths for the onnx models and label mapping
 # FINBERT_PATH = os.path.join(BASE_DIR, "models", "finbert")
