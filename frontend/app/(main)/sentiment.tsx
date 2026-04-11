@@ -4,7 +4,8 @@ import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NAV_HEIGHT } from "@/constants/layout";
-import { getStockSentiment, getUserStocks } from "@/services/user";
+import { getUserStocks } from "@/services/user";
+import { getStockSentiment } from "@/services/news";
 import { storage } from "@/utils/storage";
 import STOCKS from '../../constants/stocks.json';
 

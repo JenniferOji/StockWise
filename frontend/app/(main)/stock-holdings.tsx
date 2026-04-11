@@ -6,7 +6,8 @@ import { NAV_HEIGHT } from '@/constants/layout';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { storage } from '../../utils/storage';
-import { addStock, getUserStocks, updateStock, deleteStock } from '../../services/user';
+import { getUserStocks } from '../../services/user';
+import { addStock, updateStock, deleteStock } from '../../services/holdings';
 
 const ordinal = (n: number) => {
   const s = ['th', 'st', 'nd', 'rd'];

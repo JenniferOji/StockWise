@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Pressable, ScrollView } from 'react-native';
-import { checkStockRisk, simulateStockImpact } from '@/services/user';
+import { checkStockRisk, simulateStockImpact } from '@/services/simulation';
 import STOCKS from '../constants/stocks.json';
 
 type StockRiskResponse = {
@@ -233,14 +233,14 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: '700', color: '#0b3d91', marginBottom: 5, textAlign: 'center' },
   subtitle: { fontSize: 15, fontWeight: '600', color: '#404348', marginBottom: 16, textAlign: 'center' },
   inputRow: { flexDirection: 'row', gap: 10, marginBottom: 14, alignItems: 'flex-start' },
-  inputWrap: { flex: 1, position: 'relative' },
+  inputWrap: { flex: 1, minWidth: 0, position: 'relative' },
   input: { flex: 1, backgroundColor: '#fff', borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14 },
   dropdown: { marginTop: 6, backgroundColor: '#fff', borderWidth: 1, borderColor: '#dbe4ee', borderRadius: 10, maxHeight: 180 },
   dropdownItem: { paddingVertical: 10, paddingHorizontal: 12, borderBottomWidth: 1, borderBottomColor: '#eef2f7' },
   dropdownItemLast: { borderBottomWidth: 0 },
   dropdownSymbol: { fontSize: 13, fontWeight: '700', color: '#0f172a' },
   dropdownName: { fontSize: 12, color: '#64748b', marginTop: 1 },
-  button: { backgroundColor: '#0b3d91', borderRadius: 10, paddingHorizontal: 16, justifyContent: 'center', alignItems: 'center', alignSelf: 'flex-start', height: 46, minWidth: 104 },
+  button: { backgroundColor: '#0b3d91', borderRadius: 10, paddingHorizontal: 12, justifyContent: 'center', alignItems: 'center', alignSelf: 'flex-start', height: 44, minWidth: 0, flexShrink: 0 },
   buttonText: { color: '#fff', fontWeight: '700', textAlign: 'center' },
   loadingWrap: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   loadingText: { color: '#64748b' },

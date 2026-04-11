@@ -19,17 +19,8 @@ GMM_PATH = os.path.join(BASE_DIR, "models", "gmm_model.pkl")
 
 df_features = pd.read_csv(FEATURES_PATH)
 
-with open(SCALER_PATH, "rb") as f:
-    scaler = pickle.load(f)
-
-with open(GMM_PATH, "rb") as f:
-    gmm = pickle.load(f)
-
 with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "rb") as f:
     cluster_risk = pickle.load(f)
-
-with open(os.path.join(BASE_DIR, "models", "feature_columns.pkl"), "rb") as f:
-    feature_columns = pickle.load(f)
 
 stock_data_path = os.path.join(BASE_DIR, "data", "stocks.json")
 with open(stock_data_path, 'r') as f:
@@ -99,13 +90,6 @@ def sector_breakdown(stocks: List[StockHolding]):
     return breakdown
 
 
-# predicts the cluster for a stock using the 3 features the model was trained on
-def predict_cluster(row_dict):
-    X = np.array([[row_dict[col] for col in feature_columns]])
-    Xs = scaler.transform(X)
-    return int(gmm.predict(Xs)[0])
-
-
 feature_map = df_features.set_index("ticker").to_dict(orient="index")
 
 
@@ -113,7 +97,6 @@ feature_map = df_features.set_index("ticker").to_dict(orient="index")
 def get_diversification_suggestions(request: DiversificationRequest):
     try:
         current_stock_symbols = [stock.symbol for stock in request.current_stocks]
-        current_stock_breakdown = sector_breakdown(request.current_stocks)
         current_portfolio_volatility = calculate_portfolio_volatility(request.current_stocks)
 
         risk_levels = [
@@ -130,17 +113,8 @@ def get_diversification_suggestions(request: DiversificationRequest):
         user_index = risk_levels.index(request.user_risk_preference)
 
         df_runtime = df_features.copy()
-
-        df_runtime = df_runtime.dropna(subset=["Log_Variances", "Volatility", "VaR_95"])
-
-        df_runtime["Cluster_labels"] = [
-            predict_cluster({
-                "Log_Variances": row["Log_Variances"],
-                "Volatility": row["Volatility"],
-                "VaR_95": row["VaR_95"],
-            })
-            for _, row in df_runtime.iterrows()
-        ]
+        df_runtime = df_runtime.dropna(subset=["Log_Variances", "Volatility", "VaR_95", "Cluster_labels"])
+        df_runtime["Cluster_labels"] = df_runtime["Cluster_labels"].astype(int)
 
         target_clusters = []
 
@@ -169,8 +143,6 @@ def get_diversification_suggestions(request: DiversificationRequest):
                 "suggestions": [],
                 "risk_preference": request.user_risk_preference,
                 "comparison": {
-                    "current_portfolio": current_stock_breakdown,
-                    "with_suggestions": current_stock_breakdown,
                     "current_volatility": current_portfolio_volatility,
                     "with_suggestions_volatility": current_portfolio_volatility,
                 },
@@ -270,8 +242,7 @@ def get_diversification_suggestions(request: DiversificationRequest):
                     )
                 )
 
-        # compute sector allocation and volatility after adding suggestions
-        projected_stock_breakdown = sector_breakdown(projected_holdings)
+        # compute portfolio volatility after adding suggestions
         projected_portfolio_volatility = calculate_portfolio_volatility(projected_holdings)
 
         return {
@@ -279,8 +250,6 @@ def get_diversification_suggestions(request: DiversificationRequest):
             "risk_preference": request.user_risk_preference,
             "suggestions": suggestions,
             "comparison": {
-                "current_portfolio": current_stock_breakdown,
-                "with_suggestions": projected_stock_breakdown,
                 "current_volatility": current_portfolio_volatility,
                 "with_suggestions_volatility": projected_portfolio_volatility,
             },
@@ -293,6 +262,12 @@ def get_diversification_suggestions(request: DiversificationRequest):
 def get_random_suggestions(request: DiversificationRequest):
     try:
         current_stock_symbols = [stock.symbol for stock in request.current_stocks]
+        current_stock_breakdown = sector_breakdown(request.current_stocks)
+        current_sectors = {
+            stock.sector
+            for stock in request.current_stocks
+            if stock.sector
+        }
 
         risk_levels = [
             "Very Low Risk",
@@ -308,17 +283,8 @@ def get_random_suggestions(request: DiversificationRequest):
         user_index = risk_levels.index(request.user_risk_preference)
 
         df_runtime = df_features.copy()
-
-        df_runtime = df_runtime.dropna(subset=["Log_Variances", "Volatility", "VaR_95"])
-
-        df_runtime["Cluster_labels"] = [
-            predict_cluster({
-                "Log_Variances": row["Log_Variances"],
-                "Volatility": row["Volatility"],
-                "VaR_95": row["VaR_95"],
-            })
-            for _, row in df_runtime.iterrows()
-        ]
+        df_runtime = df_runtime.dropna(subset=["Log_Variances", "Volatility", "VaR_95", "Cluster_labels"])
+        df_runtime["Cluster_labels"] = df_runtime["Cluster_labels"].astype(int)
 
         target_clusters = []
 
@@ -335,10 +301,21 @@ def get_random_suggestions(request: DiversificationRequest):
             ~df_runtime['ticker'].isin(current_stock_symbols)
         ].copy()
 
+        sector_filtered_stocks = available_stocks
+        if current_sectors:
+            sector_filtered_stocks = available_stocks[
+                ~available_stocks['sector'].isin(current_sectors)
+            ]
+
         # keep only stocks belonging to the selected clusters
-        suggested_stocks = available_stocks[
-            available_stocks['Cluster_labels'].isin(target_clusters)
+        suggested_stocks = sector_filtered_stocks[
+            sector_filtered_stocks['Cluster_labels'].isin(target_clusters)
         ]
+
+        if len(suggested_stocks) == 0 and len(available_stocks) > 0:
+            suggested_stocks = available_stocks[
+                available_stocks['Cluster_labels'].isin(target_clusters)
+            ]
 
         if len(suggested_stocks) == 0:
             return {
@@ -346,6 +323,10 @@ def get_random_suggestions(request: DiversificationRequest):
                 "message": "No stocks match your risk preference",
                 "suggestions": [],
                 "risk_preference": request.user_risk_preference,
+                "comparison": {
+                    "current_portfolio": current_stock_breakdown,
+                    "with_suggestions": current_stock_breakdown,
+                },
             }
 
         # sort candidate pool based on user risk preference
@@ -369,10 +350,25 @@ def get_random_suggestions(request: DiversificationRequest):
                 "reason": f"Diversifies your sector exposure {request.user_risk_preference} within your risk range",
             })
 
+        projected_holdings = list(request.current_stocks)
+        for suggestion in suggestions:
+            projected_holdings.append(
+                StockHolding(
+                    symbol=suggestion["symbol"],
+                    sector=suggestion["sector"]
+                )
+            )
+
+        projected_stock_breakdown = sector_breakdown(projected_holdings)
+
         return {
             "success": True,
             "risk_preference": request.user_risk_preference,
             "suggestions": suggestions,
+            "comparison": {
+                "current_portfolio": current_stock_breakdown,
+                "with_suggestions": projected_stock_breakdown,
+            },
         }
 
     except Exception as e:

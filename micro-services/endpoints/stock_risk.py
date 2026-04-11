@@ -24,8 +24,6 @@ class SimulateStockRequest(BaseModel):
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SCALER_PATH = os.path.join(BASE_DIR, "models", "stock_scaler.pkl")
-GMM_PATH = os.path.join(BASE_DIR, "models", "gmm_model.pkl")
 CLUSTER_RISK_PATH = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
 FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
 STOCK_META_PATH = os.path.join(BASE_DIR, "data", "stocks.json")
@@ -46,23 +44,8 @@ stock_meta = {
     if str(item.get("symbol", "")).strip()
 }
 
-with open(SCALER_PATH, "rb") as f:
-    scaler = pickle.load(f)
-
-with open(GMM_PATH, "rb") as f:
-    gmm = pickle.load(f)
-
 with open(CLUSTER_RISK_PATH, "rb") as f:
     CLUSTER_CATEGORY = pickle.load(f)
-
-def predict_cluster(row_dict: dict[str, float]) -> int:
-    features = np.array([[
-        row_dict["Log_Variances"],
-        row_dict["Volatility"],
-        row_dict["VaR_95"]
-    ]])
-    scaled_features = scaler.transform(features)
-    return int(gmm.predict(scaled_features)[0])
 
 def normalize_symbol(raw_symbol: str) -> str:
     if raw_symbol is None:
@@ -89,6 +72,7 @@ def calculate_dynamic_features(symbol: str):
         "symbol": symbol,
         "company_name": meta["company_name"],
         "sector": meta["sector"],
+        "Cluster_labels": int(features["Cluster_labels"]),
         "Log_Variances": float(features["Log_Variances"]),
         "Volatility": float(features["Volatility"]),
         "VaR_95": float(features["VaR_95"]),
@@ -162,11 +146,7 @@ def check_stock_risk(request: StockRiskCheckRequest):
 
         stock_features = calculate_dynamic_features(symbol)
 
-        cluster_label = predict_cluster({
-            "Log_Variances": stock_features["Log_Variances"],
-            "Volatility": stock_features["Volatility"],
-            "VaR_95": stock_features["VaR_95"],
-        })
+        cluster_label = int(stock_features["Cluster_labels"])
 
         risk_label = map_cluster_to_risk(cluster_label)
 

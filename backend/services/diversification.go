@@ -28,16 +28,19 @@ type StockSuggestion struct {
 	Reason      string `json:"reason"`
 }
 
+type DiversificationComparison struct {
+	CurrentVolatility         *float64 `json:"current_volatility"`
+	WithSuggestionsVolatility *float64 `json:"with_suggestions_volatility"`
+}
+
 type SectorAllocation struct {
 	Sector     string  `json:"sector"`
 	Percentage float64 `json:"percentage"`
 }
 
-type DiversificationComparison struct {
-	CurrentPortfolio          []SectorAllocation `json:"current_portfolio"`
-	WithSuggestions           []SectorAllocation `json:"with_suggestions"`
-	CurrentVolatility         *float64           `json:"current_volatility"`
-	WithSuggestionsVolatility *float64           `json:"with_suggestions_volatility"`
+type RandomSuggestionComparison struct {
+	CurrentPortfolio []SectorAllocation `json:"current_portfolio"`
+	WithSuggestions  []SectorAllocation `json:"with_suggestions"`
 }
 
 type DiversificationResponse struct {
@@ -49,10 +52,11 @@ type DiversificationResponse struct {
 }
 
 type RandomSuggestionResponse struct {
-	Success        bool              `json:"success"`
-	Suggestions    []StockSuggestion `json:"suggestions"`
-	RiskPreference string            `json:"risk_preference"`
-	Message        string            `json:"message,omitempty"`
+	Success        bool                       `json:"success"`
+	Suggestions    []StockSuggestion          `json:"suggestions"`
+	RiskPreference string                     `json:"risk_preference"`
+	Comparison     RandomSuggestionComparison `json:"comparison"`
+	Message        string                     `json:"message,omitempty"`
 }
 
 func GetDiversificationSuggestions(req DiversificationRequest) (*DiversificationResponse, error) {

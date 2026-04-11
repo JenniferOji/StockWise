@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, ActivityIndicator, Modal, Pressable, ScrollView } from 'react-native'
-import { getRiskMetrics, getStockRiskCategories } from '../services/user'
+import { getRiskMetrics, getStockRiskCategories } from '../services/analytics'
 import { storage } from '../utils/storage'
 import { CATEGORY_COLORS, CATEGORY_ORDER, METRIC_THRESHOLDS } from '../constants/riskConstants'
 import { getActiveBand, getMetricInsight } from '../utils/riskUtils'

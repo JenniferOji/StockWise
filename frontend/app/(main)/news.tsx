@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, FlatList, Pressable, Linking, ScrollView } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NAV_HEIGHT } from '@/constants/layout';
 import { storage } from '../../utils/storage';
-import {getStockNews} from '../../services/user';
+import {getStockNews} from '../../services/news';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { RouteProp, useRoute, useFocusEffect} from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';

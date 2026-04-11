@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity } from 'react-native';
 import { MaterialIcons as Icon } from '@expo/vector-icons';
-import { getRandomSuggestions } from '@/services/user';
+import { getRandomSuggestions } from '@/services/recommendations';
 import { storage } from '@/utils/storage';
 
 type StockSuggestion = {
@@ -11,10 +11,19 @@ type StockSuggestion = {
   reason: string;
 };
 
+type SectorAllocation = {
+  sector: string;
+  percentage: number;
+};
+
 type OptimalResponse = {
   success: boolean;
   suggestions: StockSuggestion[];
   risk_preference: string;
+  comparison?: {
+    current_portfolio: SectorAllocation[];
+    with_suggestions: SectorAllocation[];
+  };
   message?: string;
 };
 
@@ -23,6 +32,8 @@ export default function RandomSuggestionsWidget() {
   const [risk, setRisk] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+  const [currentPortfolio, setCurrentPortfolio] = useState<SectorAllocation[]>([]);
+  const [withSuggestions, setWithSuggestions] = useState<SectorAllocation[]>([]);
 
   const fetchRandomSuggestions = async () => {
     setError('');
@@ -36,7 +47,11 @@ export default function RandomSuggestionsWidget() {
       if (response && response.success) {
         setSuggestions(response.suggestions);
         setRisk(response.risk_preference);
+        setCurrentPortfolio(response.comparison?.current_portfolio || []);
+        setWithSuggestions(response.comparison?.with_suggestions || []);
       } else {
+        setCurrentPortfolio(response?.comparison?.current_portfolio || []);
+        setWithSuggestions(response?.comparison?.with_suggestions || []);
         setError(response?.message || 'Failed to load suggestions');
       }
     } else {
@@ -75,22 +90,56 @@ export default function RandomSuggestionsWidget() {
       ) : suggestions.length === 0 ? (
         <Text style={styles.noDataText}>No suggestions available.</Text>
       ) : (
-        <FlatList
-          data={suggestions}
-          keyExtractor={(item, index) => index.toString()}
-          scrollEnabled={false}
-          renderItem={({ item }) => (
-            <View style={styles.suggestionItem}>
-              <View style={styles.suggestionHeader}>
-                <Text style={styles.suggestionSymbol}>
-                  {item.symbol} - {item.company_name}
-                </Text>
-                <Text style={styles.suggestionSector}>{item.sector}</Text>
-              </View>
-              <Text style={styles.suggestionReason}>{item.reason}</Text>
+        <>
+          {(currentPortfolio.length > 0 && withSuggestions.length > 0) && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Sector Diversification</Text>
+
+              <>
+                <Text style={styles.sectorSubtitle}>Current Portfolio</Text>
+                {currentPortfolio.map((item) => (
+                  <View key={`current-${item.sector}`} style={styles.sectorItem}>
+                    <Text style={styles.sectorName}>{item.sector}</Text>
+                    <View style={styles.sectorBarContainer}>
+                      <View style={[styles.sectorBar, { width: `${item.percentage}%` }]} />
+                    </View>
+                    <Text style={styles.sectorPercentage}>{item.percentage.toFixed(1)}%</Text>
+                  </View>
+                ))}
+              </>
+
+              <>
+                <Text style={styles.sectorSubtitle}>With Suggestions</Text>
+                {withSuggestions.map((item) => (
+                  <View key={`suggested-${item.sector}`} style={styles.sectorItem}>
+                    <Text style={styles.sectorName}>{item.sector}</Text>
+                    <View style={styles.sectorBarContainer}>
+                      <View style={[styles.sectorBar, { width: `${item.percentage}%` }]} />
+                    </View>
+                    <Text style={styles.sectorPercentage}>{item.percentage.toFixed(1)}%</Text>
+                  </View>
+                ))}
+              </>
             </View>
           )}
-        />
+
+          <FlatList
+            data={suggestions}
+            keyExtractor={(item, index) => index.toString()}
+            scrollEnabled={false}
+            renderItem={({ item }) => (
+              <View style={styles.suggestionItem}>
+                <View style={styles.suggestionHeader}>
+                  <Text style={styles.suggestionSymbol}>
+                    {item.symbol} - {item.company_name}
+                  </Text>
+                  <Text style={styles.suggestionSector}>{item.sector}</Text>
+                </View>
+                <Text style={styles.suggestionReason}>{item.reason}</Text>
+              </View>
+            )}
+          />
+        </>
       )}
     </View>
   );
@@ -118,7 +167,14 @@ const styles = StyleSheet.create({
   loadingText: { marginTop: 10, fontSize: 14, color: '#64748b', textAlign: 'center' },
   error: { color: '#dc2626', fontSize: 14, textAlign: 'center', padding: 10 },
   noDataText: { fontSize: 14, color: '#64748b', textAlign: 'center', marginTop: 10 },
-
+  section: { marginBottom: 25 },
+  sectionTitle: { fontSize: 15, fontWeight: '500', color: '#0b3d91', marginBottom: 12 },
+  sectorSubtitle: { fontSize: 14, fontWeight: '600', color: '#64748b', marginBottom: 10, marginTop: 5 },
+  sectorItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 },
+  sectorName: { fontSize: 12, color: '#334155', fontWeight: '500', width: 120 },
+  sectorBarContainer: { flex: 1, height: 20, backgroundColor: '#e0e7ef', borderRadius: 10, overflow: 'hidden' },
+  sectorBar: { height: '100%', backgroundColor: '#0b3d91', borderRadius: 10 },
+  sectorPercentage: { fontSize: 12, color: '#0b3d91', fontWeight: '700', width: 45, textAlign: 'right' },
   suggestionItem: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 10, borderLeftWidth: 4, borderLeftColor: '#0b3d91' },
   suggestionHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
   suggestionSymbol: { fontSize: 16, fontWeight: '700', color: '#0b3d91', flex: 1 },

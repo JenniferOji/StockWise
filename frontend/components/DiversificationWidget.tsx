@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
-import { getDiversificationSuggestions } from '@/services/user';
+import { getDiversificationSuggestions } from '@/services/recommendations';
 import { storage } from '@/utils/storage';
 
 type StockSuggestion = {
@@ -10,18 +10,11 @@ type StockSuggestion = {
   reason: string;
 };
 
-type SectorAllocation = {
-  sector: string;
-  percentage: number;
-};
-
 type DiversificationResponse = {
   success: boolean;
   suggestions: StockSuggestion[];
   risk_preference: string;
   comparison?: {
-    current_portfolio: SectorAllocation[];
-    with_suggestions: SectorAllocation[];
     current_volatility: number | null;
     with_suggestions_volatility: number | null;
   };
@@ -33,8 +26,6 @@ export default function DiversificationWidget() {
   const [risk, setRisk] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
-  const [currentPortfolio, setCurrentPortfolio] = useState<SectorAllocation[]>([]);
-  const [withSuggestions, setWithSuggestions] = useState<SectorAllocation[]>([]);
   const [currentVolatility, setCurrentVolatility] = useState<number | null>(null);
   const [withSuggestionsVolatility, setWithSuggestionsVolatility] = useState<number | null>(null);
 
@@ -68,13 +59,9 @@ export default function DiversificationWidget() {
         if (response && response.success) {
           setSuggestions(response.suggestions);
           setRisk(response.risk_preference);
-          setCurrentPortfolio(response.comparison?.current_portfolio || []);
-          setWithSuggestions(response.comparison?.with_suggestions || []);
           setCurrentVolatility(response.comparison?.current_volatility || null);
           setWithSuggestionsVolatility(response.comparison?.with_suggestions_volatility || null);
         } else {
-          setCurrentPortfolio(response?.comparison?.current_portfolio || []);
-          setWithSuggestions(response?.comparison?.with_suggestions || []);
           setError(response?.message || 'Failed to load suggestions');
         }
       } else {
@@ -175,40 +162,6 @@ export default function DiversificationWidget() {
           )}
         </View>
       )}
-
-
-      {(currentPortfolio.length > 0 && withSuggestions.length > 0) && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Sector Diversification</Text>
-
-          <>
-            <Text style={styles.sectorSubtitle}>Current Portfolio</Text>
-            {currentPortfolio.map((item) => (
-              <View key={`current-${item.sector}`} style={styles.sectorItem}>
-                <Text style={styles.sectorName}>{item.sector}</Text>
-                <View style={styles.sectorBarContainer}>
-                  <View style={[styles.sectorBar, { width: `${item.percentage}%` }]} />
-                </View>
-                <Text style={styles.sectorPercentage}>{item.percentage.toFixed(1)}%</Text>
-              </View>
-            ))}
-          </>
-
-          <>
-            <Text style={styles.sectorSubtitle}>With Suggestions</Text>
-            {withSuggestions.map((item) => (
-              <View key={`suggested-${item.sector}`} style={styles.sectorItem}>
-                <Text style={styles.sectorName}>{item.sector}</Text>
-                <View style={styles.sectorBarContainer}>
-                  <View style={[styles.sectorBar, { width: `${item.percentage}%` }]} />
-                </View>
-                <Text style={styles.sectorPercentage}>{item.percentage.toFixed(1)}%</Text>
-              </View>
-            ))}
-          </>
-        </View>
-      )}
-
       <View style={styles.suggestionSummaryBox}>
         <Text style={styles.suggestionSummaryTitle}>Why these stocks were selected</Text>
         <Text style={styles.suggestionSummaryText}>{getSuggestionSummary(risk)}</Text>
@@ -252,12 +205,6 @@ const styles = StyleSheet.create({
   improvementItem: { flexDirection: 'row', paddingVertical: 8, paddingHorizontal: 12, marginBottom: 6, backgroundColor: '#f0f9ff', borderRadius: 8, borderLeftWidth: 3, borderLeftColor: '#0ea5e9' },
   improvementBullet: { fontSize: 16, fontWeight: '700', color: '#0ea5e9', marginRight: 8 },
   improvementText: { fontSize: 13, color: '#334155', flex: 1, fontWeight: '500' },
-  sectorSubtitle: { fontSize: 14, fontWeight: '600', color: '#64748b', marginBottom: 10, marginTop: 5 },
-  sectorItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, gap: 8 },
-  sectorName: { fontSize: 12, color: '#334155', fontWeight: '500', width: 120 },
-  sectorBarContainer: { flex: 1, height: 20, backgroundColor: '#e0e7ef', borderRadius: 10, overflow: 'hidden' },
-  sectorBar: { height: '100%', backgroundColor: '#0b3d91', borderRadius: 10 },
-  sectorPercentage: { fontSize: 12, color: '#0b3d91', fontWeight: '700', width: 45, textAlign: 'right' },
   suggestionSummaryBox: { backgroundColor: '#eef4ff', borderRadius: 12, padding: 12, marginBottom: 12, borderWidth: 1, borderColor: '#dbeafe' },
   suggestionSummaryTitle: { fontSize: 13, fontWeight: '700', color: '#0b3d91', marginBottom: 6 },
   suggestionSummaryText: { fontSize: 13, color: '#334155', lineHeight: 18 },
