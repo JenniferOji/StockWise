@@ -28,6 +28,14 @@ with open(stock_data_path, 'r') as f:
 
 STOCK_LOOKUP = {stock["symbol"]: stock for stock in STOCK_DATA}
 
+
+def get_company_sector(symbol: str) -> Optional[str]:
+    lookup_symbol = symbol.replace("-", ".")
+    company = STOCK_LOOKUP.get(lookup_symbol)
+    if not company:
+        return None
+    return company.get("sector")
+
 # company
 class StockHolding(BaseModel):
     symbol: str
@@ -304,7 +312,9 @@ def get_random_suggestions(request: DiversificationRequest):
         sector_filtered_stocks = available_stocks
         if current_sectors:
             sector_filtered_stocks = available_stocks[
-                ~available_stocks['sector'].isin(current_sectors)
+                ~available_stocks["ticker"].apply(
+                    lambda ticker: get_company_sector(str(ticker)) in current_sectors
+                )
             ]
 
         # keep only stocks belonging to the selected clusters

@@ -6,6 +6,8 @@ __pycache__/
 *.pyo
 *.pyd
 
+ml/training_data
+
 .venv/
 venv/
 env/

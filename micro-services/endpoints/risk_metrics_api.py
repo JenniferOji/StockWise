@@ -12,10 +12,12 @@ router = APIRouter()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
+PRICES_PATH = os.path.join(BASE_DIR, "data", "prices.csv")
 SCALER_PATH = os.path.join(BASE_DIR, "models", "stock_scaler.pkl")
 GMM_PATH = os.path.join(BASE_DIR, "models", "gmm_model.pkl")
 
 df_features = pd.read_csv(FEATURES_PATH)
+df_prices = pd.read_csv(PRICES_PATH, index_col=0, parse_dates=True)
 
 with open(SCALER_PATH, "rb") as f:
     scaler = pickle.load(f)
@@ -70,51 +72,90 @@ def root():
 
 @router.post("/api/risk-metrics")
 def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
-    vols = []
-    returns = []
-    drawdowns = []
-    vars_ = []
+    if len(portfolio_request.stocks) == 0:
+        raise HTTPException(status_code=400, detail="No stocks provided")
 
-    for stock in portfolio_request.stocks:
-        features = feature_map.get(stock.ticker)
-        if not features:
-            continue
+    tickers = list({stock.ticker.replace(".", "-") for stock in portfolio_request.stocks})
 
-        vols.append(features["Volatility"])
-        returns.append(features["returns"])
-        drawdowns.append(features["max_drawdown"])
-        vars_.append(features["VaR_95"])  
+    prices = df_prices.copy()
 
-    if not vols:
+    available_tickers = [ticker for ticker in tickers if ticker in prices.columns]
+
+    if len(available_tickers) == 0:
         raise HTTPException(status_code=404, detail="No data for the tickers")
 
-    portfolio_volatility = np.mean(vols)
-    portfolio_return = np.mean(returns)
-    portfolio_drawdown = np.max(drawdowns)
-    portfolio_var_95 = np.mean(vars_)
+    prices = prices[available_tickers]
+    prices = prices.dropna(axis=1, how="all")
+    prices.ffill(inplace=True)
+    prices.bfill(inplace=True)
+
+    if prices.empty:
+        raise HTTPException(status_code=404, detail="No data for the tickers")
+
+    latest_prices = prices.iloc[-1]
+    returns = prices.pct_change().dropna()
+
+    if returns.empty:
+        raise HTTPException(status_code=404, detail="Not enough return data to calculate portfolio metrics")
+
+    weights = {}
+    portfolio_value = 0
+
+    for stock in portfolio_request.stocks:
+        ticker = stock.ticker.replace(".", "-")
+
+        if ticker not in latest_prices.index:
+            continue
+
+        latest_price = latest_prices[ticker]
+        holding_value = stock.shares * latest_price
+        portfolio_value += holding_value
+        weights[ticker] = holding_value
+
+    if portfolio_value == 0:
+        raise HTTPException(status_code=404, detail="No data for the tickers")
+
+    for ticker in weights:
+        weights[ticker] = weights[ticker] / portfolio_value
+
+    portfolio_tickers = [ticker for ticker in weights.keys() if ticker in returns.columns]
+
+    if len(portfolio_tickers) == 0:
+        raise HTTPException(status_code=404, detail="No return data for the tickers")
+
+    weights_array = np.array([weights[ticker] for ticker in portfolio_tickers])
+    portfolio_returns = returns[portfolio_tickers].mul(weights_array, axis=1).sum(axis=1)
+
+    portfolio_annual_return = portfolio_returns.mean() * 252
+    portfolio_volatility = portfolio_returns.std() * np.sqrt(252)
+    portfolio_var_95 = abs(np.percentile(portfolio_returns, 5))
+
+    cumulative = (1 + portfolio_returns).cumprod()
+    drawdown = (cumulative - cumulative.cummax()) / cumulative.cummax()
+    portfolio_max_drawdown = abs(drawdown.min())
 
     risk_free_rate = 0.02
 
     if portfolio_volatility == 0:
         portfolio_sharpe = 0
     else:
-        portfolio_sharpe = (portfolio_return - risk_free_rate) / portfolio_volatility
+        portfolio_sharpe = (portfolio_annual_return - risk_free_rate) / portfolio_volatility
         
     portfolio_volatility *= 100
-    portfolio_return *= 100
-    portfolio_drawdown *= 100
+    portfolio_annual_return *= 100
+    portfolio_max_drawdown *= 100
     portfolio_var_95 *= 100
 
     return {
         "success": True,
         "metrics": {
             "volatility": f"{portfolio_volatility:.2f}%",
-            "annual_return": f"{portfolio_return:.2f}%",
-            "max_drawdown": f"{portfolio_drawdown:.2f}%",
+            "annual_return": f"{portfolio_annual_return:.2f}%",
+            "max_drawdown": f"{portfolio_max_drawdown:.2f}%",
             "sharpe": f"{portfolio_sharpe:.3f}",
             "var_95": f"{portfolio_var_95:.2f}%"
         },
-        "portfolio_value": 0
+        "portfolio_value": round(portfolio_value, 2)
     }
 
 # this endpoint gets the risk category for each stock in the portfolio based on the model

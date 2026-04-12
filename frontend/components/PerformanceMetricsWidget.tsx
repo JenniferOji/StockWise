@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
-import { getPerformanceMetrics } from '@/services/user';
+import { getPerformanceMetrics } from '@/services/analytics';
 import { storage } from '@/utils/storage';
 import { useFocusEffect } from '@react-navigation/native';
 

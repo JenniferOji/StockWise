@@ -1,6 +1,6 @@
-// import { Platform } from 'react-native';
-// const serverUrl = Platform.OS === 'web' ? 'http://localhost:8080/api' : 'http://172.18.0.3:8080'; // a device accessible IP for mobile
-const serverUrl = process.env.EXPO_PUBLIC_API_URL ;
+import { Platform } from 'react-native';
+const serverUrl = Platform.OS === 'web' ? 'http://localhost:8080/api' : 'http://172.18.0.3:8080'; // a device accessible IP for mobile
+// const serverUrl = process.env.EXPO_PUBLIC_API_URL ;
 
 const user = "/user";
 const services = "/services";

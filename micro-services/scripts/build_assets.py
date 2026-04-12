@@ -110,6 +110,7 @@ for i, (cluster_idx, _) in enumerate(sorted_clusters):
     cluster_risk[cluster_idx] = risk_labels[i]
 
 # saving the files for API to use
+prices.to_csv(os.path.join(BASE_DIR, "data", "prices.csv"))
 df.to_csv(os.path.join(BASE_DIR, "data", "features.csv"), index=False)
 
 with open(os.path.join(BASE_DIR, "models", "stock_scaler.pkl"), "wb") as f:

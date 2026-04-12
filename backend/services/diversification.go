@@ -84,6 +84,10 @@ func GetDiversificationSuggestions(req DiversificationRequest) (*Diversification
 		return nil, err
 	}
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("diversification service error: %s", string(body))
+	}
+
 	var result DiversificationResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, err
@@ -115,6 +119,10 @@ func GetRandomSuggestions(req DiversificationRequest) (*RandomSuggestionResponse
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("random suggestions service error: %s", string(body))
 	}
 
 	var result RandomSuggestionResponse

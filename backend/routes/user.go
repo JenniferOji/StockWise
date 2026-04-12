@@ -185,6 +185,21 @@ func AddStock(ctx iris.Context) {
 		return
 	}
 
+	capitalSymbol := strings.ToUpper(strings.TrimSpace(stockInput.Symbol))
+	if capitalSymbol == "" {
+		utils.CreateError(iris.StatusBadRequest, "Bad Request", "Stock symbol is required", ctx)
+		return
+	}
+
+	var existingStock models.Stock
+	result := storage.DB.Where("user_id = ? AND symbol = ?", stockInput.UserID, capitalSymbol).First(&existingStock)
+	if result.Error == nil {
+		utils.CreateError(iris.StatusConflict, "Invalid", "Stock already exists for this user", ctx)
+		return
+	}
+
+	stockInput.Symbol = capitalSymbol
+
 	newStock := models.Stock{
 		UserID:      stockInput.UserID,
 		Symbol:      stockInput.Symbol,
