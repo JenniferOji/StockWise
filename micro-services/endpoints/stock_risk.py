@@ -26,17 +26,21 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 CLUSTER_RISK_PATH = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
 FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
+PRICES_PATH = os.path.join(BASE_DIR, "data", "prices.csv")
 STOCK_META_PATH = os.path.join(BASE_DIR, "data", "stocks.json")
 
 df_features = pd.read_csv(FEATURES_PATH)
 df_features["ticker"] = df_features["ticker"].astype(str).str.strip().str.upper()
 feature_map = df_features.set_index("ticker").to_dict(orient="index")
 
+df_prices = pd.read_csv(PRICES_PATH, index_col=0, parse_dates=True)
+df_prices.columns = df_prices.columns.astype(str).str.strip().str.upper()
+
 with open(STOCK_META_PATH, "r") as f:
     stock_list = json.load(f)
 
 stock_meta = {
-    str(item.get("symbol", "")).strip().upper(): {
+    str(item.get("symbol", "")).strip().upper().replace(".", "-"): {
         "company_name": item.get("companyName", ""),
         "sector": item.get("sector", ""),
     }
@@ -52,7 +56,7 @@ def normalize_symbol(raw_symbol: str) -> str:
         return ""
 
     cleaned = "".join(ch for ch in str(raw_symbol).upper().strip() if ch.isalnum() or ch in {".", "-"})
-    return cleaned
+    return cleaned.replace(".", "-")
 
 def calculate_dynamic_features(symbol: str):
     symbol = normalize_symbol(symbol)
@@ -88,54 +92,78 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
     if not stocks:
         return None
 
-    vols = []
-    vars_ = []
-    drawdowns = []
-    returns = []
-    sharpes = []
-    weights = []
+    prices = df_prices.copy()
+    prices = prices.dropna(axis=1, how="all")
+    prices.ffill(inplace=True)
+    prices.bfill(inplace=True)
+
+    if prices.empty:
+        return None
+
+    latest_prices = prices.iloc[-1]
+
+    holding_values = {}
 
     for stock in stocks:
-        try:
-            features = calculate_dynamic_features(stock.symbol)
-        except Exception:
+        symbol = normalize_symbol(stock.symbol)
+
+        if symbol not in latest_prices.index:
             continue
 
-        qty = stock.quantity if stock.quantity else 1
+        quantity = stock.quantity if stock.quantity else 1
+        latest_price = float(latest_prices[symbol])
+        holding_value = quantity * latest_price
 
-        vols.append(features["Volatility"])
-        vars_.append(features["VaR_95"])
-        drawdowns.append(features["max_drawdown"])
-        returns.append(features["annual_return"])
-        sharpes.append(features["sharpe"])
-        weights.append(qty)
+        if holding_value <= 0:
+            continue
 
-    if not vols:
+        if symbol in holding_values:
+            holding_values[symbol] += holding_value
+        else:
+            holding_values[symbol] = holding_value
+
+    if len(holding_values) == 0:
         return None
 
-    total_weight = np.sum(weights)
-    if total_weight <= 0:
+    portfolio_value = sum(holding_values.values())
+
+    if portfolio_value <= 0:
         return None
 
-    weights = np.array(weights) / total_weight
+    portfolio_symbols = [symbol for symbol in holding_values.keys() if symbol in prices.columns]
 
-    vols = np.array(vols)
-    vars_ = np.array(vars_)
-    drawdowns = np.array(drawdowns)
-    returns = np.array(returns)
-    sharpes = np.array(sharpes)
+    if len(portfolio_symbols) == 0:
+        return None
 
-    portfolio_vol = float(np.sum(vols * weights))
-    portfolio_var = float(np.sum(vars_ * weights))
-    portfolio_drawdown = float(np.sum(drawdowns * weights))
-    portfolio_return = float(np.sum(returns * weights))
-    portfolio_sharpe = float(np.sum(sharpes * weights))
+    prices = prices[portfolio_symbols]
+    returns = prices.pct_change().dropna()
+
+    if returns.empty:
+        return None
+
+    weights = np.array([holding_values[symbol] / portfolio_value for symbol in portfolio_symbols])
+    portfolio_returns = returns.mul(weights, axis=1).sum(axis=1)
+
+    portfolio_annual_return = float(portfolio_returns.mean() * 252)
+    portfolio_volatility = float(portfolio_returns.std() * np.sqrt(252))
+    portfolio_var = float(abs(np.percentile(portfolio_returns, 5)))
+
+    cumulative = (1 + portfolio_returns).cumprod()
+    drawdown = (cumulative - cumulative.cummax()) / cumulative.cummax()
+    portfolio_drawdown = float(abs(drawdown.min()))
+
+    risk_free_rate = 0.02
+
+    if portfolio_volatility == 0:
+        portfolio_sharpe = 0
+    else:
+        portfolio_sharpe = float((portfolio_annual_return - risk_free_rate) / portfolio_volatility)
 
     return {
-        "volatility": round(portfolio_vol * 100, 2),
+        "volatility": round(portfolio_volatility * 100, 2),
         "var_95": round(portfolio_var * 100, 2),
         "max_drawdown": round(portfolio_drawdown * 100, 2),
-        "annual_return": round(portfolio_return * 100, 2),
+        "annual_return": round(portfolio_annual_return * 100, 2),
         "sharpe": round(portfolio_sharpe, 3),
     }
 
@@ -184,7 +212,7 @@ def simulate_stock(request: SimulateStockRequest):
 
         return {
             "success": True,
-            "symbol": request.new_stock.symbol,
+            "symbol": normalize_symbol(request.new_stock.symbol),
             "quantity": request.new_stock.quantity,
             "impact": {
                 "volatility": {
@@ -215,5 +243,7 @@ def simulate_stock(request: SimulateStockRequest):
             },
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
