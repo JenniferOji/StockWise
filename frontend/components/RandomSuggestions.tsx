@@ -91,6 +91,23 @@ export default function RandomSuggestionsWidget() {
         <Text style={styles.noDataText}>No suggestions available.</Text>
       ) : (
         <>
+          <FlatList
+            data={suggestions}
+            keyExtractor={(item, index) => index.toString()}
+            scrollEnabled={false}
+            renderItem={({ item }) => (
+              <View style={styles.suggestionItem}>
+                <View style={styles.suggestionHeader}>
+                  <Text style={styles.suggestionSymbol}>
+                    {item.symbol} - {item.company_name}
+                  </Text>
+                  <Text style={styles.suggestionSector}>{item.sector}</Text>
+                </View>
+                <Text style={styles.suggestionReason}>{item.reason}</Text>
+              </View>
+            )}
+          />
+
           {(currentPortfolio.length > 0 && withSuggestions.length > 0) && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Sector Diversification</Text>
@@ -122,23 +139,6 @@ export default function RandomSuggestionsWidget() {
               </>
             </View>
           )}
-
-          <FlatList
-            data={suggestions}
-            keyExtractor={(item, index) => index.toString()}
-            scrollEnabled={false}
-            renderItem={({ item }) => (
-              <View style={styles.suggestionItem}>
-                <View style={styles.suggestionHeader}>
-                  <Text style={styles.suggestionSymbol}>
-                    {item.symbol} - {item.company_name}
-                  </Text>
-                  <Text style={styles.suggestionSector}>{item.sector}</Text>
-                </View>
-                <Text style={styles.suggestionReason}>{item.reason}</Text>
-              </View>
-            )}
-          />
         </>
       )}
     </View>

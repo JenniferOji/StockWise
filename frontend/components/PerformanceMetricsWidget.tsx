@@ -90,11 +90,11 @@ export default function PerformanceMetricsWidget() {
           />
         </View>
 
-        <View style={[styles.profitBanner, { backgroundColor: isProfit ? '#dcfce7' : '#fee2e2' }]}>
-          <Text style={[styles.profitLabel, { color: isProfit ? '#16a34a' : '#dc2626' }]}>
-            {isProfit ? 'Total Profit' : 'Total Loss'}
+        <View style={[styles.profitBanner, isProfit ? styles.profitBannerPositive : styles.profitBannerNegative]}>
+          <Text style={[styles.profitLabel, isProfit ? styles.profitLabelPositive : styles.profitLabelNegative]}>
+            {isProfit ? 'Portfolio Profit' : 'Portfolio Loss'}
           </Text>
-          <Text style={[styles.profitValue, { color: isProfit ? '#16a34a' : '#dc2626' }]}>
+          <Text style={[styles.profitValue, isProfit ? styles.profitValuePositive : styles.profitValueNegative]}>
             {isProfit ? '+' : ''}€{profitLoss?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </Text>
         </View>
@@ -106,27 +106,29 @@ export default function PerformanceMetricsWidget() {
         <Text style={styles.sectionSubtitle}>Based on your holdings performance</Text>
 
         <View style={styles.highlightRow}>
-          <View style={[styles.highlightCard, { backgroundColor: '#dcfce7' }]}>
-            <Text style={[styles.highlightLabel, { color: '#16a34a' }]}>
-              Best Performer
-            </Text>
-            <Text style={styles.highlightValue}>
-              {best?.symbol}
-            </Text>
+          <View style={[styles.highlightCard, styles.highlightCardPositive]}>
+            <View style={styles.highlightHead}>
+              <Text style={[styles.highlightLabel, styles.highlightLabelPositive]}>Best Performer</Text>
+              <Text style={[styles.highlightPill, styles.highlightPillPositive]}>
+                +{Math.abs(best?.return_pct || 0).toFixed(2)}%
+              </Text>
+            </View>
+            <Text style={styles.highlightValue}>{best?.symbol}</Text>
             <Text style={styles.highlightBestValue}>
-              {best?.profit >= 0 ? '+' : '-'}€{Math.abs(best?.profit || 0).toFixed(2)} ({best?.return_pct?.toFixed(2)}%)
+              +€{Math.abs(best?.profit || 0).toFixed(2)}
             </Text>
           </View>
 
-          <View style={[styles.highlightCard, { backgroundColor: '#fee2e2' }]}>
-            <Text style={[styles.highlightLabel, { color: '#dc2626' }]}>
-              Worst Performer
-            </Text>
-            <Text style={styles.highlightValue}>
-              {worst?.symbol}
-            </Text>
+          <View style={[styles.highlightCard, styles.highlightCardNegative]}>
+            <View style={styles.highlightHead}>
+              <Text style={[styles.highlightLabel, styles.highlightLabelNegative]}>Worst Performer</Text>
+              <Text style={[styles.highlightPill, styles.highlightPillNegative]}>
+                -{Math.abs(worst?.return_pct || 0).toFixed(2)}%
+              </Text>
+            </View>
+            <Text style={styles.highlightValue}>{worst?.symbol}</Text>
             <Text style={styles.highlightWorstValue}>
-              {worst?.profit >= 0 ? '+' : '-'}€{Math.abs(worst?.profit || 0).toFixed(2)} ({worst?.return_pct?.toFixed(2)}%)
+              -€{Math.abs(worst?.profit || 0).toFixed(2)}
             </Text>
           </View>
         </View>
@@ -195,17 +197,31 @@ const styles = StyleSheet.create({
   metricLabel:{ fontWeight:'600', color:'#64748b', fontSize:12 },
   metricValue:{ fontWeight:'700', fontSize:15, marginTop:2 },
   desc:{ fontSize:11, color:'#94a3b8', marginTop:2 },
-  profitBanner:{ borderRadius:12, padding:12, marginTop:12, alignItems:'center' },
-  profitLabel:{ fontWeight:'600', fontSize:12 },
-  profitValue:{ fontWeight:'700', fontSize:18, marginTop:2 },
+  profitBanner:{ borderRadius:14, paddingHorizontal:14, paddingVertical:12, marginTop:14, borderWidth:1 },
+  profitBannerPositive:{ backgroundColor:'#ecfdf3', borderColor:'#bbf7d0' },
+  profitBannerNegative:{ backgroundColor:'#fff1f2', borderColor:'#fecdd3' },
+  profitLabel:{ fontWeight:'700', fontSize:12, letterSpacing:0.4, textTransform:'uppercase' },
+  profitLabelPositive:{ color:'#15803d' },
+  profitLabelNegative:{ color:'#b91c1c' },
+  profitValue:{ fontWeight:'700', fontSize:21, marginTop:4, lineHeight:25 },
+  profitValuePositive:{ color:'#16a34a' },
+  profitValueNegative:{ color:'#dc2626' },
   sectionTitle:{ fontSize:15, fontWeight:'700', marginBottom:8, color:'#111' },
   sectionSubtitle:{ fontSize:12, color:'#64748b', marginBottom:10 },
-  highlightRow:{ flexDirection:'row', justifyContent:'space-between' },
-  highlightCard:{ width:'48%', borderRadius:12, padding:12 },
-  highlightLabel:{ fontWeight:'600', marginBottom:4, fontSize:12 },
-  highlightValue:{ fontWeight:'700', fontSize:15, color:'#111' },
-  highlightWorstValue:{ color:'#dc2626', fontWeight:'500', marginTop:4, fontSize:12 },
-  highlightBestValue:{ color:'#16a34a', fontWeight:'500', marginTop:4, fontSize:12 },
+  highlightRow:{ flexDirection:'row', justifyContent:'space-between', gap:10 },
+  highlightCard:{ flex:1, borderRadius:14, padding:12, borderWidth:1 },
+  highlightCardPositive:{ backgroundColor:'#ecfdf3', borderColor:'#bbf7d0' },
+  highlightCardNegative:{ backgroundColor:'#fff1f2', borderColor:'#fecdd3' },
+  highlightHead:{ flexDirection:'row', justifyContent:'space-between', alignItems:'center', marginBottom:8 },
+  highlightLabel:{ fontWeight:'700', fontSize:12, letterSpacing:0.3, textTransform:'uppercase' },
+  highlightLabelPositive:{ color:'#15803d' },
+  highlightLabelNegative:{ color:'#b91c1c' },
+  highlightPill:{ fontSize:11, fontWeight:'700', paddingHorizontal:8, paddingVertical:3, borderRadius:999, overflow:'hidden' },
+  highlightPillPositive:{ color:'#166534', backgroundColor:'#dcfce7' },
+  highlightPillNegative:{ color:'#991b1b', backgroundColor:'#ffe4e6' },
+  highlightValue:{ fontWeight:'700', fontSize:19, lineHeight:23, color:'#0f172a' },
+  highlightWorstValue:{ color:'#dc2626', fontWeight:'700', marginTop:2, fontSize:14 },
+  highlightBestValue:{ color:'#16a34a', fontWeight:'700', marginTop:2, fontSize:14 },
   breakdownSection:{ marginTop:4 },
   holdingCard:{ backgroundColor:'#f8fafc', borderRadius:12, padding:12, marginBottom:8 },
   holdingHeader:{ flexDirection:'row', justifyContent:'space-between', marginBottom:8 },

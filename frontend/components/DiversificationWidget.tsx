@@ -138,7 +138,8 @@ export default function DiversificationWidget() {
 
       {volatilityDifference != null && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Portfolio Volatility Comparison</Text>
+          <Text style={styles.sectionTitle}>Estimated Portfolio Volatility Comparison</Text>
+          <Text style={styles.metricLabel}>Based on individual stock volatilities</Text>
           <View style={styles.comparisonRow}>
             <View style={styles.comparisonColumn}>
               <Text style={styles.columnHeader}>Current</Text>
@@ -194,12 +195,13 @@ const styles = StyleSheet.create({
   error: { color: '#dc2626', fontSize: 14, textAlign: 'center', padding: 10 },
   noDataText: { fontSize: 14, color: '#64748b', textAlign: 'center', marginTop: 10 },
   section: { marginBottom: 25 },
-  sectionTitle: { fontSize: 15, fontWeight: '500', color: '#0b3d91', marginBottom: 12 },
+  sectionTitle: { fontSize: 15, fontWeight: '500', color: '#0b3d91', marginBottom: 3},
   comparisonRow: { flexDirection: 'row', gap: 10 },
   comparisonColumn: { flex: 1 },
   columnHeader: { fontSize: 14, fontWeight: '600', color: '#64748b', marginBottom: 8, textAlign: 'center' },
   metricBox: { backgroundColor: '#fff', borderRadius: 10, padding: 12, marginBottom: 8, shadowColor: '#0b3d91', shadowOpacity: 0.05, shadowRadius: 4, elevation: 1, borderWidth: 1, borderColor: '#e0e7ef' },
   metricLabel: { fontSize: 12, color: '#64748b', fontWeight: '600', marginBottom: 4 },
+  explanationLabel: { fontSize: 13, color: '#33373c', fontWeight: '600', marginBottom: 12 },
   metricValue: { fontSize: 18, fontWeight: '700', color: '#111' },
   changeText: { fontSize: 11, marginTop: 2, fontWeight: '500' },
   improvementItem: { flexDirection: 'row', paddingVertical: 8, paddingHorizontal: 12, marginBottom: 6, backgroundColor: '#f0f9ff', borderRadius: 8, borderLeftWidth: 3, borderLeftColor: '#0ea5e9' },

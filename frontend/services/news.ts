@@ -70,7 +70,7 @@ export const getSingleStockSentiment = async (symbols: string[]) => {
         }
 
         const response = await axios.post(endpoints.getStockSentiment, {
-            names: symbols, 
+            names: symbols,
         });
 
         return response.data;

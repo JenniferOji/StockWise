@@ -5,36 +5,38 @@ from pathlib import Path
 
 import nltk
 import pandas as pd
-from catboost import CatBoostClassifier
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-from skl2onnx import convert_sklearn
-from skl2onnx.common.data_types import StringTensorType
+
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.metrics import accuracy_score, classification_report
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import make_pipeline
+from sklearn.svm import LinearSVC
 
-# Download tokenizer resources
+from skl2onnx import convert_sklearn
+from skl2onnx.common.data_types import FloatTensorType
+
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
+
 nltk.download("punkt")
 nltk.download("wordnet")
 
-# Load dataset
-BASE_DIR = Path(__file__).resolve().parents[1]
-news_sentiment_path = BASE_DIR / "training_data" / "news_sentiment_data.csv"
+base_dir = Path(__file__).resolve().parents[1]
+news_sentiment_path = base_dir / "training_data" / "news_sentiment_data.csv"
 
 df = pd.read_csv(news_sentiment_path, encoding="ISO-8859-1", low_memory=False)
 
-# Inputs and labels
-X = df.Headline.values
-y = df.Sentiment.replace(4, 1)
+x = df.Headline.astype(str).values
+y = df.Sentiment.astype(str)
 
-# Train / test splitml/models/training_data
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.3, random_state=0
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y, test_size=0.3, random_state=0
 )
 
-# Text preprocessing tools
 lemm = WordNetLemmatizer()
 
 def reduce_lengthening(text):
@@ -42,92 +44,108 @@ def reduce_lengthening(text):
     return pattern.sub(r"\1\1", text)
 
 def text_preprocess(doc):
-
     temp = doc.lower()
-
     temp = re.sub("@[A-Za-z0-9_]+", "", temp)
     temp = re.sub("#[A-Za-z0-9_]+", "", temp)
     temp = re.sub(r"http\S+", "", temp)
     temp = re.sub(r"www.\S+", "", temp)
-
-    temp = re.sub("[0-9]", "", temp)
     temp = re.sub("'", " ", temp)
 
-    temp = word_tokenize(temp)
+    tokens = word_tokenize(temp)
+    tokens = [reduce_lengthening(w) for w in tokens]
+    tokens = [lemm.lemmatize(w) for w in tokens]
+    tokens = [w for w in tokens if len(w) > 2]
 
-    temp = [reduce_lengthening(w) for w in temp]
+    return " ".join(tokens)
 
-    temp = [lemm.lemmatize(w) for w in temp]
+x_train_clean = [text_preprocess(x) for x in x_train]
+x_test_clean = [text_preprocess(x) for x in x_test]
 
-    temp = [w for w in temp if len(w) > 1]
+# hybrid feature pipeline
+features = FeatureUnion([
 
-    return " ".join(temp)
+    ("word", Pipeline([
+        ("vectorizer", CountVectorizer(
+            analyzer="word",
+            ngram_range=(1, 3),
+            stop_words="english",
+            min_df=2,
+            max_df=0.9,
+            max_features=30000
+        )),
+        ("tfidf", TfidfTransformer())
+    ])),
 
-# Preprocess training data
-X_train_clean = [text_preprocess(x) for x in X_train]
-X_test_clean = [text_preprocess(x) for x in X_test]
+    ("char", Pipeline([
+        ("vectorizer", CountVectorizer(
+            analyzer="char_wb",
+            ngram_range=(3, 5),
+            max_features=20000
+        )),
+        ("tfidf", TfidfTransformer())
+    ]))
+])
 
-# Vectorization pipeline
-pipe = make_pipeline(
-    CountVectorizer(
-        ngram_range=(1,2),        # capture financial bigrams
-        stop_words="english",     # remove common words
-        min_df=5,                 # ignore rare words
-        max_df=0.9
-    ),
-    TfidfTransformer()
-)
+# full training pipeline
+pipeline = Pipeline([
+    ("features", features),
+    ("clf", LinearSVC(
+        C=2.0,
+        multi_class='ovr',
+        class_weight={
+            "negative": 1,
+            "neutral": 1,
+            "positive": 1.4
+        }
+    ))
+])
 
-pipe.fit(X_train_clean)
+pipeline.fit(x_train_clean, y_train)
 
-Xtrain = pipe.transform(X_train_clean)
-Xtest = pipe.transform(X_test_clean)
+predictions = pipeline.predict(x_test_clean)
 
-# Train CatBoost model
-cat_classifier = CatBoostClassifier(
-    iterations=1000,
-    learning_rate=0.03,
-    depth=6,
-    od_type="Iter",
-    od_wait=50,
-    verbose=100,
-    objective="MultiClass"
-)
-
-cat_classifier.fit(Xtrain, y_train, eval_set=(Xtest, y_test))
-
-# Evaluate model
-predictions = cat_classifier.predict(Xtest)
-
-print("Accuracy:", accuracy_score(y_test, predictions))
+print("accuracy:", accuracy_score(y_test, predictions))
 print(classification_report(y_test, predictions))
 
-# Export preprocessing pipeline to ONNX
-onnx_preprocessor = convert_sklearn(
-    pipe,
-    initial_types=[("input", StringTensorType([None, 1]))]
+
+with open("features.pkl", "wb") as f:
+    pickle.dump(pipeline.named_steps["features"], f)
+
+# transform training data to numeric features
+X_train_features = pipeline.named_steps["features"].transform(x_train_clean)
+
+onnx_model = convert_sklearn(
+    pipeline.named_steps["clf"],
+    initial_types=[("input", FloatTensorType([None, X_train_features.shape[1]]))],
+    options={id(pipeline.named_steps["clf"]): {"raw_scores": True}}
 )
 
-with open("sentiment_preprocessor.onnx", "wb") as f:
-    f.write(onnx_preprocessor.SerializeToString())
+with open("svm_model.onnx", "wb") as f:
+    f.write(onnx_model.SerializeToString())
 
-# exporting the model to ONNX
-cat_classifier.save_model(
-    "sentiment_catboost_model.onnx",
-    format="onnx",
-    export_parameters={
-        "onnx_domain": "ai.catboost",
-        "onnx_model_version": 1,
-        "onnx_doc_string": "News sentiment classification model",
-        "onnx_graph_name": "CatBoostModel_for_Sentiment",
-    }
+print("model training complete")
+print("feature pipeline saved (features.pkl)")
+print("svm exported to onnx (svm_model.onnx)")
+
+labels = ["negative", "neutral", "positive"]
+
+cm = confusion_matrix(y_test, predictions, labels=labels)
+
+plt.figure(figsize=(6, 5))
+sns.heatmap(
+    cm,
+    annot=True,           
+    fmt="d",               
+    cmap="Blues",          
+    xticklabels=labels,
+    yticklabels=labels,
+    cbar=True
 )
 
-# Save label map
-LABEL_MAP = {-1: "negative", 0: "neutral", 1: "positive"}
+plt.title("LinearSVC - Confusion Matrix")
+plt.xlabel("Predicted Label")
+plt.ylabel("True Label")
 
-with open("sentiment_label_map.pkl", "wb") as f:
-    pickle.dump(LABEL_MAP, f)
-
-print("Model training complete.")
-print("ONNX models exported.")
+plt.tight_layout()
+plt.savefig("confusion_matrix.png", dpi=300)
+plt.show()

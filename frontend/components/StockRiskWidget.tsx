@@ -39,6 +39,7 @@ export default function StockRiskWidget() {
   const [error, setError] = useState('');
   const [result, setResult] = useState<StockRiskResponse | null>(null);
   const [impact, setImpact] = useState<any>(null);
+  const canSimulate = shares.trim().length > 0;
 
   const filteredSuggestions = useMemo(() => {
     const q = symbol.trim().toLowerCase();
@@ -188,18 +189,25 @@ export default function StockRiskWidget() {
           <View style={styles.simSection}>
             <Text style={styles.simTitle}>Simulate Impact</Text>
             <Text style={styles.simSubtitle}>
-              See how adding this stock affects your portfolio
+              See how adding this stock affects your portfolio before you purchase it with your desired shares 
             </Text>
 
             <View style={styles.inputRow}>
-              <TextInput
-                style={styles.input}
-                placeholder="Number of shares"
-                value={shares}
-                onChangeText={setShares}
-                keyboardType="numeric"
-              />
-              <TouchableOpacity style={styles.button} onPress={handleSimulate}>
+              <View style={styles.inputWrap}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Number of shares"
+                  placeholderTextColor="#94a3b8"
+                  value={shares}
+                  onChangeText={setShares}
+                  keyboardType="numeric"
+                />
+              </View>
+              <TouchableOpacity
+                style={[styles.button, !canSimulate && styles.buttonDisabled]}
+                onPress={handleSimulate}
+                disabled={!canSimulate}
+              >
                 <Text style={styles.buttonText}>Simulate</Text>
               </TouchableOpacity>
             </View>
@@ -241,6 +249,7 @@ const styles = StyleSheet.create({
   dropdownSymbol: { fontSize: 13, fontWeight: '700', color: '#0f172a' },
   dropdownName: { fontSize: 12, color: '#64748b', marginTop: 1 },
   button: { backgroundColor: '#0b3d91', borderRadius: 10, paddingHorizontal: 12, justifyContent: 'center', alignItems: 'center', alignSelf: 'flex-start', height: 44, minWidth: 0, flexShrink: 0 },
+  buttonDisabled: { backgroundColor: '#94a3b8' },
   buttonText: { color: '#fff', fontWeight: '700', textAlign: 'center' },
   loadingWrap: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   loadingText: { color: '#64748b' },

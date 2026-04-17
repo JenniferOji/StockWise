@@ -42,7 +42,7 @@ const menu: MenuSection[] = [
         icon: "auto-graph",
     },
     { 
-        title: "Explore Opportunities",
+        title: "Explore Diversification Opportunities",
         subtitle: "Find additional stocks in your risk band to diversify your portfolio",
         icon: "lightbulb",
     },
@@ -99,7 +99,7 @@ function Accordian({ title, subtitle, icon, expanded, onToggle, isLargeScreen }:
                     {title === 'Risk Metrics' && <RiskInsightsWidget />}
                     {title === 'Sector Allocation' && <StockAllocationWidget />}
                     {title === 'Portfolio Optimisation Suggestion' && <DiversificationWidget />}
-                    {title === 'Explore Opportunities' && <RandomSuggestionsWidget />}
+                    {title === 'Explore Diversification Opportunities' && <RandomSuggestionsWidget />}
                     {title === 'Stock Risk Checker' && <StockRiskWidget />}
                 </View>
             )}

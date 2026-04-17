@@ -340,7 +340,7 @@ def get_random_suggestions(request: DiversificationRequest):
             }
 
         # sort candidate pool based on user risk preference
-        candidate_pool = suggested_stocks.sample(n=min(5, len(suggested_stocks)))
+        candidate_pool = suggested_stocks.sample(n=min(3, len(suggested_stocks)))
 
         suggestions = []
 
