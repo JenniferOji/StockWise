@@ -38,7 +38,7 @@ variances = returns.var() * 252
 var_95 = {}
 for t in returns.columns:
     r = returns[t].dropna()
-    var_95[t] = abs(np.percentile(r, 5))
+    var_95[t] = abs(np.percentile(r, 5)) * np.sqrt(252)
 
 # max drawdown: how far did the stock drop from its peak at its worst point
 max_drawdowns = {}

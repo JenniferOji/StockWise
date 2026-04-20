@@ -166,7 +166,6 @@ export default function StockRiskWidget() {
       )}
 
       {!!error && <Text style={styles.error}>{error}</Text>}
-
       {result && (
         <View style={[styles.resultCard, { borderLeftColor: riskColor }]}>
           <Text style={styles.stockTitle}>

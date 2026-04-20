@@ -29,7 +29,7 @@ export const getStockRiskCategories = async (userId: number) => {
 
         const formattedStocks = stocks.map((s: any) => {
             const { totalShares, avgPrice } = totalEntries(s);
-            return { ticker: s.symbol, shares: totalShares, purchase_price: avgPrice };
+            return { symbol: s.symbol, shares: totalShares, purchase_price: avgPrice };
         });
 
         console.log("Calling endpoint:", endpoints.getStockRiskCategories);

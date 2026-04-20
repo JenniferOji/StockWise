@@ -16,6 +16,7 @@ PRICES_PATH = os.path.join(BASE_DIR, "data", "prices.csv")
 
 df_features = pd.read_csv(FEATURES_PATH)
 df_prices = pd.read_csv(PRICES_PATH, index_col=0, parse_dates=True)
+df_features.columns = df_features.columns.str.lower()
 
 # the cluster risk mapping is needed to assign the risk category to the stocks based on the predicted cluster label from the gmm model
 CLUSTER_RISK_PATH = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
@@ -113,7 +114,7 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
 
     portfolio_annual_return = portfolio_returns.mean() * 252
     portfolio_volatility = portfolio_returns.std() * np.sqrt(252)
-    portfolio_var_95 = abs(np.percentile(portfolio_returns, 5))
+    portfolio_var_95 = abs(np.percentile(portfolio_returns, 5)) * np.sqrt(252)
 
     cumulative = (1 + portfolio_returns).cumprod()
     drawdown = (cumulative - cumulative.cummax()) / cumulative.cummax()
@@ -187,11 +188,11 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
             StockRiskCategory(
                 symbol=symbol,
                 risk_bucket=category,
-                volatility=round(features["Volatility"] * 100, 2),
+                volatility=round(features["volatility"] * 100, 2),
                 max_drawdown=round(features.get("max_drawdown", 0) * 100, 2),
-                annual_return=round(features["Returns"] * 100, 2),
-                sharpe=round(features.get("Sharpe", 0), 3),
-                var_95=round(features["VaR_95"] * 100, 2),
+                annual_return=round(features["returns"] * 100, 2),
+                sharpe=round(features.get("sharpe", 0), 3),
+                var_95=round(features["var_95"] * 100, 2),
             )
         )
         

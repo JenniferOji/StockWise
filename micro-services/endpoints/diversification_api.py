@@ -24,6 +24,7 @@ with open(stock_data_path, 'r') as f:
     STOCK_DATA = json.load(f)
 
 df_features = pd.read_csv(FEATURES_PATH)
+df_features.columns = df_features.columns.str.lower()
 
 feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
@@ -125,8 +126,8 @@ def get_diversification_suggestions(request: DiversificationRequest):
         user_index = risk_levels.index(request.user_risk_preference)
 
         df_runtime = df_features.copy()
-        df_runtime = df_runtime.dropna(subset=["log_variances", "volatility", "var_95", "Cluster_labels"])
-        df_runtime["Cluster_labels"] = df_runtime["Cluster_labels"].astype(int)
+        df_runtime = df_runtime.dropna(subset=["log_variances", "volatility", "var_95", "cluster_labels"])
+        df_runtime["cluster_labels"] = df_runtime["cluster_labels"].astype(int)
 
         target_clusters = []
 
@@ -145,7 +146,7 @@ def get_diversification_suggestions(request: DiversificationRequest):
 
         # keep only stocks belonging to the selected clusters
         suggested_stocks = available_stocks[
-            available_stocks['Cluster_labels'].isin(target_clusters)
+            available_stocks['cluster_labels'].isin(target_clusters)
         ]
 
         if len(suggested_stocks) == 0:
@@ -295,8 +296,8 @@ def get_random_suggestions(request: DiversificationRequest):
         user_index = risk_levels.index(request.user_risk_preference)
 
         df_runtime = df_features.copy()
-        df_runtime = df_runtime.dropna(subset=["Log_Variances", "Volatility", "VaR_95", "Cluster_labels"])
-        df_runtime["Cluster_labels"] = df_runtime["Cluster_labels"].astype(int)
+        df_runtime = df_runtime.dropna(subset=["log_variances", "volatility", "var_95", "cluster_labels"])
+        df_runtime["cluster_labels"] = df_runtime["cluster_labels"].astype(int)
 
         target_clusters = []
 
@@ -323,12 +324,12 @@ def get_random_suggestions(request: DiversificationRequest):
 
         # keep only stocks belonging to the selected clusters
         suggested_stocks = sector_filtered_stocks[
-            sector_filtered_stocks['Cluster_labels'].isin(target_clusters)
+            sector_filtered_stocks['cluster_labels'].isin(target_clusters)
         ]
 
         if len(suggested_stocks) == 0 and len(available_stocks) > 0:
             suggested_stocks = available_stocks[
-                available_stocks['Cluster_labels'].isin(target_clusters)
+                available_stocks['cluster_labels'].isin(target_clusters)
             ]
 
         if len(suggested_stocks) == 0:

@@ -31,6 +31,7 @@ STOCK_META_PATH = os.path.join(BASE_DIR, "data", "stocks.json")
 
 df_features = pd.read_csv(FEATURES_PATH)
 df_features["symbol"] = df_features["symbol"].astype(str).str.strip().str.upper().str.replace(".", "-", regex=False)
+df_features.columns = df_features.columns.str.lower()
 feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
 df_prices = pd.read_csv(PRICES_PATH, index_col=0, parse_dates=True)
@@ -64,13 +65,13 @@ def calculate_dynamic_features(symbol: str):
         "symbol": symbol,
         "company_name": meta.get("companyName", ""),
         "sector": meta.get("sector", ""),
-        "Cluster_labels": int(features["Cluster_labels"]),
-        "Log_Variances": float(features["Log_Variances"]),
-        "Volatility": float(features["Volatility"]),
-        "VaR_95": float(features["VaR_95"]),
+        "cluster_labels": int(features["cluster_labels"]),
+        "log_variances": float(features["log_variances"]),
+        "volatility": float(features["volatility"]),
+        "var_95": float(features["var_95"]),
         "max_drawdown": float(features["max_drawdown"]),
         "annual_return": float(features["returns"]),
-        "sharpe": float(features["Sharpe"]),
+        "sharpe": float(features["sharpe"]),
     }
 
 def map_cluster_to_risk(cluster_label: int):
@@ -168,7 +169,7 @@ def check_stock_risk(request: StockRiskCheckRequest):
 
         stock_features = calculate_dynamic_features(symbol)
 
-        cluster_label = int(stock_features["Cluster_labels"])
+        cluster_label = int(stock_features["cluster_labels"])
 
         risk_label = map_cluster_to_risk(cluster_label)
 
@@ -180,7 +181,7 @@ def check_stock_risk(request: StockRiskCheckRequest):
             "cluster": cluster_label,
             "risk_level": risk_label,
             "metrics": {
-                "volatility": round(stock_features["Volatility"] * 100, 2),
+                "volatility": round(stock_features["volatility"] * 100, 2),
                 "max_drawdown": round(stock_features["max_drawdown"] * 100, 2),
                 "annual_return": round(stock_features["annual_return"] * 100, 2),
             },
