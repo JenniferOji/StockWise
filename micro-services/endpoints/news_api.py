@@ -11,35 +11,30 @@ from typing import List
 from dotenv import load_dotenv
 import re
 import onnxruntime as ort
+import nltk
+from nltk.stem import WordNetLemmatizer
+from nltk.tokenize import word_tokenize
 
 load_dotenv()
 router = APIRouter()
 
+lemm = WordNetLemmatizer()
+
 # load the onnx models from the file path
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# paths for the onnx models and label mapping
-# FINBERT_PATH = os.path.join(BASE_DIR, "models", "finbert")
-# tokenizer = AutoTokenizer.from_pretrained(FINBERT_PATH)
-
-# finbert_session = ort.InferenceSession(os.path.join(FINBERT_PATH, "model.onnx"),providers=["CPUExecutionProvider"])
-
 # preprocessing converts text to the numeric feature vectors used b the model - catboost cannot read text 
-preproc_path = os.path.join(BASE_DIR, "models", "sentiment_preprocessor.onnx")
-# takes the numeric feature vectors from the preprocessing step and predicts the sentiment class
-model_path = os.path.join(BASE_DIR, "models", "sentiment_catboost_model.onnx")
+model_path = os.path.join(BASE_DIR, "models", "svm_model.onnx")
 
-preproc_sess = ort.InferenceSession(preproc_path, providers=["CPUExecutionProvider"])
 model_sess = ort.InferenceSession(model_path, providers=["CPUExecutionProvider"])
+# print("MODEL INPUT:", model_sess.get_inputs()[0].name, model_sess.get_inputs()[0].type)
 
 # loads the label dictionary to convert the model output back to the sentiment label
-with open(os.path.join(BASE_DIR, "models", "sentiment_label_map.pkl"), "rb") as f:
-    sentiment_label = pickle.load(f)
+labels = ["negative", "neutral", "positive"]
 
 class StockRequest(BaseModel):
     names: List[str]
 
-# only getting the first part of the company name to search for news as the api seems to work better with that.
 def split_company_name(company_name: str):
     name = company_name.split('(')[0].strip()
 
@@ -50,7 +45,6 @@ def split_company_name(company_name: str):
    
     return words[0] if words else company_name
 
-# checks if the headline mentions the stock by looking for the parameters in the headline
 def title_mentions_stock(headline: str, company_name: str, shortened_company_name: str, symbol: str):
     headline_lower = headline.lower()
     company_base = company_name.split('(')[0].strip().lower()
@@ -66,66 +60,54 @@ def title_mentions_stock(headline: str, company_name: str, shortened_company_nam
 
     return False
 
-
-# formatting the date from the api for display
 def format_date(value: str):
     if value is None:
         return None
 
-    # handling unix timestamps - somethign returned by api endpoints
     if isinstance(value, (int, float)):
         dt = datetime.utcfromtimestamp(value)
-
     else:
         fixed = value.replace("Z", "+00:00")
         dt = datetime.fromisoformat(fixed)
 
     return dt.strftime("%d %b %Y")
 
-# TEXT PREPROCESSIGN STPES - same as the preprocessing used during model training 
-
-# reduces repeated characters to a max of 2 
 def reduce_lengthening(text):
     pattern = re.compile(r"(.)\1{2,}")
     return pattern.sub(r"\1\1", text)
 
-# cleans text - removes urls, mentions, numbers
-def text_preprocess(text: str):
-    text = text.lower()
-    text = re.sub(r"http\S+", "", text)
-    text = re.sub(r"[^a-z\s]", "", text)
-    text = re.sub(r"(.)\1{2,}", r"\1\1", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
+def text_preprocess(doc: str):
+    temp = doc.lower()
+    temp = re.sub("@[A-Za-z0-9_]+", "", temp)
+    temp = re.sub("#[A-Za-z0-9_]+", "", temp)
+    temp = re.sub(r"http\S+", "", temp)
+    temp = re.sub(r"www.\S+", "", temp)
+    temp = re.sub("'", " ", temp)
 
-# gets the sentiment label for a list of texts by running them through the preprocessing and model onnx pipelines
+    tokens = word_tokenize(temp)
+    tokens = [reduce_lengthening(w) for w in tokens]
+    tokens = [lemm.lemmatize(w) for w in tokens]
+    tokens = [w for w in tokens if len(w) > 2]
+
+    return " ".join(tokens)
+
 def get_sentiment_labels(texts: List[str]):
     clean_texts = [text_preprocess(t) for t in texts]
 
-    # initialising the input for the preprocessing model 
-    preproc_input = preproc_sess.get_inputs()[0].name
-
-    # running the preprocessing model to get the features for the sentiment model
-    # preprocessing model take the clean text and converts them to numeric feature vectors as model inout 
-    preproc_out = preproc_sess.run(
-        None,
-        {preproc_input: np.array([[t] for t in clean_texts], dtype=object)}
-    )
-
-    features = preproc_out[0]
-
-    # initialising the input for the sentiment model
     model_input = model_sess.get_inputs()[0].name
 
-    # running the sentiment model to get the sentiment predictions for the input features
-    outputs = model_sess.run(None, {model_input: features})
+    inputs = np.array(clean_texts, dtype=object).reshape(-1, 1)
 
-    labels = outputs[0].flatten()
+    outputs = model_sess.run(None, {model_input: inputs})
+
+    predictions = outputs[0]
 
     result = []
-    for label in labels:
-        # the label is a number representing the sentiment class 
-        result.append(label)
+    for pred in predictions:
+        if isinstance(pred, (str, np.str_)):
+            result.append(pred)
+        else:
+            result.append(labels[int(pred)])
     return result
 
 SENTIMENT_SCORE = {
@@ -134,16 +116,14 @@ SENTIMENT_SCORE = {
     "negative": -1
 }
 
-# computes the average sentiment score for each stock based on the sentiment of the articles 
 def compute_stock_sentiment(articles, names: List[str] | None = None):
 
     stock_scores = {}
     stock_counts = {}
 
-    # for each article, we get the stock name and sentiment, convert the sentiment to a score using the SENTIMENT_SCORE dictionary and tally the scores and counts for each stock
     for article in articles:
         stock = article.get("symbol")
-        sentiment = article.get("catboost_model", "neutral")
+        sentiment = article.get("linearsvm_model", "neutral")
 
         score = SENTIMENT_SCORE.get(sentiment, 0)
         stock_scores[stock] = stock_scores.get(stock, 0) + score
@@ -151,11 +131,9 @@ def compute_stock_sentiment(articles, names: List[str] | None = None):
 
     results = {}
 
-    # for each stock we compute the vaerage sentiment score and assign a label based on it 
     for stock in stock_scores:
         avg_score = stock_scores[stock] / stock_counts[stock]
 
-        # the 0.33 threshold means at least 33% more positive articles than negative articles
         if avg_score > 0.33:
             label = "positive"
         elif avg_score < -0.33:
@@ -171,7 +149,6 @@ def compute_stock_sentiment(articles, names: List[str] | None = None):
 
     return results
 
-# this endpoint fetches the news articles and gets a sentiment label for each 
 @router.post("/stock-news")
 def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
     api_key = os.getenv("FINNHUB_API_KEY") 
@@ -181,7 +158,6 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
     if len(names) == 0:
         raise HTTPException(status_code=400, detail="No stock names provided")
 
-    # get the frist part of the company name 
     search_terms = [split_company_name(name) for name in names]
     
     to_date = datetime.utcnow().date()
@@ -190,7 +166,6 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
     else:
         from_date = to_date - timedelta(days=look_back_days - 1)
 
-    # clean articles to only return article image, headline, and the ticker
     formatted_articles = []
     seen_urls = set()
 
@@ -246,7 +221,6 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
                 continue
             seen_urls.add(url)
 
-            # sentiment = get_sentiment_label(headline)
             text = headline + " " + summary
 
             article_texts.append(text)
@@ -261,26 +235,19 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
                 "date": format_date(article.get("datetime")),
             })
 
-    # formatted_articles = formatted_articles[:15]
-
-    # using the onnx models to get the sentiment label 
-    catboost_sentiments = get_sentiment_labels(article_texts) if article_texts else []
-    # finbert_sentiments = get_finbert_sentiments(article_texts) if article_texts else []
+    linearsvm_sentiments = get_sentiment_labels(article_texts) if article_texts else []
     
-    # for each article we add the sentiment label to it
-    for article, catboost_sentiment in zip(article_refs, catboost_sentiments):
-        article["catboost_model"] = catboost_sentiment
+    for article, sentiment in zip(article_refs, linearsvm_sentiments):
+        article["linearsvm_model"] = sentiment
         formatted_articles.append(article)
 
     return {
         "success": True,
         "names": names,
         "count": len(formatted_articles),
-        # "stock_sentiments": stock_sentiments,
         "articles": formatted_articles
     }
 
-# thsi endpoint gets the sentiment summary for a list of stocks 
 @router.post("/stock-sentiment")
 def get_stock_sentiment(request: StockRequest):
 

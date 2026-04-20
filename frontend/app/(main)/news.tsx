@@ -185,10 +185,10 @@ export default function News() {
 
                   <View style={[
                     styles.sentimentBadge,
-                    { backgroundColor: `${getSentimentColor(item.catboost_model)}20` }
+                    { backgroundColor: `${getSentimentColor(item.linearsvm_model)}20` }
                   ]}>
-                    <Text style={{ color: getSentimentColor(item.catboost_model), fontWeight: '700', fontSize: 12 }}>
-                      {item.catboost_model}
+                    <Text style={{ color: getSentimentColor(item.linearsvm_model), fontWeight: '700', fontSize: 12 }}>
+                      {item.linearsvm_model}
                     </Text>
                   </View>
                 </View>

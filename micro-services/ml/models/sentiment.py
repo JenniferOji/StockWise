@@ -15,7 +15,7 @@ from sklearn.metrics import accuracy_score, classification_report
 from sklearn.svm import LinearSVC
 
 from skl2onnx import convert_sklearn
-from skl2onnx.common.data_types import FloatTensorType
+from skl2onnx.common.data_types import StringTensorType
 
 
 import matplotlib.pyplot as plt
@@ -62,28 +62,17 @@ x_train_clean = [text_preprocess(x) for x in x_train]
 x_test_clean = [text_preprocess(x) for x in x_test]
 
 # hybrid feature pipeline
-features = FeatureUnion([
-
-    ("word", Pipeline([
-        ("vectorizer", CountVectorizer(
-            analyzer="word",
-            ngram_range=(1, 3),
-            stop_words="english",
-            min_df=2,
-            max_df=0.9,
-            max_features=30000
-        )),
-        ("tfidf", TfidfTransformer())
-    ])),
-
-    ("char", Pipeline([
-        ("vectorizer", CountVectorizer(
-            analyzer="char_wb",
-            ngram_range=(3, 5),
-            max_features=20000
-        )),
-        ("tfidf", TfidfTransformer())
-    ]))
+# hybrid feature pipeline
+features = Pipeline([
+    ("vectorizer", CountVectorizer(
+        analyzer="word",
+        ngram_range=(1, 3),
+        stop_words="english",
+        min_df=2,
+        max_df=0.9,
+        max_features=30000
+    )),
+    ("tfidf", TfidfTransformer())
 ])
 
 # full training pipeline
@@ -108,15 +97,9 @@ print("accuracy:", accuracy_score(y_test, predictions))
 print(classification_report(y_test, predictions))
 
 
-with open("features.pkl", "wb") as f:
-    pickle.dump(pipeline.named_steps["features"], f)
-
-# transform training data to numeric features
-X_train_features = pipeline.named_steps["features"].transform(x_train_clean)
-
 onnx_model = convert_sklearn(
-    pipeline.named_steps["clf"],
-    initial_types=[("input", FloatTensorType([None, X_train_features.shape[1]]))],
+    pipeline,
+    initial_types=[("input", StringTensorType([None]))],
     options={id(pipeline.named_steps["clf"]): {"raw_scores": True}}
 )
 
@@ -124,7 +107,6 @@ with open("svm_model.onnx", "wb") as f:
     f.write(onnx_model.SerializeToString())
 
 print("model training complete")
-print("feature pipeline saved (features.pkl)")
 print("svm exported to onnx (svm_model.onnx)")
 
 labels = ["negative", "neutral", "positive"]
