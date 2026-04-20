@@ -11,6 +11,7 @@ type SimulateStockRequest struct {
 }
 
 func SimulateStock(ctx iris.Context) {
+	// read request body
 	var req SimulateStockRequest
 
 	if err := ctx.ReadJSON(&req); err != nil {
@@ -19,17 +20,20 @@ func SimulateStock(ctx iris.Context) {
 		return
 	}
 
+	// validate required symbol
 	if req.NewStock.Symbol == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.JSON(iris.Map{"detail": "Symbol is required"})
 		return
 	}
 
+	// normalise optional quantity
 	quantity := 0.0
 	if req.NewStock.Quantity != nil {
 		quantity = *req.NewStock.Quantity
 	}
 
+	// run simulation in service layer
 	result, err := services.SimulateStock(
 		req.NewStock.Symbol,
 		quantity,

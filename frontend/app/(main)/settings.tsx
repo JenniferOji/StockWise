@@ -53,8 +53,7 @@ export default function SettingsPage() {
   const handleUpdateRisk = async (newRisk: string) => {
     setLoading(true);
     try {
-      await axios.put(`${endpoints.updateRisk}`, {
-        user_id: parseInt(userId),
+      await axios.patch(endpoints.updateRisk(parseInt(userId)), {
         risk: newRisk,
       });
 

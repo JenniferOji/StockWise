@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	models "github.com/YourGitHubUser/StockWise/backend/schemas"
@@ -30,7 +30,7 @@ type StockEntryInput struct {
 }
 
 type AddStockInput struct {
-	UserID      uint              `json:"user_id" validate:"required"`
+	UserID      uint              `json:"user_id"`
 	Symbol      string            `json:"symbol" validate:"required"`
 	CompanyName string            `json:"company_name" validate:"required"`
 	Sector      string            `json:"sector" validate:"required"`
@@ -38,13 +38,11 @@ type AddStockInput struct {
 }
 
 type UpdateStockInput struct {
-	StockID uint              `json:"stock_id" validate:"required"`
 	Entries []StockEntryInput `json:"entries" validate:"required"`
 }
 
 type UpdateRiskInput struct {
-	UserID uint   `json:"user_id" validate:"required"`
-	Risk   string `json:"risk" validate:"required"`
+	Risk string `json:"risk" validate:"required"`
 }
 
 type NewsItem struct {
@@ -55,6 +53,7 @@ type NewsItem struct {
 }
 
 func Register(ctx iris.Context) {
+	// read request body
 	var userInput RegisterUserInput
 	err := ctx.ReadJSON(&userInput)
 	if err != nil {
@@ -62,24 +61,24 @@ func Register(ctx iris.Context) {
 		return
 	}
 
+	// check if email is already used
 	var newUser models.Users
 	userExists, userExistsErr := getAndHandleUserExists(&newUser, userInput.Email)
 	if userExistsErr != nil {
 		utils.CreateError(
 			iris.StatusConflict,
 			"Conflict",
-			"Email already registered", // decription shown to user
+			"Email already registered",
 			ctx,
 		)
 		return
 	}
 
 	if userExists == true {
-		fmt.Println("User already exists")
 		return
 	}
 
-	// if we get to this point the user does not exist
+	// hash password before storing
 	hashedPassword, hashErr := hashAndSaltPassword(userInput.Password)
 	if hashErr != nil {
 		utils.CreateInternalServerError(ctx)
@@ -105,6 +104,7 @@ func Register(ctx iris.Context) {
 }
 
 func Login(ctx iris.Context) {
+	// read request body
 	var userInput LoginUserInput
 	err := ctx.ReadJSON(&userInput)
 	if err != nil {
@@ -115,19 +115,19 @@ func Login(ctx iris.Context) {
 	var existingUser models.Users
 	errMsg := "Invalid email or password."
 	userExists, userExistsErr := getAndHandleUserExists(&existingUser, userInput.Email)
-	// if theres a user exists error we need to create an internal server error
+	// stop early if user lookup fails
 	if userExistsErr != nil {
 		utils.CreateInternalServerError(ctx)
 		return
 	}
 
-	// if false user hasnt regeistered or gave faulty details
+	// reject unknown users
 	if userExists == false {
 		utils.CreateError(iris.StatusUnauthorized, "Credentials Error", errMsg, ctx)
 		return
 	}
 
-	// if the user logged in with a social account they cant login with password
+	// reject password login for social accounts
 	if existingUser.SocialLogin == true {
 		utils.CreateError(iris.StatusUnauthorized, "Credentials Error", "Social Login account.", ctx)
 		return
@@ -139,7 +139,6 @@ func Login(ctx iris.Context) {
 		return
 	}
 
-	// at this point th euser gave th eright error
 	ctx.JSON(iris.Map{
 		"ID":       existingUser.ID,
 		"Username": existingUser.Username,
@@ -148,9 +147,8 @@ func Login(ctx iris.Context) {
 	})
 }
 
-// takes in user model pointer and email string to check if user exists
+// check if user exists by email
 func getAndHandleUserExists(user *models.Users, email string) (exists bool, err error) {
-	// query the dsatabase for a user with the given email
 	userExistsQuery := storage.DB.Where("email = ?", strings.ToLower(email)).Limit(1).Find(user)
 
 	if userExistsQuery.Error != nil {
@@ -167,7 +165,6 @@ func getAndHandleUserExists(user *models.Users, email string) (exists bool, err 
 }
 
 func hashAndSaltPassword(password string) (hashedPassword string, err error) {
-	// generate a hashed and salted password from the given password string
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 	if err != nil {
@@ -178,19 +175,31 @@ func hashAndSaltPassword(password string) (hashedPassword string, err error) {
 }
 
 func AddStock(ctx iris.Context) {
+	// read user id from route
+	userID, err := strconv.ParseUint(ctx.Params().Get("userId"), 10, 64)
+	if err != nil {
+		utils.CreateError(iris.StatusBadRequest, "Bad Request", "User ID is required", ctx)
+		return
+	}
+
+	// read request body
 	var stockInput AddStockInput
-	err := ctx.ReadJSON(&stockInput)
+	err = ctx.ReadJSON(&stockInput)
 	if err != nil {
 		utils.HandleValidationErrors(err, ctx)
 		return
 	}
 
+	stockInput.UserID = uint(userID)
+
+	// normalize and validate symbol
 	capitalSymbol := strings.ToUpper(strings.TrimSpace(stockInput.Symbol))
 	if capitalSymbol == "" {
 		utils.CreateError(iris.StatusBadRequest, "Bad Request", "Stock symbol is required", ctx)
 		return
 	}
 
+	// prevent duplicate stock for same user
 	var existingStock models.Stock
 	result := storage.DB.Where("user_id = ? AND symbol = ?", stockInput.UserID, capitalSymbol).First(&existingStock)
 	if result.Error == nil {
@@ -200,6 +209,7 @@ func AddStock(ctx iris.Context) {
 
 	stockInput.Symbol = capitalSymbol
 
+	// create stock and related entries
 	newStock := models.Stock{
 		UserID:      stockInput.UserID,
 		Symbol:      stockInput.Symbol,
@@ -222,6 +232,20 @@ func AddStock(ctx iris.Context) {
 }
 
 func UpdateStock(ctx iris.Context) {
+	// read route params
+	userID, userIDErr := strconv.ParseUint(ctx.Params().Get("userId"), 10, 64)
+	if userIDErr != nil {
+		utils.CreateError(iris.StatusBadRequest, "Bad Request", "User ID is required", ctx)
+		return
+	}
+
+	stockID, stockIDErr := strconv.ParseUint(ctx.Params().Get("stockId"), 10, 64)
+	if stockIDErr != nil {
+		utils.CreateError(iris.StatusBadRequest, "Bad Request", "Stock ID is required", ctx)
+		return
+	}
+
+	// read request body
 	var updateInput UpdateStockInput
 	err := ctx.ReadJSON(&updateInput)
 	if err != nil {
@@ -229,13 +253,15 @@ func UpdateStock(ctx iris.Context) {
 		return
 	}
 
+	// load stock and verify owner
 	var stock models.Stock
-	result := storage.DB.First(&stock, updateInput.StockID)
+	result := storage.DB.Where("id = ? AND user_id = ?", uint(stockID), uint(userID)).First(&stock)
 	if result.Error != nil {
 		utils.CreateError(iris.StatusNotFound, "Not Found", "Stock not found", ctx)
 		return
 	}
 
+	// replace existing entries with new values
 	storage.DB.Where("stock_id = ?", stock.ID).Delete(&models.StockEntry{})
 
 	for _, entry := range updateInput.Entries {
@@ -251,12 +277,14 @@ func UpdateStock(ctx iris.Context) {
 }
 
 func GetUserStocks(ctx iris.Context) {
-	userID := ctx.URLParam("user_id")
+	// read user id from route
+	userID := ctx.Params().Get("userId")
 	if userID == "" {
 		utils.CreateError(iris.StatusBadRequest, "Bad Request", "User ID is required", ctx)
 		return
 	}
 
+	// fetch stocks with related entries
 	var stocks []models.Stock
 	result := storage.DB.Preload("Entries").Where("user_id = ?", userID).Find(&stocks)
 	if result.Error != nil {
@@ -269,13 +297,21 @@ func GetUserStocks(ctx iris.Context) {
 }
 
 func DeleteStock(ctx iris.Context) {
-	stockID := ctx.URLParam("stock_id")
+	// read route params
+	userID := ctx.Params().Get("userId")
+	if userID == "" {
+		utils.CreateError(iris.StatusBadRequest, "Bad Request", "User ID is required", ctx)
+		return
+	}
+
+	stockID := ctx.Params().Get("stockId")
 	if stockID == "" {
 		utils.CreateError(iris.StatusBadRequest, "Bad Request", "Stock ID is required", ctx)
 		return
 	}
 
-	result := storage.DB.Delete(&models.Stock{}, stockID)
+	// delete only if stock belongs to user
+	result := storage.DB.Where("id = ? AND user_id = ?", stockID, userID).Delete(&models.Stock{})
 	if result.Error != nil {
 		utils.CreateInternalServerError(ctx)
 		return
@@ -285,7 +321,8 @@ func DeleteStock(ctx iris.Context) {
 }
 
 func GetRiskPreference(ctx iris.Context) {
-	userID := ctx.URLParam("user_id")
+	// read user id from route
+	userID := ctx.Params().Get("userId")
 	if userID == "" {
 		utils.CreateError(iris.StatusBadRequest, "Bad Request", "User ID is required", ctx)
 		return
@@ -300,17 +337,26 @@ func GetRiskPreference(ctx iris.Context) {
 	ctx.JSON(iris.Map{"risk": user.Risk})
 }
 
-// handles when the user updates their risk profile
+// update user risk preference
 func UpdateRisk(ctx iris.Context) {
+	// read user id from route
+	userID, err := strconv.ParseUint(ctx.Params().Get("userId"), 10, 64)
+	if err != nil {
+		utils.CreateError(iris.StatusBadRequest, "Bad Request", "User ID is required", ctx)
+		return
+	}
+
+	// read request body
 	var riskInput UpdateRiskInput
-	err := ctx.ReadJSON(&riskInput)
+	err = ctx.ReadJSON(&riskInput)
 	if err != nil {
 		utils.HandleValidationErrors(err, ctx)
 		return
 	}
 
+	// load user and apply new risk value
 	var user models.Users
-	result := storage.DB.First(&user, riskInput.UserID)
+	result := storage.DB.First(&user, uint(userID))
 	if result.Error != nil {
 		utils.CreateError(iris.StatusNotFound, "Not Found", "User not found", ctx)
 		return

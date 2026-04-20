@@ -46,14 +46,17 @@ type StockRiskCategoriesResponse struct {
 	PortfolioRisk string                         `json:"portfolio_risk"`
 }
 
-// either returns the risk metrics respinse or an error
+// calls risk metrics endpoint
 func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
+	// get ml service url
 	mlApiUrl := os.Getenv("ML_API_URL")
 	endpoint := "/api/risk-metrics"
 
 	if mlApiUrl == "" {
 		return nil, fmt.Errorf("ML_API_URL not set")
 	}
+
+	// build request payload
 	requestBody := RiskMetricsRequest{
 		Stocks: stocks,
 	}
@@ -63,34 +66,31 @@ func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
 		return nil, err
 	}
 
-	// calling the fastAPI microservice
+	// call ml service
 	url := mlApiUrl + endpoint
-	// url := "http://192.168.1.19:8000" + endpoint
 
 	resp, err := http.Post(
 		url,
 		"application/json",
-		// bytes because http.Post requires an io.Reader
 		bytes.NewBuffer(jsonData),
 	)
 	if err != nil {
 		return nil, err
 	}
-	// ensures the response body is closed after reading
 	defer resp.Body.Close()
 
-	// read the response body
+	// read response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	// checking for non-200 status codes to know if there was an error
+	// handle upstream errors
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("risk metrics service error: %s", string(body))
 	}
 
-	// parse the JSON response into RiskMetricsResponse struct
+	// parse json response
 	var result RiskMetricsResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, err
@@ -99,8 +99,9 @@ func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
 	return &result, nil
 }
 
-// returns a risk bucket for each stock symbol
+// calls stock risk categories endpoint
 func CalculateStockRiskCategories(stocks []Stock) (*StockRiskCategoriesResponse, error) {
+	// build request payload
 	requestBody := StockRiskCategoriesRequest{
 		Stocks: stocks,
 	}
@@ -110,6 +111,7 @@ func CalculateStockRiskCategories(stocks []Stock) (*StockRiskCategoriesResponse,
 		return nil, err
 	}
 
+	// get ml service url
 	mlApiUrl := os.Getenv("ML_API_URL")
 	endpoint := "/api/stock-risk-categories"
 
@@ -117,8 +119,8 @@ func CalculateStockRiskCategories(stocks []Stock) (*StockRiskCategoriesResponse,
 		return nil, fmt.Errorf("ML_API_URL not set")
 	}
 
+	// call ml service
 	url := mlApiUrl + endpoint
-	// url := "http://fastapi:8000" + endpoint 
 
 	resp, err := http.Post(
 		url,
@@ -130,6 +132,7 @@ func CalculateStockRiskCategories(stocks []Stock) (*StockRiskCategoriesResponse,
 	}
 	defer resp.Body.Close()
 
+	// read response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -139,6 +142,7 @@ func CalculateStockRiskCategories(stocks []Stock) (*StockRiskCategoriesResponse,
 		return nil, fmt.Errorf("stock risk categories service error: %s", string(body))
 	}
 
+	// parse json response
 	var result StockRiskCategoriesResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, err

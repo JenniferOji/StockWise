@@ -10,8 +10,7 @@ export const addStock = async (
     sector: string
 ) => {
     try {
-        const response = await axios.post(endpoints.addStock, {
-            user_id: userId,
+        const response = await axios.post(endpoints.addStock(userId), {
             symbol,
             company_name: companyName,
             sector,
@@ -25,10 +24,9 @@ export const addStock = async (
     }
 }
 
-export const updateStock = async (stockId: number, entries: { quantity: number; purchase_price: number }[]) => {
+export const updateStock = async (userId: number, stockId: number, entries: { quantity: number; purchase_price: number }[]) => {
     try {
-        const response = await axios.put(endpoints.updateStock, {
-            stock_id: stockId,
+        const response = await axios.patch(endpoints.updateStock(userId, stockId), {
             entries
         });
         return response.data;
@@ -38,11 +36,9 @@ export const updateStock = async (stockId: number, entries: { quantity: number; 
     }
 }
 
-export const deleteStock = async (stockId: number) => {
+export const deleteStock = async (userId: number, stockId: number) => {
     try {
-        const response = await axios.delete(endpoints.deleteStock, {
-            params: { stock_id: stockId }
-        });
+        const response = await axios.delete(endpoints.deleteStock(userId, stockId));
         return response.data;
     } catch (error) {
         handleError(error);

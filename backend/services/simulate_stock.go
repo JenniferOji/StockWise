@@ -26,8 +26,8 @@ type MetricChange struct {
 }
 
 type SimulateStockResponse struct {
-	Success  bool   `json:"success"`
-	Symbol   string `json:"symbol"`
+	Success  bool    `json:"success"`
+	Symbol   string  `json:"symbol"`
 	Quantity float64 `json:"quantity"`
 	Impact   struct {
 		Volatility   MetricChange `json:"volatility"`
@@ -39,6 +39,7 @@ type SimulateStockResponse struct {
 }
 
 func SimulateStock(symbol string, quantity float64, current []PortfolioStock) (*SimulateStockResponse, error) {
+	// get ml service url
 	mlApiUrl := os.Getenv("ML_API_URL")
 	endpoint := "/api/simulate-stock"
 
@@ -46,6 +47,7 @@ func SimulateStock(symbol string, quantity float64, current []PortfolioStock) (*
 		return nil, fmt.Errorf("ML_API_URL not set")
 	}
 
+	// build request payload
 	requestBody := SimulateStockRequest{
 		CurrentStocks: current,
 		NewStock: PortfolioStock{
@@ -59,6 +61,7 @@ func SimulateStock(symbol string, quantity float64, current []PortfolioStock) (*
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
+	// call ml service
 	url := mlApiUrl + endpoint
 
 	resp, err := http.Post(
@@ -71,11 +74,13 @@ func SimulateStock(symbol string, quantity float64, current []PortfolioStock) (*
 	}
 	defer resp.Body.Close()
 
+	// read response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response: %w", err)
 	}
 
+	// pass back upstream error details
 	if resp.StatusCode >= 400 {
 		return nil, &UpstreamHTTPError{
 			StatusCode: resp.StatusCode,
@@ -83,6 +88,7 @@ func SimulateStock(symbol string, quantity float64, current []PortfolioStock) (*
 		}
 	}
 
+	// parse json response
 	var result SimulateStockResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)

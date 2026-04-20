@@ -391,7 +391,10 @@ export default function StockHoldings() {
                 if (formMode === 'add') {
                   await saveStock(selected, formattedEntries);
                 } else if ((selected as any).dbId) {
-                  await updateStock((selected as any).dbId, formattedEntries);
+                  const userJson = await storage.getItem('user');
+                  if (!userJson) return;
+                  const user = JSON.parse(userJson);
+                  await updateStock(user.ID, (selected as any).dbId, formattedEntries);
                   await loadUserStocks();
                 }
 
@@ -408,7 +411,10 @@ export default function StockHoldings() {
                 style={styles.modalDelete}
                 onPress={async () => {
                   if (selected && (selected as any).dbId) {
-                    await deleteStock((selected as any).dbId);
+                    const userJson = await storage.getItem('user');
+                    if (!userJson) return;
+                    const user = JSON.parse(userJson);
+                    await deleteStock(user.ID, (selected as any).dbId);
                     await loadUserStocks();
                   }
                   setModalVisible(false);

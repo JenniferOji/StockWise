@@ -5,9 +5,7 @@ import { getUserStocks, totalEntries } from "./user";
 
 export const checkStockRisk = async (symbol: string) => {
     try {
-        const response = await axios.post(endpoints.getStockRisk, {
-            symbol,
-        });
+        const response = await axios.get(endpoints.getStockRisk(symbol));
         return response.data;
     } catch (error) {
         handleError(error);

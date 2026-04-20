@@ -5,8 +5,9 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
-// GetDiversificationSuggestions handles HTTP requests.
+// handles diversification suggestions request
 func GetDiversificationSuggestions(ctx iris.Context) {
+	// read request body
 	var req services.DiversificationRequest
 
 	if err := ctx.ReadJSON(&req); err != nil {
@@ -15,6 +16,7 @@ func GetDiversificationSuggestions(ctx iris.Context) {
 		return
 	}
 
+	// run diversification logic in service layer
 	result, err := services.GetDiversificationSuggestions(req)
 	if err != nil {
 		ctx.StatusCode(iris.StatusInternalServerError)
@@ -25,7 +27,9 @@ func GetDiversificationSuggestions(ctx iris.Context) {
 	ctx.JSON(result)
 }
 
+// handles random suggestions request
 func GetRandomSuggestions(ctx iris.Context) {
+	// read request body
 	var req services.DiversificationRequest
 
 	if err := ctx.ReadJSON(&req); err != nil {
@@ -34,6 +38,7 @@ func GetRandomSuggestions(ctx iris.Context) {
 		return
 	}
 
+	// run random suggestion logic in service layer
 	result, err := services.GetRandomSuggestions(req)
 	if err != nil {
 		ctx.StatusCode(iris.StatusInternalServerError)

@@ -6,10 +6,8 @@ import { getUserStocks } from "./user";
 export const getNews = async (userId: number) => {
     try {
         console.log('Getting stocks for user ID:', userId);
-        console.log('Endpoint:', endpoints.getStocks);
-        const response = await axios.get(endpoints.getStocks, {
-            params: { user_id: userId }
-        });
+        console.log('Endpoint:', endpoints.getStocks(userId));
+        const response = await axios.get(endpoints.getStocks(userId));
         console.log('Response status:', response.status);
         console.log('Response data:', response.data);
         return response.data;
@@ -25,16 +23,23 @@ export const getStockNews = async (userID: number) => {
         const stocks = await getUserStocks(userID);
         console.log('Stocks data:', stocks);
         if (!stocks) throw new Error("No stocks found");
-        // send all the users stock holdings 
-        const currentStocks = stocks.map((stock: any) => ({
-            name: stock.company_name,
-        }));
-        console.log('Current stocks to send:', currentStocks);
-        
-        const response = await axios.post(endpoints.getStockNews, {
-            current_stocks: currentStocks,
-        });
-        return response.data;
+        const symbols = stocks
+            .map((stock: any) => stock.symbol)
+            .filter((symbol: any) => typeof symbol === 'string' && symbol.length > 0);
+
+        if (symbols.length === 0) return { articles: [] };
+
+        const responses = await Promise.all(
+            symbols.map((symbol: string) => axios.get(endpoints.getStockNews(symbol)))
+        );
+
+        const mergedArticles = responses.flatMap((response) => response.data?.articles || []);
+
+        return {
+            success: true,
+            articles: mergedArticles,
+            count: mergedArticles.length,
+        };
 
     } catch (error) {
         handleError(error);
@@ -49,14 +54,21 @@ export const getStockSentiment = async (userID: number) => {
             return {};
         }
 
-        const currentStocks = stocks.map((stock: any) => ({
-            name: stock.company_name,
-        }));
+        const symbols = stocks
+            .map((stock: any) => stock.symbol)
+            .filter((symbol: any) => typeof symbol === 'string' && symbol.length > 0);
 
-        const response = await axios.post(endpoints.getStockSentiment, {
-            current_stocks: currentStocks,
-        });
-        return response.data;
+        if (symbols.length === 0) {
+            return {};
+        }
+
+        const responses = await Promise.all(
+            symbols.map((symbol: string) => axios.get(endpoints.getStockSentiment(symbol)))
+        );
+
+        return responses.reduce((acc: Record<string, any>, response) => {
+            return { ...acc, ...(response.data || {}) };
+        }, {});
     } catch (error) {
         handleError(error);
         return {};
@@ -69,11 +81,13 @@ export const getSingleStockSentiment = async (symbols: string[]) => {
             return {};
         }
 
-        const response = await axios.post(endpoints.getStockSentiment, {
-            names: symbols,
-        });
+        const responses = await Promise.all(
+            symbols.map((symbol: string) => axios.get(endpoints.getStockSentiment(symbol)))
+        );
 
-        return response.data;
+        return responses.reduce((acc: Record<string, any>, response) => {
+            return { ...acc, ...(response.data || {}) };
+        }, {});
     } catch (error) {
         handleError(error);
         return {};

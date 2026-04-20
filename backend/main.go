@@ -32,30 +32,37 @@ func main() {
 
 	app.Validator = validator.New()
 
-	user := app.Party("/api/user")
+	users := app.Party("/api/users")
 	{
-		user.Post("/register", routes.Register)
-		user.Post("/login", routes.Login)
-		user.Post("/stock", routes.AddStock)
-		user.Get("/stocks", routes.GetUserStocks)
-		user.Put("/stock", routes.UpdateStock)
-		user.Delete("/stock", routes.DeleteStock)
-		user.Put("/risk", routes.UpdateRisk)
-		user.Get("/risk-preference", routes.GetRiskPreference)
-
+		users.Post("/", routes.Register)
+		users.Get("/{userId:uint}/stocks", routes.GetUserStocks)
+		users.Post("/{userId:uint}/stocks", routes.AddStock)
+		users.Patch("/{userId:uint}/stocks/{stockId:uint}", routes.UpdateStock)
+		users.Delete("/{userId:uint}/stocks/{stockId:uint}", routes.DeleteStock)
+		users.Get("/{userId:uint}/risk-preference", routes.GetRiskPreference)
+		users.Patch("/{userId:uint}/risk-preference", routes.UpdateRisk)
 	}
 
-	service := app.Party("/api/services")
+	sessions := app.Party("/api/sessions")
 	{
-		service.Post("/risk-metrics", routes.GetRiskMetrics)
-		service.Post("/stock-risk-categories", routes.GetStockRiskCategories)
-		service.Post("/performance-metrics", routes.GetPerformanceMetrics)
-		service.Post("/diversification-suggestions", routes.GetDiversificationSuggestions)
-		service.Post("/random-suggestions", routes.GetRandomSuggestions)
-		service.Post("/stock-news", routes.GetStockNews)
-		service.Post("/stock-sentiment", routes.GetStockSentiment)
-		service.Post("/check-stock-risk", routes.GetStockRisk)
-		service.Post("/simulate-stock", routes.SimulateStock)
+		sessions.Post("/", routes.Login)
+	}
+
+	portfolios := app.Party("/api/portfolios")
+	{
+		portfolios.Post("/risk-metrics", routes.GetRiskMetrics)
+		portfolios.Post("/risk-categories", routes.GetStockRiskCategories)
+		portfolios.Post("/performance-metrics", routes.GetPerformanceMetrics)
+		portfolios.Post("/diversification-suggestions", routes.GetDiversificationSuggestions)
+		portfolios.Post("/random-suggestions", routes.GetRandomSuggestions)
+		portfolios.Post("/simulations", routes.SimulateStock)
+	}
+
+	stocks := app.Party("/api/stocks")
+	{
+		stocks.Get("/{symbol:string}/news", routes.GetStockNews)
+		stocks.Get("/{symbol:string}/sentiment", routes.GetStockSentiment)
+		stocks.Get("/{symbol:string}/risk", routes.GetStockRisk)
 	}
 
 	// app.Listen(":4000")

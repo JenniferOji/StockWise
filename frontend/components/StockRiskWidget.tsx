@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator,
 import { checkStockRisk, simulateStockImpact } from '@/services/simulation';
 import STOCKS from '../constants/stocks.json';
 import { CATEGORY_COLORS } from '@/constants/riskConstants';
+import { storage } from '@/utils/storage';
 
 type StockRiskResponse = {
   success: boolean;
@@ -25,6 +26,7 @@ const getRiskColor = (riskLevel: string) => {
 
 export default function StockRiskWidget() {
   const [symbol, setSymbol] = useState('');
+  const [userId, setUserId] = useState<number | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [shares, setShares] = useState('');
   const [loading, setLoading] = useState(false);
@@ -71,10 +73,32 @@ export default function StockRiskWidget() {
   const handleSimulate = async () => {
     if (!shares) return;
 
+    let resolvedUserId = userId;
+
+    if (resolvedUserId === null) {
+      try {
+        const userJson = await storage.getItem('user');
+        if (!userJson) {
+          setError('Please log in to simulate portfolio impact');
+          return;
+        }
+        const user = JSON.parse(userJson);
+        if (!user?.ID) {
+          setError('Please log in to simulate portfolio impact');
+          return;
+        }
+        setUserId(user.ID);
+        resolvedUserId = user.ID;
+      } catch {
+        setError('Please log in to simulate portfolio impact');
+        return;
+      }
+    }
+
     setSimLoading(true);
 
     const response = await simulateStockImpact(
-      1,
+      resolvedUserId as number,
       symbol.trim().toUpperCase(),
       Number(shares)
     );

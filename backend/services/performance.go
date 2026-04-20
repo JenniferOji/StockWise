@@ -39,7 +39,7 @@ type PerformanceMetricsResponse struct {
 		ReturnsBySymbol map[string]string          `json:"returns_by_symbol"`
 		PriceComparison map[string]PriceComparison `json:"price_comparison"`
 	} `json:"metrics"`
-	
+
 	PortfolioValue float64   `json:"portfolio_value"`
 	TotalInvested  float64   `json:"total_invested"`
 	ProfitLoss     float64   `json:"profit_loss"`
@@ -47,8 +47,9 @@ type PerformanceMetricsResponse struct {
 	WorstPerformer Performer `json:"worst_performer"`
 }
 
-// calls the FastAPI microservice for performance metrics
+// calls performance metrics endpoint
 func CalculatePerformanceMetrics(req PerformanceMetricsRequest) (*PerformanceMetricsResponse, error) {
+	// get ml service url
 	mlApiUrl := os.Getenv("ML_API_URL")
 	endpoint := "/api/performance-metrics"
 
@@ -56,6 +57,7 @@ func CalculatePerformanceMetrics(req PerformanceMetricsRequest) (*PerformanceMet
 		return nil, fmt.Errorf("ML_API_URL not set")
 	}
 
+	// build request payload
 	requestBody := PerformanceMetricsRequest{
 		Stocks: req.Stocks,
 		Days:   req.Days,
@@ -66,6 +68,7 @@ func CalculatePerformanceMetrics(req PerformanceMetricsRequest) (*PerformanceMet
 		return nil, err
 	}
 
+	// call ml service
 	url := mlApiUrl + endpoint
 
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
@@ -75,6 +78,7 @@ func CalculatePerformanceMetrics(req PerformanceMetricsRequest) (*PerformanceMet
 
 	defer resp.Body.Close()
 
+	// read response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -84,6 +88,7 @@ func CalculatePerformanceMetrics(req PerformanceMetricsRequest) (*PerformanceMet
 		return nil, fmt.Errorf("performance metrics service error: %s", string(body))
 	}
 
+	// parse json response
 	var result PerformanceMetricsResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, err

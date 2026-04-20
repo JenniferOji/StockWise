@@ -1,51 +1,34 @@
 package routes
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
-	"github.com/kataras/iris/v12"
+	"strings"
+
 	"github.com/YourGitHubUser/StockWise/backend/services"
+	"github.com/kataras/iris/v12"
 )
 
-type StockRiskRequest struct {
-	Symbol string `json:"symbol"`
-}
-
+// handles stock risk request
 func GetStockRisk(ctx iris.Context) {
-	var req StockRiskRequest
-
-	// validation on the request body
-	if err := ctx.ReadJSON(&req); err != nil {
-		ctx.StatusCode(400)
-		ctx.JSON(map[string]string{"error": "Invalid body"})
-		return
-	}
-
-	if req.Symbol == "" {
+	// read symbol from route
+	symbol := strings.TrimSpace(ctx.Params().Get("symbol"))
+	if symbol == "" {
 		ctx.StatusCode(400)
 		ctx.JSON(map[string]string{"error": "Symbol is required"})
 		return
 	}
 
-	// call the service function to check stock risk
-	result, err := services.CheckStockRisk(req.Symbol)
+	// run stock risk check in service layer
+	result, err := services.CheckStockRisk(symbol)
 	if err != nil {
+		// pass back clear errors from ml api
 		var upstreamErr *services.UpstreamHTTPError
 		if errors.As(err, &upstreamErr) {
-			var upstreamBody map[string]any
-			if unmarshalErr := json.Unmarshal([]byte(upstreamErr.Body), &upstreamBody); unmarshalErr == nil {
-				ctx.StatusCode(upstreamErr.StatusCode)
-				ctx.JSON(upstreamBody)
-				return
-			}
-
 			ctx.StatusCode(upstreamErr.StatusCode)
 			ctx.JSON(map[string]string{"detail": upstreamErr.Body})
 			return
 		}
 
-		fmt.Printf("[GetStockRisk] internal error: %v\n", err)
 		ctx.StatusCode(500)
 		ctx.JSON(map[string]string{"error": err.Error()})
 		return

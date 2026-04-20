@@ -61,10 +61,8 @@ export const loginUser = async (email: string, password: string) => {
 export const getUserStocks = async (userId: number) => {
     try {
         console.log('Getting stocks for user ID:', userId);
-        console.log('Endpoint:', endpoints.getStocks);
-        const response = await axios.get(endpoints.getStocks, {
-            params: { user_id: userId }
-        });
+        console.log('Endpoint:', endpoints.getStocks(userId));
+        const response = await axios.get(endpoints.getStocks(userId));
         console.log('Response status:', response.status);
         console.log('Response data:', response.data);
         return response.data;
@@ -77,9 +75,7 @@ export const getUserStocks = async (userId: number) => {
 
 export const getRiskPreference = async(userId: number) => {
     try {        
-        const response = await axios.get(endpoints.getRiskPreference, {
-            params: { user_id: userId }
-        });
+        const response = await axios.get(endpoints.getRiskPreference(userId));
         console.log('getRiskPreference full response:', response.data);
         return response.data.risk;
     } catch (error) {
