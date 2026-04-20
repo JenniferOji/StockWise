@@ -1,12 +1,20 @@
-export const CATEGORY_ORDER = ['Very Low Risk', 'Low Risk', 'Moderate Risk', 'High Risk', 'Very High Risk']
-
 export const CATEGORY_COLORS = {
-	'Very Low Risk': '#22c55e',
-	'Low Risk': '#84cc16',
-	'Moderate Risk': '#eab308',
-	'High Risk': '#f97316',
-	'Very High Risk': '#ef4444',
+  'Very Low Risk': '#22c55e',
+  'Low Risk': '#84cc16',
+  'Moderate Risk': '#eab308',
+  'High Risk': '#f97316',
+  'Very High Risk': '#ef4444',
+  'Extreme Risk': '#991b1b',
 }
+
+export const CATEGORY_ORDER = [
+  'Very Low Risk',
+  'Low Risk',
+  'Moderate Risk',
+  'High Risk',
+  'Very High Risk',
+  'Extreme Risk',
+]
 
 const lowVolatilityBands = [{ label: 'Good', color: '#22c55e', range: '0-10%', max: 10 }, { label: 'Moderate', color: '#eab308', range: '10-20%', max: 20 }, { label: 'High', color: '#f97316', range: '20-30%', max: 30 }, { label: 'Severe', color: '#ef4444', range: '30%+', max: Infinity }]
 const moderateVolatilityBands = [{ label: 'Good', color: '#22c55e', range: '0-20%', max: 20 }, { label: 'Moderate', color: '#eab308', range: '20-35%', max: 35 }, { label: 'High', color: '#f97316', range: '35-50%', max: 50 }, { label: 'Severe', color: '#ef4444', range: '50%+', max: Infinity }]

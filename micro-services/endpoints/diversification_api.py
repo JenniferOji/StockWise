@@ -14,10 +14,7 @@ router = APIRouter()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")  
-SCALER_PATH = os.path.join(BASE_DIR, "models", "stock_scaler.pkl")
-GMM_PATH = os.path.join(BASE_DIR, "models", "gmm_model.pkl")
 
-df_features = pd.read_csv(FEATURES_PATH)
 
 with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "rb") as f:
     cluster_risk = pickle.load(f)
@@ -26,8 +23,14 @@ stock_data_path = os.path.join(BASE_DIR, "data", "stocks.json")
 with open(stock_data_path, 'r') as f:
     STOCK_DATA = json.load(f)
 
-STOCK_LOOKUP = {stock["symbol"]: stock for stock in STOCK_DATA}
+df_features = pd.read_csv(FEATURES_PATH)
 
+feature_map = df_features.set_index("symbol").to_dict(orient="index")
+
+STOCK_LOOKUP = {
+    stock["symbol"].replace(".", "-"): stock
+    for stock in STOCK_DATA
+}
 
 def get_company_sector(symbol: str) -> Optional[str]:
     lookup_symbol = symbol.replace("-", ".")
@@ -56,10 +59,10 @@ def calculate_portfolio_volatility(stocks: List[StockHolding]):
 
     vols = []
     for stock in stocks:
-        features = df_features[df_features["ticker"] == stock.symbol]
+        features = df_features[df_features["symbol"] == stock.symbol]
         if features.empty:
             continue
-        vols.append(features.iloc[0]["Volatility"])
+        vols.append(features.iloc[0]["volatility"])
 
     if not vols:
         return None
@@ -98,7 +101,7 @@ def sector_breakdown(stocks: List[StockHolding]):
     return breakdown
 
 
-feature_map = df_features.set_index("ticker").to_dict(orient="index")
+feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
 
 @router.post("/api/diversification-suggestions")
@@ -113,6 +116,7 @@ def get_diversification_suggestions(request: DiversificationRequest):
             "Moderate Risk",
             "High Risk",
             "Very High Risk",
+            "Extreme Risk",
         ]
 
         if request.user_risk_preference not in risk_levels:
@@ -121,7 +125,7 @@ def get_diversification_suggestions(request: DiversificationRequest):
         user_index = risk_levels.index(request.user_risk_preference)
 
         df_runtime = df_features.copy()
-        df_runtime = df_runtime.dropna(subset=["Log_Variances", "Volatility", "VaR_95", "Cluster_labels"])
+        df_runtime = df_runtime.dropna(subset=["log_variances", "volatility", "var_95", "Cluster_labels"])
         df_runtime["Cluster_labels"] = df_runtime["Cluster_labels"].astype(int)
 
         target_clusters = []
@@ -131,12 +135,12 @@ def get_diversification_suggestions(request: DiversificationRequest):
             cluster_index = risk_levels.index(risk_label)
 
             # allowing stock suggestions within a +/- 1 risk band
-            if abs(cluster_index - user_index) <= 1:
+            if abs(cluster_index - user_index) <= 1 and risk_label != "Extreme Risk":
                 target_clusters.append(cluster_idx)
 
         # only considers stocks the user doesnt currently hold 
         available_stocks = df_runtime[
-            ~df_runtime['ticker'].isin(current_stock_symbols)
+            ~df_runtime['symbol'].isin(current_stock_symbols)
         ].copy()
 
         # keep only stocks belonging to the selected clusters
@@ -161,11 +165,11 @@ def get_diversification_suggestions(request: DiversificationRequest):
 
         # sort candidate pool based on user risk preference
         if request.user_risk_preference in ["High Risk", "Very High Risk"]:
-            candidate_pool = suggested_stocks.sort_values(by="Volatility", ascending=False).head(10)
+            candidate_pool = suggested_stocks.sort_values(by="volatility", ascending=False).head(10)
         else:
-            candidate_pool = suggested_stocks.sort_values(by="Volatility", ascending=True).head(10)
+            candidate_pool = suggested_stocks.sort_values(by="volatility", ascending=True).head(10)
             
-        candidate_symbols = candidate_pool["ticker"].tolist()
+        candidate_symbols = candidate_pool["symbol"].tolist()
 
         combos = []
 
@@ -182,8 +186,7 @@ def get_diversification_suggestions(request: DiversificationRequest):
             for symbol in combo:
                 # company = STOCK_DATA.get(symbol)
 
-                lookup_symbol = symbol.replace("-", ".")  
-                company = STOCK_LOOKUP.get(lookup_symbol)
+                company = STOCK_LOOKUP.get(symbol)
 
                 if not company:
                     continue
@@ -283,6 +286,7 @@ def get_random_suggestions(request: DiversificationRequest):
             "Moderate Risk",
             "High Risk",
             "Very High Risk",
+            "Extreme Risk",
         ]
 
         if request.user_risk_preference not in risk_levels:
@@ -301,19 +305,19 @@ def get_random_suggestions(request: DiversificationRequest):
             cluster_index = risk_levels.index(risk_label)
 
             # allowing stock suggestions within a +/- 1 risk band
-            if abs(cluster_index - user_index) <= 1:
+            if abs(cluster_index - user_index) <= 1 and risk_label != "Extreme Risk":
                 target_clusters.append(cluster_idx)
 
         # only considers stocks the user doesnt currently hold 
         available_stocks = df_runtime[
-            ~df_runtime['ticker'].isin(current_stock_symbols)
+            ~df_runtime['symbol'].isin(current_stock_symbols)
         ].copy()
 
         sector_filtered_stocks = available_stocks
         if current_sectors:
             sector_filtered_stocks = available_stocks[
-                ~available_stocks["ticker"].apply(
-                    lambda ticker: get_company_sector(str(ticker)) in current_sectors
+                ~available_stocks["symbol"].apply(
+                    lambda symbol: get_company_sector(str(symbol)) in current_sectors
                 )
             ]
 
@@ -345,10 +349,9 @@ def get_random_suggestions(request: DiversificationRequest):
         suggestions = []
 
         for _, row in candidate_pool.iterrows():
-            symbol = row["ticker"]
+            symbol = row["symbol"]
 
-            lookup_symbol = symbol.replace("-", ".")
-            company = STOCK_LOOKUP.get(lookup_symbol)
+            company = STOCK_LOOKUP.get(symbol)
 
             if not company:
                 continue

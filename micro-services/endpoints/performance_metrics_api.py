@@ -6,16 +6,16 @@ import pandas as pd
 import os
 
 router = APIRouter()
-
+ 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
 
 df_features = pd.read_csv(FEATURES_PATH)
-feature_map = df_features.set_index("ticker").to_dict(orient="index")
+feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
 # Pydantic models for request validation and type checking
 class Stock(BaseModel):
-	ticker: str
+	symbol: str
 	shares: float
 	purchase_price: float
 
@@ -40,7 +40,7 @@ def root():
 def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 	portfolio = {}
 	for stock in portfolio_request.stocks:
-		portfolio[stock.ticker] = {
+		portfolio[stock.symbol] = {
 			'shares': stock.shares,
 			'purchase_price': stock.purchase_price
 		}
@@ -51,14 +51,14 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 	price_returns = {}
 	profit_map = {}
 
-	for ticker, holding in portfolio.items():
-		features = feature_map.get(ticker)
+	for symbol, holding in portfolio.items():
+		features = feature_map.get(symbol)
 		if not features:
 			continue
 
 		shares = holding['shares']
 		purchase_price = holding['purchase_price']
-		current_price = features.get("Close", purchase_price)
+		current_price = features.get("close", purchase_price)
 
 		invested_value = purchase_price * shares
 		current_value = current_price * shares
@@ -72,19 +72,19 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 
 		profit = current_value - invested_value
 
-		returns[ticker] = pct_return
-		profit_map[ticker] = profit
+		returns[symbol] = pct_return
+		profit_map[symbol] = profit
 
-		price_returns[ticker] = {
+		price_returns[symbol] = {
 			"purchase_price": purchase_price,
 			"current_price": current_price,
 			"return_pct": pct_return
 		}
 
-		portfolio_value[ticker] = current_value
+		portfolio_value[symbol] = current_value
 
 	if not returns:
-		raise HTTPException(status_code=404, detail="No valid tickers in data")
+		raise HTTPException(status_code=404, detail="No valid symbols in data")
 			
 	# calculating best and worst performer
 	best_performer_symbol = max(profit_map, key=profit_map.get)
@@ -119,7 +119,7 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 
 	metrics = {
 		"overall_return": f"{overall_return * 100:.2f}%",
-		"returns_by_ticker": {k: f"{v * 100:.2f}%" for k, v in returns.items()},
+		"returns_by_symbol": {k: f"{v * 100:.2f}%" for k, v in returns.items()},
 		"price_comparison": {
 			k: {
 				"purchase_price": v["purchase_price"],

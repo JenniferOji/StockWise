@@ -10,7 +10,7 @@ export const getRiskMetrics = async (userId: number) => {
 
         const formattedStocks = stocks.map((s: any) => {
             const { totalShares, avgPrice } = totalEntries(s);
-            return { ticker: s.symbol, shares: totalShares, purchase_price: avgPrice };
+            return { symbol: s.symbol, shares: totalShares, purchase_price: avgPrice };
         });
 
         const response = await axios.post(endpoints.getRiskMetrics, { stocks: formattedStocks });
@@ -50,8 +50,7 @@ export const getPerformanceMetrics = async (userId: number, days: number = 365) 
 
         const formattedStocks = stocks.map((s: any) => {
             const { totalShares, avgPrice } = totalEntries(s);
-            return { ticker: s.symbol, shares: totalShares, purchase_price: avgPrice };
-        });
+            return { symbol: s.symbol, shares: totalShares, purchase_price: avgPrice };        });
 
         const response = await axios.post(endpoints.getPerformanceMetrics, { stocks: formattedStocks, days });
         return response.data;

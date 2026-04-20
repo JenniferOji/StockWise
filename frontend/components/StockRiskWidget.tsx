@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Pressable, ScrollView } from 'react-native';
 import { checkStockRisk, simulateStockImpact } from '@/services/simulation';
 import STOCKS from '../constants/stocks.json';
+import { CATEGORY_COLORS } from '@/constants/riskConstants';
 
 type StockRiskResponse = {
   success: boolean;
@@ -18,16 +19,8 @@ type StockRiskResponse = {
   message?: string;
 };
 
-export const CATEGORY_COLORS = {
-	'Very Low Risk': '#22c55e',
-	'Low Risk': '#84cc16',
-	'Moderate Risk': '#eab308',
-	'High Risk': '#f97316',
-	'Very High Risk': '#ef4444',
-}
-
 const getRiskColor = (riskLevel: string) => {
-  return CATEGORY_COLORS[riskLevel.trim() as keyof typeof CATEGORY_COLORS];
+  return CATEGORY_COLORS[riskLevel.trim() as keyof typeof CATEGORY_COLORS] || '#0b3d91';
 };
 
 export default function StockRiskWidget() {

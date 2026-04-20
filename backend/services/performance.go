@@ -15,7 +15,7 @@ type PerformanceMetricsRequest struct {
 }
 
 type PerformanceStock struct {
-	Ticker        string  `json:"ticker"`
+	Symbol        string  `json:"symbol"`
 	Shares        float64 `json:"shares"`
 	PurchasePrice float64 `json:"purchase_price"`
 }
@@ -36,9 +36,10 @@ type PerformanceMetricsResponse struct {
 	Success bool `json:"success"`
 	Metrics struct {
 		OverallReturn   string                     `json:"overall_return"`
-		ReturnsByTicker map[string]string          `json:"returns_by_ticker"`
+		ReturnsBySymbol map[string]string          `json:"returns_by_symbol"`
 		PriceComparison map[string]PriceComparison `json:"price_comparison"`
 	} `json:"metrics"`
+	
 	PortfolioValue float64   `json:"portfolio_value"`
 	TotalInvested  float64   `json:"total_invested"`
 	ProfitLoss     float64   `json:"profit_loss"`

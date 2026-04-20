@@ -75,7 +75,7 @@ for ticker in daily_returns.columns:
     var_95[ticker] = abs(np.percentile(r, 5))
 
 df2 = pd.DataFrame({
-    'Stock Symbols': annual_return_variances.index,
+    'Symbols': annual_return_variances.index,
     'Variances': annual_return_variances.values,
     'Returns': annual_means_returns.values,
     'VaR_95': [var_95.get(t, np.nan) for t in annual_return_variances.index],
@@ -154,21 +154,9 @@ else:
     print(f"\nBest GMM: {best_gmm.n_components} components, "
           f"covariance={best_gmm.covariance_type}, BIC={best_bic:.2f}")
 
-# need exactly 5 clusters to map to the 5 risk levels
-if best_gmm.n_components != 5:
-    print(f"Refitting with 5 components using best covariance type: {best_gmm.covariance_type}")
-    best_gmm = GaussianMixture(
-        n_components=5,
-        covariance_type=best_gmm.covariance_type,
-        n_init=10,
-        random_state=42,
-        max_iter=500
-    )
-    best_gmm.fit(Xs)
-    best_labels = best_gmm.predict(Xs)
 
 df2['Cluster_labels'] = best_labels
-n_components = 5
+n_components = best_gmm.n_components
 
 # rank clusters by risk using volatility and var - higher = more risky
 cluster_risk_scores = {}
@@ -192,7 +180,8 @@ risk_labels = [
     "Low Risk",
     "Moderate Risk",
     "High Risk",
-    "Very High Risk"
+    "Very High Risk",
+    "Extreme Risk"
 ]
 
 cluster_risk = {}
@@ -228,7 +217,7 @@ print("\nStocks per Cluster:")
 for cluster_idx in range(n_components):
     cluster_data = df2[df2['Cluster_labels'] == cluster_idx]
     risk_level = cluster_risk.get(cluster_idx, "Unknown")
-    print(f"\n{risk_level}: {cluster_data['Stock Symbols'].tolist()}")
+    print(f"\n{risk_level}: {cluster_data['Symbols'].tolist()}")
 
 # saving everything
 df2.to_csv(os.path.join(DATA_DIR, "features.csv"), index=False)

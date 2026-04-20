@@ -13,17 +13,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
 PRICES_PATH = os.path.join(BASE_DIR, "data", "prices.csv")
-SCALER_PATH = os.path.join(BASE_DIR, "models", "stock_scaler.pkl")
-GMM_PATH = os.path.join(BASE_DIR, "models", "gmm_model.pkl")
 
 df_features = pd.read_csv(FEATURES_PATH)
 df_prices = pd.read_csv(PRICES_PATH, index_col=0, parse_dates=True)
-
-with open(SCALER_PATH, "rb") as f:
-    scaler = pickle.load(f)
-
-with open(GMM_PATH, "rb") as f:
-    gmm = pickle.load(f)
 
 # the cluster risk mapping is needed to assign the risk category to the stocks based on the predicted cluster label from the gmm model
 CLUSTER_RISK_PATH = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
@@ -32,11 +24,11 @@ with open(CLUSTER_RISK_PATH, "rb") as f:
 
 CLUSTER_CATEGORY = cluster_risk_mapping
 
-feature_map = df_features.set_index("ticker").to_dict(orient="index")
+feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
 # pydantic models for request validation and type checking
 class Stock(BaseModel):
-    ticker: str  
+    symbol: str  
     shares: float 
     purchase_price: float 
 
@@ -45,7 +37,7 @@ class PortfolioRequest(BaseModel):
     days: int = 365
 
 class StockRiskCategory(BaseModel):
-    ticker: str
+    symbol: str
     risk_bucket: str
     volatility: float
     max_drawdown: float
@@ -59,13 +51,6 @@ class StockRiskCategoryResponse(BaseModel):
     total: int
     portfolio_risk: str
 
-# predicts the cluster label for a stock using the 3 features the model was trained on
-def predict_cluster_label(log_variance, volatility, var_95):
-    features = np.array([[log_variance, volatility, var_95]])
-    scaled_features = scaler.transform(features)
-    labels = gmm.predict(scaled_features)
-    return int(labels[0])
-
 @router.get("/")
 def root():
     return {"message": "Risk metrics API"}
@@ -75,16 +60,16 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
     if len(portfolio_request.stocks) == 0:
         raise HTTPException(status_code=400, detail="No stocks provided")
 
-    tickers = list({stock.ticker.replace(".", "-") for stock in portfolio_request.stocks})
+    symbols = list({stock.symbol.replace(".", "-") for stock in portfolio_request.stocks})
 
     prices = df_prices.copy()
 
-    available_tickers = [ticker for ticker in tickers if ticker in prices.columns]
+    available_symbols = [symbol for symbol in symbols if symbol in prices.columns]
 
-    if len(available_tickers) == 0:
+    if len(available_symbols) == 0:
         raise HTTPException(status_code=404, detail="No data for the tickers")
 
-    prices = prices[available_tickers]
+    prices = prices[available_symbols]
     prices = prices.dropna(axis=1, how="all")
     prices.ffill(inplace=True)
     prices.bfill(inplace=True)
@@ -102,29 +87,29 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
     portfolio_value = 0
 
     for stock in portfolio_request.stocks:
-        ticker = stock.ticker.replace(".", "-")
+        symbol = stock.symbol.replace(".", "-")
 
-        if ticker not in latest_prices.index:
+        if symbol not in latest_prices.index:
             continue
 
-        latest_price = latest_prices[ticker]
+        latest_price = latest_prices[symbol]
         holding_value = stock.shares * latest_price
         portfolio_value += holding_value
-        weights[ticker] = holding_value
+        weights[symbol] = holding_value
 
     if portfolio_value == 0:
         raise HTTPException(status_code=404, detail="No data for the tickers")
 
-    for ticker in weights:
-        weights[ticker] = weights[ticker] / portfolio_value
+    for symbol in weights:
+        weights[symbol] = weights[symbol] / portfolio_value
 
-    portfolio_tickers = [ticker for ticker in weights.keys() if ticker in returns.columns]
+    portfolio_symbols = [symbol for symbol in weights.keys() if symbol in returns.columns]
 
-    if len(portfolio_tickers) == 0:
+    if len(portfolio_symbols) == 0:
         raise HTTPException(status_code=404, detail="No return data for the tickers")
 
-    weights_array = np.array([weights[ticker] for ticker in portfolio_tickers])
-    portfolio_returns = returns[portfolio_tickers].mul(weights_array, axis=1).sum(axis=1)
+    weights_array = np.array([weights[symbol] for symbol in portfolio_symbols])
+    portfolio_returns = returns[portfolio_symbols].mul(weights_array, axis=1).sum(axis=1)
 
     portfolio_annual_return = portfolio_returns.mean() * 252
     portfolio_volatility = portfolio_returns.std() * np.sqrt(252)
@@ -165,7 +150,7 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
     if len(portfolio_request.stocks) == 0:
         raise HTTPException(status_code=400, detail="No stocks provided")
 
-    tickers = list({stock.ticker for stock in portfolio_request.stocks})
+    symbols = list({stock.symbol for stock in portfolio_request.stocks})
 
     if len(feature_map) == 0:
         raise HTTPException(status_code=404, detail="No price data found for the stocks")
@@ -176,20 +161,23 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
         "Moderate Risk": [],
         "High Risk": [],
         "Very High Risk": [],
+        "Extreme Risk": [],
     }
 
     cluster_counts = {}
 
     # assigning the risk categegory for each stock 
-    for ticker in tickers:
+    for symbol in symbols:
 
-        features = feature_map.get(ticker)
+        symbol = symbol.replace(".", "-")  
+
+        features = feature_map.get(symbol)
 
         if not features:
             continue
 
         # using the precomputed cluster label from the features CSV
-        cluster_label = int(features["Cluster_labels"])
+        cluster_label = int(features["cluster_labels"])
 
         category = CLUSTER_CATEGORY.get(cluster_label, "Moderate Risk")
 
@@ -197,12 +185,12 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
 
         categories[category].append(
             StockRiskCategory(
-                ticker=ticker,
+                symbol=symbol,
                 risk_bucket=category,
                 volatility=round(features["Volatility"] * 100, 2),
-                max_drawdown=round(features["max_drawdown"] * 100, 2),
-                annual_return=round(features["returns"] * 100, 2),
-                sharpe=round(features["Sharpe"], 3),
+                max_drawdown=round(features.get("max_drawdown", 0) * 100, 2),
+                annual_return=round(features["Returns"] * 100, 2),
+                sharpe=round(features.get("Sharpe", 0), 3),
                 var_95=round(features["VaR_95"] * 100, 2),
             )
         )

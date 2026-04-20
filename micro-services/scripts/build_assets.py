@@ -16,12 +16,12 @@ with open(os.path.join(BASE_DIR, "data", "stocks.json"), "r") as f:
 
 RISK_FREE_RATE = 0.02
 
-# tickers = list(STOCK_DATA.keys())
-# yahoo finance uses - instead of . for tickers 
-tickers = [stock["symbol"].replace(".", "-") for stock in STOCK_DATA]
+# symbols = list(STOCK_DATA.keys())
+# yahoo finance uses - instead of . for symbols 
+symbols = [stock["symbol"].replace(".", "-") for stock in STOCK_DATA]
 
-# download 1 year of price data for all tickers
-prices = yf.download(tickers, period="1y", auto_adjust=True)["Close"]
+# download 1 year of price data for all symbols
+prices = yf.download(symbols, period="1y", auto_adjust=True)["Close"]
 prices = prices.dropna(axis=1, how="all")
 prices.ffill(inplace=True)
 prices.bfill(inplace=True)
@@ -57,53 +57,59 @@ sharpe_ratios = np.where(
 )
 
 df = pd.DataFrame({
-    "ticker": variances.index,
+    "symbol": variances.index,
     "returns": annual_returns.values,
     "variance": variances.values,
-    "VaR_95": [var_95.get(t, np.nan) for t in variances.index],
+    "var_95": [var_95.get(t, np.nan) for t in variances.index],
     "max_drawdown": [max_drawdowns.get(t, np.nan) for t in variances.index],
-    "Sharpe": sharpe_ratios,
-    "Close": [latest_prices.get(t, np.nan) for t in variances.index]
+    "sharpe": sharpe_ratios,
+    "close": [latest_prices.get(t, np.nan) for t in variances.index]
 })
 
+
 # log transform variance to reduce the skew caused by extreme outliers like meme stocks
-df["Log_Variances"] = np.log1p(np.clip(df["variance"], 0, 2))
-df["Volatility"] = np.sqrt(df["variance"])
+df["log_variances"] = np.log1p(np.clip(df["variance"], 0, 2))
+df["volatility"] = np.sqrt(df["variance"])
 
 
 df.dropna(inplace=True)
 
 # these 3 features were chosen after testing all possible combinations - these gave best BIC and silhouette
-features = ["Log_Variances", "Volatility", "VaR_95"]
+features = ["log_variances", "volatility", "var_95"]
 
 X = df[features].values
 
 scaler = StandardScaler()
 Xs = scaler.fit_transform(X)
 
-# fitting the gmm model with 5 components 
-gmm = GaussianMixture(n_components=5, covariance_type="full", n_init=10, random_state=42, max_iter=500)
+# fitting the gmm model with 6 components 
+gmm = GaussianMixture(n_components=6, covariance_type="full", n_init=10, random_state=42, max_iter=500)
 gmm.fit(Xs)
 labels = gmm.predict(Xs)
 
-df["Cluster_labels"] = labels
+df["cluster_labels"] = labels
 
 # ranking each cluster by risk the higher volatility and var means higher risk
 cluster_risk_scores = {}
-for cluster_idx in range(5):
-    cluster_data = df[df["Cluster_labels"] == cluster_idx]
+for cluster_idx in range(6):
+    cluster_data = df[df["cluster_labels"] == cluster_idx]
     if len(cluster_data) == 0:
         cluster_risk_scores[cluster_idx] = 0
         continue
     cluster_risk_scores[cluster_idx] = (
-        0.60 * cluster_data["Volatility"].mean() +
-        0.40 * cluster_data["VaR_95"].mean()
+        0.60 * cluster_data["volatility"].mean() +
+        0.40 * cluster_data["var_95"].mean()
     )
 
 # sorting the clusters from the lowest to highest risk score and assign risk labels
 sorted_clusters = sorted(cluster_risk_scores.items(), key=lambda x: x[1])
 
-risk_labels = ["Very Low Risk", "Low Risk", "Moderate Risk", "High Risk", "Very High Risk"]
+risk_labels = ["Very Low Risk",
+                "Low Risk", 
+                "Moderate Risk", 
+                "High Risk", 
+                "Very High Risk", 
+                "Extreme Risk"]
 
 cluster_risk = {}
 for i, (cluster_idx, _) in enumerate(sorted_clusters):

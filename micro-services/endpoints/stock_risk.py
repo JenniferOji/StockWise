@@ -30,52 +30,40 @@ PRICES_PATH = os.path.join(BASE_DIR, "data", "prices.csv")
 STOCK_META_PATH = os.path.join(BASE_DIR, "data", "stocks.json")
 
 df_features = pd.read_csv(FEATURES_PATH)
-df_features["ticker"] = df_features["ticker"].astype(str).str.strip().str.upper()
-feature_map = df_features.set_index("ticker").to_dict(orient="index")
+df_features["symbol"] = df_features["symbol"].astype(str).str.strip().str.upper().str.replace(".", "-", regex=False)
+feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
 df_prices = pd.read_csv(PRICES_PATH, index_col=0, parse_dates=True)
 df_prices.columns = df_prices.columns.astype(str).str.strip().str.upper()
 
 with open(STOCK_META_PATH, "r") as f:
-    stock_list = json.load(f)
+    STOCK_DATA = json.load(f)
 
-stock_meta = {
-    str(item.get("symbol", "")).strip().upper().replace(".", "-"): {
-        "company_name": item.get("companyName", ""),
-        "sector": item.get("sector", ""),
-    }
-    for item in stock_list
-    if str(item.get("symbol", "")).strip()
+STOCK_LOOKUP = {
+    stock["symbol"].replace(".", "-").upper(): stock
+    for stock in STOCK_DATA
+    if stock.get("symbol")
 }
 
 with open(CLUSTER_RISK_PATH, "rb") as f:
     CLUSTER_CATEGORY = pickle.load(f)
 
-def normalize_symbol(raw_symbol: str) -> str:
-    if raw_symbol is None:
-        return ""
-
-    cleaned = "".join(ch for ch in str(raw_symbol).upper().strip() if ch.isalnum() or ch in {".", "-"})
-    return cleaned.replace(".", "-")
-
 def calculate_dynamic_features(symbol: str):
-    symbol = normalize_symbol(symbol)
+    symbol = str(symbol).strip().upper().replace(".", "-")
 
-    if not symbol:
-        raise ValueError("Symbol is required")
+    if symbol not in STOCK_LOOKUP:
+        raise ValueError(f"Symbol '{symbol}' not found")
 
     features = feature_map.get(symbol)
     if not features:
-        raise ValueError(f"Ticker '{symbol}' not found in dataset")
+        raise ValueError(f"Symbol '{symbol}' not found in dataset")
 
-    meta = stock_meta.get(symbol)
-    if not meta:
-        raise ValueError(f"Ticker metadata not found for '{symbol}'")
+    meta = STOCK_LOOKUP[symbol]
 
     return {
         "symbol": symbol,
-        "company_name": meta["company_name"],
-        "sector": meta["sector"],
+        "company_name": meta.get("companyName", ""),
+        "sector": meta.get("sector", ""),
         "Cluster_labels": int(features["Cluster_labels"]),
         "Log_Variances": float(features["Log_Variances"]),
         "Volatility": float(features["Volatility"]),
@@ -105,7 +93,10 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
     holding_values = {}
 
     for stock in stocks:
-        symbol = normalize_symbol(stock.symbol)
+        symbol = str(stock.symbol).strip().upper().replace(".", "-")
+
+        if symbol not in STOCK_LOOKUP:
+            continue
 
         if symbol not in latest_prices.index:
             continue
@@ -170,7 +161,10 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
 @router.post("/api/check-stock-risk")
 def check_stock_risk(request: StockRiskCheckRequest):
     try:
-        symbol = normalize_symbol(request.symbol)
+        symbol = str(request.symbol).strip().upper().replace(".", "-")
+
+        if symbol not in STOCK_LOOKUP:
+            raise ValueError(f"Symbol '{symbol}' not found")
 
         stock_features = calculate_dynamic_features(symbol)
 
@@ -210,9 +204,14 @@ def simulate_stock(request: SimulateStockRequest):
         if not current_metrics or not new_metrics:
             raise HTTPException(status_code=400, detail="Could not calculate portfolio metrics")
 
+        symbol = str(request.new_stock.symbol).strip().upper().replace(".", "-")
+
+        if symbol not in STOCK_LOOKUP:
+            raise HTTPException(status_code=400, detail=f"Symbol '{symbol}' not found")
+
         return {
             "success": True,
-            "symbol": normalize_symbol(request.new_stock.symbol),
+            "symbol": symbol,
             "quantity": request.new_stock.quantity,
             "impact": {
                 "volatility": {

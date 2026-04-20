@@ -10,7 +10,7 @@ import (
 )
 
 type Stock struct {
-	Ticker        string  `json:"ticker"`
+	Symbol        string  `json:"symbol"`
 	Shares        float64 `json:"shares"`
 	PurchasePrice float64 `json:"purchase_price"`
 }
@@ -28,8 +28,9 @@ type RiskMetricsResponse struct {
 type StockRiskCategoriesRequest struct {
 	Stocks []Stock `json:"stocks"`
 }
+
 type StockRiskCategory struct {
-	Ticker       string  `json:"ticker"`
+	Symbol       string  `json:"symbol"`
 	RiskBucket   string  `json:"risk_bucket"`
 	Volatility   float64 `json:"volatility"`
 	MaxDrawdown  float64 `json:"max_drawdown"`
@@ -39,10 +40,10 @@ type StockRiskCategory struct {
 }
 
 type StockRiskCategoriesResponse struct {
-	Success        bool                           `json:"success"`
-	Categories     map[string][]StockRiskCategory `json:"categories"`
-	Total          int                            `json:"total"`
-	PortfolioRisk  string                         `json:"portfolio_risk"`
+	Success       bool                           `json:"success"`
+	Categories    map[string][]StockRiskCategory `json:"categories"`
+	Total         int                            `json:"total"`
+	PortfolioRisk string                         `json:"portfolio_risk"`
 }
 
 // either returns the risk metrics respinse or an error
