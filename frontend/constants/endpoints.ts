@@ -15,8 +15,8 @@ const stocksEndpoint = serverUrl + api + stocks;
 
 
 export const endpoints = {
-  register: usersEndpoint + "/",
-  login: sessionsEndpoint + "/",
+  register: usersEndpoint,
+  login: sessionsEndpoint,
   addStock: (userId: number) => `${usersEndpoint}/${userId}/stocks`,
   getStocks: (userId: number) => `${usersEndpoint}/${userId}/stocks`,
   updateStock: (userId: number, stockId: number) => `${usersEndpoint}/${userId}/stocks/${stockId}`,

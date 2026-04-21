@@ -34,7 +34,7 @@ func main() {
 
 	users := app.Party("/api/users")
 	{
-		users.Post("/", routes.Register)
+		users.Post("", routes.Register)
 		users.Get("/{userId:uint}/stocks", routes.GetUserStocks)
 		users.Post("/{userId:uint}/stocks", routes.AddStock)
 		users.Patch("/{userId:uint}/stocks/{stockId:uint}", routes.UpdateStock)
@@ -45,7 +45,7 @@ func main() {
 
 	sessions := app.Party("/api/sessions")
 	{
-		sessions.Post("/", routes.Login)
+		sessions.Post("", routes.Login)
 	}
 
 	portfolios := app.Party("/api/portfolios")
