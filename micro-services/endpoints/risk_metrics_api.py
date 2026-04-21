@@ -120,6 +120,7 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
     portfolio_annual_return = portfolio_returns.mean() * 252
     portfolio_volatility = portfolio_returns.std() * np.sqrt(252)
     portfolio_var_95 = abs(np.percentile(portfolio_returns, 5)) * np.sqrt(252)
+    portfolio_var_95 = abs(np.percentile(portfolio_returns, 5))
 
     cumulative = (1 + portfolio_returns).cumprod()
     drawdown = (cumulative - cumulative.cummax()) / cumulative.cummax()

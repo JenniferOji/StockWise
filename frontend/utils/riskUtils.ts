@@ -1,5 +1,6 @@
 import { METRIC_THRESHOLDS } from '../constants/riskConstants'
 
+// shared shape for one threshold band
 type MetricBand = {
 	label: string
 	color: string
@@ -7,6 +8,7 @@ type MetricBand = {
 	max: number
 }
 
+// stock fields used by risk widgets
 export type StockRiskLike = {
 	symbol?: string
 	ticker?: string
@@ -15,10 +17,12 @@ export type StockRiskLike = {
 	annual_return: number
 }
 
+// grouped risk categories from backend
 export type StockRiskCategoriesLike = {
 	categories: Record<string, StockRiskLike[]>
 }
 
+// finds the matching band for a metric value
 export function getActiveBand(label: string, rawValue: string, riskPref: string): MetricBand {
 	const value = parseFloat(rawValue)
 	const profile = METRIC_THRESHOLDS[label][riskPref]
@@ -27,20 +31,17 @@ export function getActiveBand(label: string, rawValue: string, riskPref: string)
 	return match || profile.bands[profile.bands.length - 1]
 }
 
+// builds explanation text for each metric card
 export function getMetricInsight(label: string, rawValue: string, riskPref: string): { what: string; score: string; tip: string } {
 	const value = parseFloat(rawValue)
 	const band = getActiveBand(label, rawValue, riskPref)
 
+	// handles volatility explanations and tips
 	if (label === 'Volatility') {
 		const what = 'Portfolio volatility measures how much your portfolio value fluctuates over time. The higher the number, the more your balance swings up and down.'
 
+		// messages based on risk preference and band
 		const scoreMap: Record<string, Record<string, string>> = {
-			'Very Low Risk': {
-				Good: `Your score of ${value}% is low. Your portfolio is very stable, which is exactly what a low-risk strategy aims for.`,
-				Moderate: `Your score of ${value}% is starting to show some movement. It is manageable but worth watching for a low-risk investor.`,
-				High: `Your score of ${value}% is high for a low-risk portfolio. Your balance is swinging more than expected for your profile.`,
-				Severe: `Your score of ${value}% is very high for a low-risk investor. This level of fluctuation would likely be uncomfortable and is outside your risk profile.`,
-			},
 			'Low Risk': {
 				Good: `Your score of ${value}% is low. Your portfolio is very stable, which is exactly what a low-risk strategy aims for.`,
 				Moderate: `Your score of ${value}% is starting to show some movement. It is manageable but worth watching for a low-risk investor.`,
@@ -59,19 +60,14 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 				High: `Your score of ${value}% is high even by aggressive investment standards. Ensure this aligns with your actual comfort level.`,
 				Extreme: `Your score of ${value}% is extreme. This is significantly above what most high-risk portfolios experience and may indicate over-concentration in very volatile assets.`,
 			},
-			'Very High Risk': {
-				Expected: `Your score of ${value}% is well within the expected range for a high-risk investor. Higher volatility comes with the territory when pursuing stronger returns.`,
-				Elevated: `Your score of ${value}% is elevated, even for a high-risk portfolio. Make sure you are comfortable with the potential swings this implies.`,
-				High: `Your score of ${value}% is high even by aggressive investment standards. Ensure this aligns with your actual comfort level.`,
-				Extreme: `Your score of ${value}% is extreme. This is significantly above what most high-risk portfolios experience and may indicate over-concentration in very volatile assets.`,
-			},
 		}
 
 		const score = scoreMap[riskPref][band.label]
+		// decides when to show a follow up action tip
 		const showTip =
-			((riskPref === 'Very Low Risk' || riskPref === 'Low Risk') && band.label !== 'Good') ||
+			(riskPref === 'Low Risk' && band.label !== 'Good') ||
 			(riskPref === 'Moderate Risk' && (band.label === 'High' || band.label === 'Severe')) ||
-			((riskPref === 'High Risk' || riskPref === 'Very High Risk') && band.label === 'Extreme')
+			(riskPref === 'High Risk' && band.label === 'Extreme')
 		const tip = showTip
 			? 'In the Stock Risk Categories below, try filtering by "High Volatility" to see which of your stocks are driving this score.'
 			: ''
@@ -79,16 +75,12 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 		return { what, score, tip }
 	}
 
+	// handles sharpe ratio explanations and tips
 	if (label === 'Sharpe Ratio') {
 		const what = 'The Sharpe Ratio measures how much return you are getting for the amount of risk you are taking. A higher number means you are being better rewarded for the risk in your portfolio.'
 
+		// messages based on risk preference and band
 		const scoreMap: Record<string, Record<string, string>> = {
-			'Very Low Risk': {
-				Poor: `Your score of ${value} is poor for a low-risk investor. You are taking on risk without being adequately rewarded. Consider shifting toward steadier, income-focused holdings.`,
-				Fair: `Your score of ${value} is fair. You are getting some return for your risk, but there is room to improve. Low-risk portfolios should aim for consistency above 1.0.`,
-				Good: `Your score of ${value} is good. You are earning solid returns relative to the modest risk you are taking, which is the goal for a conservative strategy.`,
-				Excellent: `Your score of ${value} is excellent. You are generating strong returns while keeping risk low. This is ideal for your profile.`,
-			},
 			'Low Risk': {
 				Poor: `Your score of ${value} is poor for a low-risk investor. You are taking on risk without being adequately rewarded. Consider shifting toward steadier, income-focused holdings.`,
 				Fair: `Your score of ${value} is fair. You are getting some return for your risk, but there is room to improve. Low-risk portfolios should aim for consistency above 1.0.`,
@@ -107,15 +99,10 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 				Good: `Your score of ${value} is good. Your higher-risk approach is being rewarded with meaningful returns.`,
 				Excellent: `Your score of ${value} is excellent. Your high-risk strategy is generating strong risk-adjusted returns.`,
 			},
-			'Very High Risk': {
-				Poor: `Your score of ${value} is poor, even accounting for the higher risk you are taking on. Your aggressive positions are not paying off enough yet.`,
-				Fair: `Your score of ${value} is fair. High-risk strategies can take time to pay off, but aim to get this above 0.8 as returns accumulate.`,
-				Good: `Your score of ${value} is good. Your higher-risk approach is being rewarded with meaningful returns.`,
-				Excellent: `Your score of ${value} is excellent. Your high-risk strategy is generating strong risk-adjusted returns.`,
-			},
 		}
 
 		const score = scoreMap[riskPref][band.label]
+		// tip appears when sharpe is weak
 		const showTip = band.label === 'Poor' || band.label === 'Fair'
 		const tip = showTip
 			? 'In the Stock Risk Categories below, filter by "High Returns" to see which stocks are earning the most and consider whether your high-risk holdings justify their place.'
@@ -124,16 +111,12 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 		return { what, score, tip }
 	}
 
+	// handles max drawdown explanations and tips
 	if (label === 'Max Drawdown') {
 		const what = 'Max Drawdown shows the largest drop your portfolio has experienced from its highest point to its lowest. Think of it as the worst-case loss you have seen during a bad stretch in the market.'
 
+		// messages based on risk preference and band
 		const scoreMap: Record<string, Record<string, string>> = {
-			'Very Low Risk': {
-				Good: `Your score of ${value}% is low. Your portfolio has weathered market dips well, which is exactly what a low-risk strategy should do.`,
-				Moderate: `Your score of ${value}% means you have had some notable dips. For a low-risk investor, this is starting to push the boundaries of what is comfortable.`,
-				High: `Your score of ${value}% is high for a low-risk portfolio. You have experienced significant losses at some point, which may not align with your risk comfort.`,
-				Severe: `Your score of ${value}% is severe. A low-risk investor should not be experiencing drops of this magnitude. This warrants a review of your holdings.`,
-			},
 			'Low Risk': {
 				Good: `Your score of ${value}% is low. Your portfolio has weathered market dips well, which is exactly what a low-risk strategy should do.`,
 				Moderate: `Your score of ${value}% means you have had some notable dips. For a low-risk investor, this is starting to push the boundaries of what is comfortable.`,
@@ -152,15 +135,10 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 				High: `Your score of ${value}% is high even for an aggressive portfolio. Consider whether concentration in a few volatile positions is increasing your downside exposure.`,
 				Extreme: `Your score of ${value}% is extreme. Even for a high-risk investor, this level of drawdown suggests significant concentration risk or heavy exposure to very volatile assets.`,
 			},
-			'Very High Risk': {
-				Expected: `Your score of ${value}% is within the expected range for a high-risk investor. Larger drawdowns are a natural part of aggressive investing.`,
-				Elevated: `Your score of ${value}% is elevated but not unusual for high-risk strategies during volatile periods. Ensure you are comfortable holding through large dips.`,
-				High: `Your score of ${value}% is high even for an aggressive portfolio. Consider whether concentration in a few volatile positions is increasing your downside exposure.`,
-				Extreme: `Your score of ${value}% is extreme. Even for a high-risk investor, this level of drawdown suggests significant concentration risk or heavy exposure to very volatile assets.`,
-			},
 		}
 
 		const score = scoreMap[riskPref][band.label]
+		// tip appears when drawdown is outside safe range
 		const showTip = band.label !== 'Good' && band.label !== 'Expected'
 		const tip = showTip
 			? 'In the Stock Risk Categories below, filter by "High Drawdown" to see which of your stocks have had the biggest historical drops.'
@@ -169,16 +147,12 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 		return { what, score, tip }
 	}
 
+	// handles var explanations and tips
 	if (label === 'VaR (95%)') {
 		const what = 'Value at Risk (VaR) estimates the maximum amount you could expect to lose on a bad day. In simple terms: on 95% of days your losses should stay below this number.'
 
+		// messages based on risk preference and band
 		const scoreMap: Record<string, Record<string, string>> = {
-			'Very Low Risk': {
-				Good: `Your score of ${value}% is low. On a bad day, your losses are well-contained. This is great for a low-risk portfolio.`,
-				Moderate: `Your score of ${value}% is moderate. On rough market days, you could see losses around this level, which is slightly above ideal for a conservative investor.`,
-				High: `Your score of ${value}% is high for a low-risk investor. Your daily downside exposure is greater than it should be for your profile.`,
-				Severe: `Your score of ${value}% is severe. A low-risk portfolio should not have this level of potential daily loss. Consider reviewing your most volatile holdings.`,
-			},
 			'Low Risk': {
 				Good: `Your score of ${value}% is low. On a bad day, your losses are well-contained. This is great for a low-risk portfolio.`,
 				Moderate: `Your score of ${value}% is moderate. On rough market days, you could see losses around this level, which is slightly above ideal for a conservative investor.`,
@@ -197,15 +171,10 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 				High: `Your score of ${value}% is high even by aggressive standards. Your portfolio is significantly exposed to short-term swings.`,
 				Extreme: `Your score of ${value}% is extreme. Even high-risk portfolios rarely reach this level. This may indicate heavy concentration in a few very volatile positions.`,
 			},
-			'Very High Risk': {
-				Expected: `Your score of ${value}% is within the expected range for a high-risk investor. Higher daily risk is a trade-off that comes with pursuing stronger long-term returns.`,
-				Elevated: `Your score of ${value}% is elevated, even for a high-risk strategy. Ensure this level of potential daily loss is something you can stomach.`,
-				High: `Your score of ${value}% is high even by aggressive standards. Your portfolio is significantly exposed to short-term swings.`,
-				Extreme: `Your score of ${value}% is extreme. Even high-risk portfolios rarely reach this level. This may indicate heavy concentration in a few very volatile positions.`,
-			},
 		}
 
 		const score = scoreMap[riskPref][band.label]
+		// tip appears when daily risk is elevated
 		const showTip = band.label !== 'Good' && band.label !== 'Expected'
 		const tip = showTip
 			? 'In the Stock Risk Categories below, filter by "High Volatility" to identify the stocks most likely contributing to your day-to-day risk.'
@@ -214,5 +183,6 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 		return { what, score, tip }
 	}
 
+	// default empty response for unsupported labels
 	return { what: '', score: '', tip: '' }
 }
