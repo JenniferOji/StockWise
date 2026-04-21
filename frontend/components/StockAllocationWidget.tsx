@@ -21,7 +21,7 @@ type ChartItem = {
 	color: string;
 };
 
-// donought chart 
+// donut chart view by sector
 
 function DonutChart({
 	chartData,
@@ -74,7 +74,7 @@ function DonutChart({
 	);
 }
 
-// bar chart 
+// bar chart view by share count
 
 function BarChart({
 	chartData,
@@ -222,11 +222,10 @@ export default function StockAllocationWidget() {
 		<ScrollView>
 			<View style={styles.container}>
 
-				{/* <Text style={styles.title}>Sector Allocation</Text> */}
 				<Text style={styles.subtitle}>Explore your portfolio composition - tap a sector to view sector holdings</Text>
 
 				{isLargeScreen ? (
-					// side by side display for large paegs 
+					// show both charts side by side on large screens
 					<View style={styles.sideBySide}>
 						<View style={styles.sideItem}>
 							<DonutChart chartData={chartData} selectedSector={selectedSector} onSelectSector={setSelectedSector} />
@@ -240,7 +239,7 @@ export default function StockAllocationWidget() {
 						</View>
 					</View>
 				) : (
-					// swipabale pages 
+					// show charts as swipe pages on smaller screens
 					<View>
 						<ScrollView
 							ref={swipeRef}
@@ -262,7 +261,7 @@ export default function StockAllocationWidget() {
 							</View>
 						</ScrollView>
 
-						{/* page indicator  */}
+						{/* page dots for swipe view */}
 						<View style={styles.dotsRow}>
 							{[0, 1].map(i => (
 								<Pressable key={i} onPress={() => goToPage(i)}>
@@ -273,14 +272,14 @@ export default function StockAllocationWidget() {
 					</View>
 				)}
 
-				{/* sector legend */}
+				{/* sector legend list */}
 				<SectorLegend
 					chartData={chartData}
 					selectedSector={selectedSector}
 					onSelectSector={setSelectedSector}
 				/>
 
-				{/* sector details */}
+				{/* selected sector details */}
 				{selectedSector && selectedSectorData && (
 					<View style={styles.detailsCard}>
 						<View style={styles.detailsHeader}>

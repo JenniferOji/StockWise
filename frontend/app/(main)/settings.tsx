@@ -77,15 +77,14 @@ export default function SettingsPage() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
+      {/* page header */}
       <View style={styles.header}>
-        {/* <Text style={styles.title}>Settings</Text> */}
         <Text style={styles.subtitle}>
           Manage your preferences and account
         </Text>
       </View>
 
-      {/* Risk Section */}
+      {/* risk settings */}
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Risk Tolerance</Text>
         <Text style={styles.sectionDescription}>
@@ -115,7 +114,7 @@ export default function SettingsPage() {
         </Pressable>
       </View>
 
-      {/* Placeholder Section (for fullness) */}
+      {/* account details */}
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Account</Text>
 
@@ -126,12 +125,7 @@ export default function SettingsPage() {
         <Text style={styles.readonlyHint}>Email cannot be changed.</Text>
       </View>
 
-      {/* 
-      <TouchableOpacity style={styles.logoutButton}>
-        <Text style={styles.logoutText}>Log Out</Text>
-      </TouchableOpacity> */}
-
-      {/* pop up for selecting risk */}
+      {/* modal for risk selection */}
       <Modal visible={showRiskModal} transparent animationType="fade">
         <TouchableOpacity
           style={styles.modalOverlay}

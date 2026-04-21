@@ -29,6 +29,7 @@ export default function DiversificationWidget() {
   const [currentVolatility, setCurrentVolatility] = useState<number | null>(null);
   const [withSuggestionsVolatility, setWithSuggestionsVolatility] = useState<number | null>(null);
 
+  // returns explanation text based on user's risk preference
   const getSuggestionSummary = (riskPreference: string) => {
     const riskLevel = riskPreference.trim().toLowerCase();
 
@@ -47,6 +48,7 @@ export default function DiversificationWidget() {
     return 'These stocks are selected to best align with your risk preference using the portfolio optimization model.';
   };
 
+  // fetches diversification suggestions on mount
   useEffect(() => {
     async function fetchDiversificationSuggestions() {
       setError('');
@@ -131,9 +133,9 @@ export default function DiversificationWidget() {
     };
   })();
 
+  // renders diversification suggestions with volatility comparison
   return (
     <View style={styles.card}>
-      {/* <Text style={styles.title}>Diversification Suggestions</Text> */}
       <Text style={styles.subtitle}>{risk} Preference</Text>
 
       {volatilityDifference != null && (

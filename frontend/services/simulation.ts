@@ -10,6 +10,7 @@ export const checkStockRisk = async (symbol: string) => {
     } catch (error) {
         handleError(error);
         if (axios.isAxiosError(error)) {
+            // keep api error detail so ui can show useful feedback
             return error.response?.data || { detail: error.message };
         }
         return { detail: 'Failed to analyse stock' };
@@ -21,6 +22,7 @@ export const simulateStockImpact = async (userId: number, symbol: string, quanti
         const stocks = await getUserStocks(userId);
         if (!stocks) throw new Error("No stocks found");
 
+        // send existing holdings so impact can be recalculated
         const currentStocks = stocks.map((s: any) => {
             const { totalShares } = totalEntries(s);
             return {

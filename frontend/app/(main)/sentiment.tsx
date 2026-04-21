@@ -153,7 +153,7 @@ export default function SentimentPage() {
           See the overall market mood for your holdings, classified by machine learning model: positive, neutral, or negative.
         </Text>
 
-        {/* Sentiment Gradient bar for the user to visually gather the sentiment towards their stock */}
+        {/* sentiment gradient scale for quick reading */}
         <View style={styles.heatmapBox}>
           <LinearGradient
             colors={["#ff1744", "#ff9100", "#00c853"]}

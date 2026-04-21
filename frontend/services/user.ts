@@ -2,7 +2,9 @@ import axios from "axios";
 import { endpoints } from "../constants/endpoints";
 import { handleError } from "../utils/handleError";
 
+// aggregates multiple stock purchases into total position
 export const totalEntries = (s: any) => {
+    // combine multiple buys into one total position
     const entries = s.entries || [];
     const totalShares = entries.reduce((sum: number, e: any) => sum + (e.quantity || 0), 0);
     const avgPrice = totalShares > 0
@@ -11,6 +13,7 @@ export const totalEntries = (s: any) => {
     return { totalShares, avgPrice };
 };
 
+// creates new user account with credentials and risk preference
 export const registerUser = async(
     username: string,
     email: string,
@@ -26,7 +29,7 @@ export const registerUser = async(
                 risk
             });
             console.log('Registration response:', response);
-            // if there is data present return it
+            // return created user when signup works
             if (response.data) return response.data;
             return null;
         }catch (error) {
@@ -41,9 +44,10 @@ export const registerUser = async(
     }
 }
 
+// authenticates user and returns session data
 export const loginUser = async (email: string, password: string) => {
     try {
-        // send post request to server login endpoint with email and password 
+        // send login details to server
         const response = await axios.post(endpoints.login, { 
             email,
             password
@@ -58,6 +62,7 @@ export const loginUser = async (email: string, password: string) => {
 }
 
 
+// retrieves all stocks in user portfolio
 export const getUserStocks = async (userId: number) => {
     try {
         console.log('Getting stocks for user ID:', userId);
@@ -73,8 +78,10 @@ export const getUserStocks = async (userId: number) => {
     }
 }
 
+// retrieves user's saved risk preference
 export const getRiskPreference = async(userId: number) => {
     try {        
+        // fetch saved risk preference for suggestions
         const response = await axios.get(endpoints.getRiskPreference(userId));
         console.log('getRiskPreference full response:', response.data);
         return response.data.risk;

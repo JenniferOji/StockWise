@@ -68,10 +68,9 @@ export default function RandomSuggestionsWidget() {
   return (
     <View style={styles.card}>
 
-      {/* Header with refresh */}
+      {/* header and refresh button */}
       <View style={styles.headerRow}>
         <View>
-          {/* <Text style={styles.title}>Explore Opportunities</Text> */}
           <Text style={styles.subtitle}>{risk} Preference</Text>
         </View>
 

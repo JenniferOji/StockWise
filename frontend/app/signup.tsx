@@ -5,6 +5,7 @@ import { storage } from '../utils/storage';
 import { registerUser } from '../services/user';
 import { MaterialIcons } from '@expo/vector-icons';
 
+// signup form with user profile and risk preference
 export default function SignUpPage() {
   const router = useRouter();
   const [username, setUsername] = useState('');
@@ -17,6 +18,7 @@ export default function SignUpPage() {
 
   const riskOptions = ['Low Risk', 'Moderate Risk', 'High Risk'];
 
+  // creates new user account and stores session
   const handleSignUp = async () => {
     setLoading(true);
     try {
@@ -35,10 +37,12 @@ export default function SignUpPage() {
     }
   };
 
+  // navigates back to intro page
   const handleBackToHome = () => {
     router.push('/');
   };
 
+  // renders signup form with name, email, password, and risk selection
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>

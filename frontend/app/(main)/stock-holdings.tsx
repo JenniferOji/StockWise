@@ -16,22 +16,22 @@ const ordinal = (n: number) => {
 };
 
 export default function StockHoldings() {
-  // query holds the current search text from the user 
+  // search text for current holdings
   const [query, setQuery] = useState('');
   const [addQuery, setAddQuery] = useState('');
-  // displayed is the list of stocks the user has added to the page 
+  // stocks currently shown on the page
   const [displayed, setDisplayed] = useState<typeof STOCKS[number][]>([]);
 
-  // modal controls for the edit popup
+  // modal state for add and edit flows
   const [modalVisible, setModalVisible] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [formMode, setFormMode] = useState<'add' | 'edit'>('edit');
-  // which stock is currently being edited in the modal
+  // stock selected in the modal
   const [selected, setSelected] = useState<typeof STOCKS[number] | null>(null);
-  // editing shares value
+  // editable list of buy entries
   const [entries, setEntries] = useState([{ shares: '', price: '' }]);
 
-  // colour for the search bar icon 
+  // icon colour for search field
   const iconColor = Colors.light.icon;
   const isFormValid = entries.every(e =>
     Number.isFinite(parseFloat(e.shares)) &&
@@ -40,11 +40,11 @@ export default function StockHoldings() {
     parseFloat(e.price) > 0
   );
   
-  // function to load the users stocks from the backend  
+  // load user holdings from the api
   const loadUserStocks = async () => {
     try {
       const userJson = await storage.getItem('user');
-      // if we have user data, parse and use it to get the stocks
+      // if user exists load their stocks
       if (userJson) {
         const user = JSON.parse(userJson);
         const stocks = await getUserStocks(user.ID);
@@ -87,12 +87,12 @@ export default function StockHoldings() {
     }
   };
 
-  // when the pasge loads it will get the users stocks from the backend and display it 
+  // load stocks when page opens
   useEffect(() => {
     loadUserStocks();
   }, []);
 
-  // Filter only stocks the user currently holds.
+  // filter stocks already in portfolio by search text
   const filteredDisplayed = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return displayed;
@@ -103,7 +103,7 @@ export default function StockHoldings() {
     );
   }, [query, displayed]);
 
-  // Search list for stocks user does not currently hold.
+  // build list of stocks user can still add
   const stocksToAdd = useMemo(() => {
     const heldSymbols = new Set(displayed.map((s) => s.symbol));
     const q = addQuery.trim().toLowerCase();
@@ -118,7 +118,7 @@ export default function StockHoldings() {
     });
   }, [displayed, addQuery]);
 
-  // Save a new stock to backend and refresh displayed holdings.
+  // add a stock then refresh the list
   const saveStock = async (item: typeof STOCKS[number], entriesData: any[]) => {
     try {
       const userJson = await storage.getItem('user');
@@ -149,7 +149,7 @@ export default function StockHoldings() {
         </Text>
       </View>
 
-      {/* search input - typing shows matches below */}
+      {/* search and add controls */}
       <View style={[styles.pageShell, styles.searchContainer]}>
         <View style={styles.searchRow}>
           <View style={styles.searchInputContainer}>
@@ -161,7 +161,7 @@ export default function StockHoldings() {
               onChangeText={setQuery}
               style={[styles.searchInput, styles.searchInputWithIcon]}
             />
-            {/* search icon is positioned absolutely inside only the input field */}
+            {/* keep search icon inside the input */}
             <View style={styles.searchIcon} pointerEvents="none">
               <IconSymbol name="magnifyingglass" size={18} color={iconColor} />
             </View>
@@ -324,7 +324,7 @@ export default function StockHoldings() {
               >
                 {entries.map((entry, index) => (
                   <View key={index} style={styles.entryBlock}>
-                    {/* remove button */}
+                    {/* remove this entry row */}
                     <View style={styles.entryHeaderRow}>
                       <Text style={styles.entryLabel}>{ordinal(index + 1)} Investment</Text>
                       {entries.length > 1 && (
@@ -369,7 +369,7 @@ export default function StockHoldings() {
               </ScrollView>
             </View>
 
-            {/* entry button */}
+            {/* add another entry row */}
             <Pressable
               style={styles.addEntryBtn}
               onPress={() => setEntries([...entries, { shares: '', price: '' }])}

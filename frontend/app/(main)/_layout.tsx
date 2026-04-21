@@ -16,7 +16,7 @@ import SentimentPage from './sentiment';
 import Settings from './settings';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-// shared varibales for all classes to use 
+// shared settings used by the main app routes
 export const unstable_settings = {};
 
 export default function RootLayout() {

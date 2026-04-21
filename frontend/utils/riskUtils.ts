@@ -8,7 +8,8 @@ type MetricBand = {
 }
 
 export type StockRiskLike = {
-	ticker: string
+	symbol?: string
+	ticker?: string
 	volatility: number
 	max_drawdown: number
 	annual_return: number

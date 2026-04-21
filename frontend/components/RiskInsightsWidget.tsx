@@ -34,11 +34,13 @@ export default function RiskInsightsWidget() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  // returns color for metric based on its risk band
   function getMetricColor(label: string, rawValue: string) {
     const band = getActiveBand(label, rawValue, riskPreference)
     return band.color
   }
 
+  // renders threshold scale showing metric bands and highlights active one
   function ThresholdScale({ label, riskPreference, rawValue }: { label: string; riskPreference: string; rawValue: string }) {
     const profile = METRIC_THRESHOLDS[label]?.[riskPreference]
     const activeBand = getActiveBand(label, rawValue, riskPreference)
@@ -62,6 +64,7 @@ export default function RiskInsightsWidget() {
     )
   }
 
+  // renders single metric card with color, value, and description
   function MetricBox({ label, value, desc, onPress }: any) {
     const color = getMetricColor(label, value)
     return (
@@ -79,6 +82,7 @@ export default function RiskInsightsWidget() {
     )
   }
 
+  // fetches risk metrics and stock categories on mount
   useEffect(() => {
     async function fetchRiskMetricsForUser() {
       setLoading(true)
@@ -111,6 +115,7 @@ export default function RiskInsightsWidget() {
   const hasMetricSelected = sortMetric !== null
   const portfolioRiskColor = CATEGORY_COLORS[portfolioRisk as keyof typeof CATEGORY_COLORS] || '#0b3d91'
 
+  // sorts stocks by selected metric and direction
   function getSortedStocks(stocks: StockRiskLike[]) {
     const sortedStocks = [...stocks]
     if (sortMetric === null) return sortedStocks
@@ -128,6 +133,7 @@ export default function RiskInsightsWidget() {
     return sortedStocks
   }
 
+  // renders complete risk insights widget with metrics and categorized stocks
   return (
     <View style={styles.card}>
       <View style={styles.valueRow}><Text style={styles.valueLabel}>Calculated over a one year period using historical data</Text></View>
@@ -142,7 +148,6 @@ export default function RiskInsightsWidget() {
           ]}
         >
           <View style={styles.portfolioRiskTop}>
-            {/* <View style={[styles.portfolioRiskDot, { backgroundColor: portfolioRiskColor }]} /> */}
             <Text style={styles.portfolioRiskLabel}>Overall Portfolio Risk</Text>
           </View>
           <View
@@ -193,7 +198,6 @@ export default function RiskInsightsWidget() {
       <View style={styles.riskCategorySection}>
         <Text style={styles.sectionTitle}>Stock Risk Categories</Text>
         <Text style={styles.sectionSubtitle}>Grouped by machine-learned risk profile</Text>
-          {/* <Text style={styles.sectionSubtitle}>Sorting applies within each risk category.</Text></Text> */}
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sortRow}>
           <Pressable
@@ -308,16 +312,20 @@ export default function RiskInsightsWidget() {
             <View key={category} style={[styles.categoryCard, { borderLeftColor: color }]}>
               <Text style={[styles.categoryTitle, { color }]}>{category}</Text>
               {stocks.length ? (
-                stocks.map((stock: StockRiskLike) => (
-                  <View key={`${category}-${stock.ticker}`} style={styles.stockRow}>
-                    <Text style={styles.stockTicker}>{stock.ticker}</Text>
-                    <View style={styles.stockMetrics}>
-                      <Text style={styles.stockMetric}>Vol {stock.volatility.toFixed(1)}%</Text>
-                      <Text style={styles.stockMetric}>DD {stock.max_drawdown.toFixed(1)}%</Text>
-                      <Text style={styles.stockMetric}>Ret {stock.annual_return.toFixed(1)}%</Text>
+                stocks.map((stock: StockRiskLike) => {
+                  const stockLabel = stock.symbol || stock.ticker || 'Unknown'
+
+                  return (
+                    <View key={`${category}-${stockLabel}`} style={styles.stockRow}>
+                      <Text style={styles.stockTicker}>{stockLabel}</Text>
+                      <View style={styles.stockMetrics}>
+                        <Text style={styles.stockMetric}>Vol {stock.volatility.toFixed(1)}%</Text>
+                        <Text style={styles.stockMetric}>DD {stock.max_drawdown.toFixed(1)}%</Text>
+                        <Text style={styles.stockMetric}>Ret {stock.annual_return.toFixed(1)}%</Text>
+                      </View>
                     </View>
-                  </View>
-                ))
+                  )
+                })
               ) : (<Text style={styles.emptyCategoryText}>No stocks in this category.</Text>)}
             </View>
           )

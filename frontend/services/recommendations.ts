@@ -4,6 +4,7 @@ import { handleError } from "../utils/handleError";
 import { totalEntries, getRiskPreference, getUserStocks } from "./user";
 
 const normalizeRiskPreference = (risk?: string | null) => {
+    // map user text to the labels used by the model api
     const normalized = (risk || "").trim().toLowerCase();
 
     if (normalized === "very low risk" || normalized === "very low") return "Very Low Risk";
@@ -23,6 +24,7 @@ export const getDiversificationSuggestions = async (userID: number) => {
         const rawRisk = await getRiskPreference(userID);
         const risk = normalizeRiskPreference(rawRisk);
         
+        // build current holdings in the format expected by api
         const currentStocks = stocks.map((s: any) => {
             const { totalShares, avgPrice } = totalEntries(s);
             return { symbol: s.symbol, sector: s.sector, quantity: totalShares, purchase_price: avgPrice };
@@ -47,6 +49,7 @@ export const getRandomSuggestions = async (userID: number) => {
         const rawRisk = await getRiskPreference(userID);
         const risk = normalizeRiskPreference(rawRisk);
         
+        // build current holdings in the format expected by api
         const currentStocks = stocks.map((s: any) => {
             const { totalShares, avgPrice } = totalEntries(s);
             return { symbol: s.symbol, sector: s.sector, quantity: totalShares, purchase_price: avgPrice };

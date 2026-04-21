@@ -9,6 +9,7 @@ export default function PerformanceMetricsWidget() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
+  // fetches performance metrics from backend for current user
   const fetchMetrics = async () => {
     setError('');
     setLoading(true);
@@ -29,6 +30,7 @@ export default function PerformanceMetricsWidget() {
     setLoading(false);
   };
 
+  // refreshes metrics whenever screen is focused
   useFocusEffect(
     useCallback(() => {
       fetchMetrics();
@@ -67,6 +69,7 @@ export default function PerformanceMetricsWidget() {
   const best = metrics.best_performer;
   const worst = metrics.worst_performer;
 
+  // renders performance overview with portfolio value, returns, and stock breakdown
   return (
     <View style={styles.container}>
       <View style={styles.topCard}>
@@ -100,7 +103,7 @@ export default function PerformanceMetricsWidget() {
         </View>
       </View>
 
-      {/* best and worst stock */}
+      {/* best and worst performing stock */}
       <View style={styles.sectionCard}>
         <Text style={styles.sectionTitle}>Performance Highlights</Text>
         <Text style={styles.sectionSubtitle}>Based on your holdings performance</Text>
@@ -134,7 +137,7 @@ export default function PerformanceMetricsWidget() {
         </View>
       </View>
 
-      {/* Holdings breakdown for each stock */}
+      {/* per stock breakdown */}
       {metrics?.metrics?.price_comparison && (
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Holdings Breakdown</Text>
@@ -175,6 +178,7 @@ export default function PerformanceMetricsWidget() {
   );
 }
 
+// renders single metric box with label, value, and description
 function MetricBox({ label, value, desc }: any) {
   return (
     <View style={styles.metricBox}>

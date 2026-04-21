@@ -6,7 +6,7 @@ import { View } from 'react-native';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { StatusBar } from 'expo-status-bar';
 
-// shared varibales for all classes to use 
+// shared settings used by the app routes
 export const unstable_settings = {};
 
 export default function RootLayout() {

@@ -137,7 +137,6 @@ export default function StockRiskWidget() {
 
   return (
     <View style={styles.card}>
-      {/* <Text style={styles.title}>Stock Risk Checker</Text> */}
       <Text style={styles.subtitle}>Analyse the risk level of any stock ticker</Text>
 
       <View style={styles.inputRow}>
@@ -241,7 +240,6 @@ export default function StockRiskWidget() {
                 {renderMetric("Volatility", impact.impact.volatility)}
                 {renderMetric("VaR (95%)", impact.impact.var_95)}
                 {renderMetric("Max Drawdown", impact.impact.max_drawdown)}
-                {/* {renderMetric("Annual Return", impact.impact.annual_return)} */}
                 {renderMetric("Sharpe Ratio", impact.impact.sharpe)}
               </View>
             )}

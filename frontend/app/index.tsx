@@ -5,11 +5,13 @@ import { useState, useEffect } from "react";
 import { User } from "../types/user";
 import { storage } from "../utils/storage";
 
+// intro page with sign up and login navigation
 export default function IntroPage() {
   const isLoadingComplete = useCachedResources();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
 
+  // checks if user exists in storage and redirects if logged in
   useEffect(() => {
     async function getUser() {
       const user = await storage.getItem('user');
@@ -21,10 +23,12 @@ export default function IntroPage() {
 
   }, []);
 
+  // navigates to signup page
   const handleSignUp = () => {
     router.push('/signup' as any);
   };
 
+  // navigates to login page
   const handleLogin = () => {
     router.push('/login' as any);
   };
@@ -33,6 +37,7 @@ export default function IntroPage() {
     return null;
   }
 
+  // renders welcome screen with app branding and auth buttons
   return (
     <AuthContext.Provider value={{ user, setUser }}>
       <SafeAreaView style={styles.container}>

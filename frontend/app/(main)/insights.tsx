@@ -11,7 +11,7 @@ import DiversificationWidget from '@/components/DiversificationWidget';
 import RandomSuggestionsWidget from '@/components/RandomSuggestions';   
 import StockRiskWidget from '@/components/StockRiskWidget';
 
-// accordion tutorial i used: https://sanjanahumanintech.medium.com/accordion-in-react-native-95586a738aee
+// list of sections shown on the insights page
 
 type MenuSection = {
         title: string;
@@ -19,7 +19,6 @@ type MenuSection = {
         icon: keyof typeof Icon.glyphMap;
 };
 
-// list of all the sections that will show up on the insights page
 const menu: MenuSection[] = [
     { 
         title: "Performance Analysis",
@@ -63,7 +62,7 @@ interface AccordianProps {
     isLargeScreen: boolean;
 }
 
-// accordion component - the collapsible sections you click on
+// accordion section the user can open and close
 function Accordian({ title, subtitle, icon, expanded, onToggle, isLargeScreen }: AccordianProps) {
     return (
         <View style={[styles.accordionContainer, isLargeScreen && styles.accordionContainerLarge]}>
@@ -107,7 +106,7 @@ function Accordian({ title, subtitle, icon, expanded, onToggle, isLargeScreen }:
     );
 }
 
-// main insights screen component
+// main insights screen
 export default function InsightsScreen() {
     const [expandedTitle, setExpandedTitle] = useState<string | null>(null);
     const { width } = useWindowDimensions();
@@ -123,13 +122,12 @@ export default function InsightsScreen() {
             <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
                 <View style={[styles.pageShell, isLargeScreen && styles.pageShellLarge]}>
                     <View style={styles.pageHeader}>
-                        {/* <Text style={styles.pageTitle}>Portfolio Insights</Text> */}
                         <Text style={styles.pageSubtitle}>
                             Explore performance, risk, allocation and diversification in one place
                         </Text>
                     </View>
 
-                    {/* map through menu array to create accordion sections */}
+					{/* render all insight sections */}
                     {menu.map((section, index) => (
                         <Accordian 
                             key={index}

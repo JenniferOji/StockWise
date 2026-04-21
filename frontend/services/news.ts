@@ -3,6 +3,7 @@ import { endpoints } from "../constants/endpoints";
 import { handleError } from "../utils/handleError";
 import { getUserStocks } from "./user";
 
+// retrieves stock list for news aggregation
 export const getNews = async (userId: number) => {
     try {
         console.log('Getting stocks for user ID:', userId);
@@ -18,11 +19,14 @@ export const getNews = async (userId: number) => {
     }
 }
 
+// fetches news articles for all user holdings
 export const getStockNews = async (userID: number) => {
     try {        
         const stocks = await getUserStocks(userID);
         console.log('Stocks data:', stocks);
         if (!stocks) throw new Error("No stocks found");
+
+        // collect valid ticker symbols from user holdings
         const symbols = stocks
             .map((stock: any) => stock.symbol)
             .filter((symbol: any) => typeof symbol === 'string' && symbol.length > 0);
@@ -33,6 +37,7 @@ export const getStockNews = async (userID: number) => {
             symbols.map((symbol: string) => axios.get(endpoints.getStockNews(symbol)))
         );
 
+        // combine all stock articles into one list
         const mergedArticles = responses.flatMap((response) => response.data?.articles || []);
 
         return {
@@ -47,6 +52,7 @@ export const getStockNews = async (userID: number) => {
     }
 };
 
+// fetches sentiment analysis for all holdings
 export const getStockSentiment = async (userID: number) => {
     try {
         const stocks = await getUserStocks(userID);
@@ -54,6 +60,7 @@ export const getStockSentiment = async (userID: number) => {
             return {};
         }
 
+        // collect valid ticker symbols from user holdings
         const symbols = stocks
             .map((stock: any) => stock.symbol)
             .filter((symbol: any) => typeof symbol === 'string' && symbol.length > 0);
@@ -66,6 +73,7 @@ export const getStockSentiment = async (userID: number) => {
             symbols.map((symbol: string) => axios.get(endpoints.getStockSentiment(symbol)))
         );
 
+        // merge each sentiment result into one object
         return responses.reduce((acc: Record<string, any>, response) => {
             return { ...acc, ...(response.data || {}) };
         }, {});
@@ -75,6 +83,7 @@ export const getStockSentiment = async (userID: number) => {
     }
 };
 
+// fetches sentiment for specific stock symbols
 export const getSingleStockSentiment = async (symbols: string[]) => {
     try {
         if (!symbols || symbols.length == 0) {
@@ -85,6 +94,7 @@ export const getSingleStockSentiment = async (symbols: string[]) => {
             symbols.map((symbol: string) => axios.get(endpoints.getStockSentiment(symbol)))
         );
 
+        // merge each sentiment result into one object
         return responses.reduce((acc: Record<string, any>, response) => {
             return { ...acc, ...(response.data || {}) };
         }, {});
