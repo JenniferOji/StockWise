@@ -15,51 +15,47 @@ import nltk
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
+# loading environment variables and setting up api router
 load_dotenv()
 router = APIRouter()
 
 lemm = WordNetLemmatizer()
 
-# load the onnx models from the file path
+# setting up base directory and loading onnx sentiment model
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# preprocessing converts text to the numeric feature vectors used b the model - catboost cannot read text 
 model_path = os.path.join(BASE_DIR, "models", "svm_model.onnx")
-
 model_sess = ort.InferenceSession(model_path, providers=["CPUExecutionProvider"])
-# print("MODEL INPUT:", model_sess.get_inputs()[0].name, model_sess.get_inputs()[0].type)
 
-# loads the label dictionary to convert the model output back to the sentiment label
+# mapping model outputs to sentiment labels
 labels = ["negative", "neutral", "positive"]
 
 class StockRequest(BaseModel):
     names: List[str]
 
+# extracting simplified company name for search queries
 def split_company_name(company_name: str):
     name = company_name.split('(')[0].strip()
-
     name = name.split(',')[0].strip()
     if '.' in name:
         name = name.split('.')[0]
     words = name.split()
-   
     return words[0] if words else company_name
 
+# checking if article headline actually mentions the company
 def title_mentions_stock(headline: str, company_name: str, shortened_company_name: str, symbol: str):
     headline_lower = headline.lower()
     company_base = company_name.split('(')[0].strip().lower()
 
     if shortened_company_name and shortened_company_name.lower() in headline_lower:
         return True
-
     if symbol and symbol.lower() in headline_lower:
         return True
-
     if company_base and company_base in headline_lower:
         return True
 
     return False
 
+# converting timestamps into readable date format
 def format_date(value: str):
     if value is None:
         return None
@@ -72,10 +68,12 @@ def format_date(value: str):
 
     return dt.strftime("%d %b %Y")
 
+# normalising repeated characters in text
 def reduce_lengthening(text):
     pattern = re.compile(r"(.)\1{2,}")
     return pattern.sub(r"\1\1", text)
 
+# cleaning and preprocessing text before passing to model
 def text_preprocess(doc: str):
     temp = doc.lower()
     temp = re.sub("@[A-Za-z0-9_]+", "", temp)
@@ -91,15 +89,14 @@ def text_preprocess(doc: str):
 
     return " ".join(tokens)
 
+# running sentiment model on list of texts
 def get_sentiment_labels(texts: List[str]):
     clean_texts = [text_preprocess(t) for t in texts]
 
     model_input = model_sess.get_inputs()[0].name
-
     inputs = np.array(clean_texts, dtype=object).reshape(-1, 1)
 
     outputs = model_sess.run(None, {model_input: inputs})
-
     predictions = outputs[0]
 
     result = []
@@ -110,12 +107,14 @@ def get_sentiment_labels(texts: List[str]):
             result.append(labels[int(pred)])
     return result
 
+# mapping sentiment labels to numeric scores
 SENTIMENT_SCORE = {
     "positive": 1,
     "neutral": 0,
     "negative": -1
 }
 
+# aggregating sentiment scores per stock
 def compute_stock_sentiment(articles, names: List[str] | None = None):
 
     stock_scores = {}
@@ -131,6 +130,7 @@ def compute_stock_sentiment(articles, names: List[str] | None = None):
 
     results = {}
 
+    # converting average score into final sentiment label
     for stock in stock_scores:
         avg_score = stock_scores[stock] / stock_counts[stock]
 
@@ -149,17 +149,18 @@ def compute_stock_sentiment(articles, names: List[str] | None = None):
 
     return results
 
+# fetching news articles and attaching sentiment predictions
 @router.post("/stock-news")
 def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
     api_key = os.getenv("FINNHUB_API_KEY") 
-    
     names = request.names
 
     if len(names) == 0:
         raise HTTPException(status_code=400, detail="No stock names provided")
 
     search_terms = [split_company_name(name) for name in names]
-    
+
+    # calculating date range for news query
     to_date = datetime.utcnow().date()
     if look_back_days <= 1:
         from_date = to_date
@@ -172,6 +173,7 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
     article_texts = []
     article_refs = []
 
+    # fetching company symbols and related news from api
     for i, search_term in enumerate(search_terms):
         try:
             search_resp = requests.get(
@@ -179,7 +181,6 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
                 params={"q": search_term, "token": api_key},
                 timeout=10,
             )
-            search_resp.raise_for_status()
             search_data = search_resp.json()
 
             results = search_data.get("result", [])
@@ -197,7 +198,6 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
                 },
                 timeout=10,
             )
-            news_resp.raise_for_status()
             articles = news_resp.json()
         except requests.RequestException:
             continue
@@ -205,6 +205,7 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
         if not isinstance(articles, list):
             continue
 
+        # filtering and collecting valid articles
         for article in articles:
             image = article.get("image")
             headline = article.get("headline", "")
@@ -222,7 +223,6 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
             seen_urls.add(url)
 
             text = headline + " " + summary
-
             article_texts.append(text)
 
             article_refs.append({
@@ -235,8 +235,9 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
                 "date": format_date(article.get("datetime")),
             })
 
+    # running sentiment model and attaching results
     linearsvm_sentiments = get_sentiment_labels(article_texts) if article_texts else []
-    
+
     for article, sentiment in zip(article_refs, linearsvm_sentiments):
         article["linearsvm_model"] = sentiment
         formatted_articles.append(article)
@@ -248,6 +249,7 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
         "articles": formatted_articles
     }
 
+# endpoint to summarise sentiment per stock
 @router.post("/stock-sentiment")
 def get_stock_sentiment(request: StockRequest):
 

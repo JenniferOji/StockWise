@@ -25,24 +25,31 @@ from sklearn.metrics import confusion_matrix
 nltk.download("punkt")
 nltk.download("wordnet")
 
-base_dir = Path(__file__).resolve().parents[1]
-news_sentiment_path = base_dir / "training_data" / "news_sentiment_data.csv"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+MODELS_DIR = os.path.join(BASE_DIR, "models")
 
+news_sentiment_path = os.path.join(BASE_DIR, "training_data", "news_sentiment_data.csv")
+
+# loading dataset and preparing training data
 df = pd.read_csv(news_sentiment_path, encoding="ISO-8859-1", low_memory=False)
 
 x = df.Headline.astype(str).values
 y = df.Sentiment.astype(str)
 
+# splitting data into training and testing sets
 x_train, x_test, y_train, y_test = train_test_split(
     x, y, test_size=0.3, random_state=0
 )
 
 lemm = WordNetLemmatizer()
 
+# reducing repeated characters to normalise informal text
 def reduce_lengthening(text):
     pattern = re.compile(r"(.)\1{2,}")
     return pattern.sub(r"\1\1", text)
 
+# cleaning and preprocessing text before feature extraction
 def text_preprocess(doc):
     temp = doc.lower()
     temp = re.sub("@[A-Za-z0-9_]+", "", temp)
@@ -58,11 +65,11 @@ def text_preprocess(doc):
 
     return " ".join(tokens)
 
+# applying preprocessing to training and test data
 x_train_clean = [text_preprocess(x) for x in x_train]
 x_test_clean = [text_preprocess(x) for x in x_test]
 
-# hybrid feature pipeline
-# hybrid feature pipeline
+# building feature extraction pipeline using ngrams and tfidf weighting
 features = Pipeline([
     ("vectorizer", CountVectorizer(
         analyzer="word",
@@ -75,7 +82,7 @@ features = Pipeline([
     ("tfidf", TfidfTransformer())
 ])
 
-# full training pipeline
+# combining feature extraction with linear svm classifier
 pipeline = Pipeline([
     ("features", features),
     ("clf", LinearSVC(
@@ -89,41 +96,43 @@ pipeline = Pipeline([
     ))
 ])
 
+# training the model
 pipeline.fit(x_train_clean, y_train)
 
+# evaluating model performance
 predictions = pipeline.predict(x_test_clean)
 
 print("accuracy:", accuracy_score(y_test, predictions))
 print(classification_report(y_test, predictions))
 
-
+# exporting trained model to onnx format for fast inference in api
 onnx_model = convert_sklearn(
     pipeline,
     initial_types=[("input", StringTensorType([None]))],
     options={id(pipeline.named_steps["clf"]): {"raw_scores": True}}
 )
 
-with open("svm_model.onnx", "wb") as f:
+# saving onnx model to disk for loading in api
+model_path = os.path.join(MODELS_DIR, "svm_model.onnx")
+
+with open(model_path, "wb") as f:
     f.write(onnx_model.SerializeToString())
 
-print("model training complete")
-print("svm exported to onnx (svm_model.onnx)")
-
+# generating confusion matrix to visualise performance
 labels = ["negative", "neutral", "positive"]
-
 cm = confusion_matrix(y_test, predictions, labels=labels)
 
 plt.figure(figsize=(6, 5))
 sns.heatmap(
     cm,
-    annot=True,           
-    fmt="d",               
-    cmap="Blues",          
+    annot=True,
+    fmt="d",
+    cmap="Blues",
     xticklabels=labels,
     yticklabels=labels,
     cbar=True
 )
-
+    
 plt.title("LinearSVC - Confusion Matrix")
 plt.xlabel("Predicted Label")
 plt.ylabel("True Label")

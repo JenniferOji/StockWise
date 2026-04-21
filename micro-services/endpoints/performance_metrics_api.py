@@ -5,15 +5,16 @@ import numpy as np
 import pandas as pd
 import os
 
+# setting up api router and loading dataset
 router = APIRouter()
- 
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
 
 df_features = pd.read_csv(FEATURES_PATH)
 feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
-# Pydantic models for request validation and type checking
+# request models for portfolio input
 class Stock(BaseModel):
 	symbol: str
 	shares: float
@@ -23,6 +24,7 @@ class PortfolioRequest(BaseModel):
 	stocks: List[Stock]
 	days: int = 365
 
+# response model for performance output
 class PerformanceMetricsResponse(BaseModel):
 	success: bool
 	metrics: dict
@@ -36,8 +38,11 @@ class PerformanceMetricsResponse(BaseModel):
 def root():
 	return {"message": "Performance metrics API"}
 
+# calculating portfolio performance metrics including returns and profit
 @router.post("/api/performance-metrics")
 def calculate_performance_metrics(portfolio_request: PortfolioRequest):
+
+	# converting request into usable portfolio dictionary
 	portfolio = {}
 	for stock in portfolio_request.stocks:
 		portfolio[stock.symbol] = {
@@ -51,6 +56,7 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 	price_returns = {}
 	profit_map = {}
 
+	# calculating returns and profit for each stock
 	for symbol, holding in portfolio.items():
 		features = feature_map.get(symbol)
 		if not features:
@@ -85,8 +91,8 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 
 	if not returns:
 		raise HTTPException(status_code=404, detail="No valid symbols in data")
-			
-	# calculating best and worst performer
+
+	# identifying best and worst performing stocks
 	best_performer_symbol = max(profit_map, key=profit_map.get)
 	worst_performer_symbol = min(profit_map, key=profit_map.get)
 
@@ -102,12 +108,12 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 		"return_pct": round(returns[worst_performer_symbol] * 100, 2)
 	}
 
-	# calculating the overall portfolio return 
+	# calculating total portfolio return and profit
 	total_invested = sum(holding['shares'] * holding['purchase_price'] for holding in portfolio.values())
 	overall_return = (total_value - total_invested) / total_invested if total_invested else 0
 	profit_loss = total_value - total_invested
 
-	# annualised return using the CAGR formula: https://www.investopedia.com/terms/c/cagr.asp
+	# calculating annualised return using cagr formula
 	n_years = portfolio_request.days / 365
 
 	if total_invested and n_years > 0:
@@ -117,6 +123,7 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 	else:
 		cagr = 0
 
+	# formatting final metrics output
 	metrics = {
 		"overall_return": f"{overall_return * 100:.2f}%",
 		"returns_by_symbol": {k: f"{v * 100:.2f}%" for k, v in returns.items()},

@@ -10,17 +10,16 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# load the stock data from the json file to get the tickers
+# loading stock data and preparing symbol list
 with open(os.path.join(BASE_DIR, "data", "stocks.json"), "r") as f:
     STOCK_DATA = json.load(f)
 
 RISK_FREE_RATE = 0.02
 
-# symbols = list(STOCK_DATA.keys())
-# yahoo finance uses - instead of . for symbols 
+# converting symbols to yahoo finance format
 symbols = [stock["symbol"].replace(".", "-") for stock in STOCK_DATA]
 
-# download 1 year of price data for all symbols
+# downloading historical price data and cleaning missing values
 prices = yf.download(symbols, period="1y", auto_adjust=True)["Close"]
 prices = prices.dropna(axis=1, how="all")
 prices.ffill(inplace=True)
@@ -29,18 +28,17 @@ latest_prices = prices.iloc[-1]
 
 returns = prices.pct_change().dropna()
 
-# annualised returns and variance
+# calculating annualised returns and variance
 annual_returns = returns.mean() * 252
 variances = returns.var() * 252
 
-
-# value at risk: looking at the worst 5% of daily returns for each stock
+# calculating value at risk for downside risk
 var_95 = {}
 for t in returns.columns:
     r = returns[t].dropna()
     var_95[t] = abs(np.percentile(r, 5)) * np.sqrt(252)
 
-# max drawdown: how far did the stock drop from its peak at its worst point
+# calculating maximum drawdown for each stock
 max_drawdowns = {}
 for t in returns.columns:
     r = returns[t]
@@ -48,14 +46,15 @@ for t in returns.columns:
     drawdown = (cumulative - cumulative.cummax()) / cumulative.cummax()
     max_drawdowns[t] = abs(drawdown.min())
 
+# computing volatility and sharpe ratio
 volatility = np.sqrt(variances)
 sharpe_ratios = np.where(
-    # assignign sharpe ratio of 0 to avoid stocks with 0 volatility 
     volatility == 0,
     0,
     (annual_returns - RISK_FREE_RATE) / volatility
 )
 
+# building feature dataset used for clustering
 df = pd.DataFrame({
     "symbol": variances.index,
     "returns": annual_returns.values,
@@ -66,30 +65,27 @@ df = pd.DataFrame({
     "close": [latest_prices.get(t, np.nan) for t in variances.index]
 })
 
-
-# log transform variance to reduce the skew caused by extreme outliers like meme stocks
+# transforming features to reduce skew and create clustering inputs
 df["log_variances"] = np.log1p(np.clip(df["variance"], 0, 2))
 df["volatility"] = np.sqrt(df["variance"])
-
-
 df.dropna(inplace=True)
 
-# these 3 features were chosen after testing all possible combinations - these gave best BIC and silhouette
+# selecting features used for clustering based on prior testing
 features = ["log_variances", "volatility", "var_95"]
-
 X = df[features].values
 
+# scaling features before applying gmm
 scaler = StandardScaler()
 Xs = scaler.fit_transform(X)
 
-# fitting the gmm model with 6 components 
+# fitting gaussian mixture model to cluster stocks by risk profile
 gmm = GaussianMixture(n_components=6, covariance_type="full", n_init=10, random_state=42, max_iter=500)
 gmm.fit(Xs)
 labels = gmm.predict(Xs)
 
 df["cluster_labels"] = labels
 
-# ranking each cluster by risk the higher volatility and var means higher risk
+# ranking clusters by risk using volatility and var
 cluster_risk_scores = {}
 for cluster_idx in range(6):
     cluster_data = df[df["cluster_labels"] == cluster_idx]
@@ -101,21 +97,23 @@ for cluster_idx in range(6):
         0.40 * cluster_data["var_95"].mean()
     )
 
-# sorting the clusters from the lowest to highest risk score and assign risk labels
+# assigning human readable risk labels to clusters
 sorted_clusters = sorted(cluster_risk_scores.items(), key=lambda x: x[1])
 
-risk_labels = ["Very Low Risk",
-                "Low Risk", 
-                "Moderate Risk", 
-                "High Risk", 
-                "Very High Risk", 
-                "Extreme Risk"]
+risk_labels = [
+    "Very Low Risk",
+    "Low Risk", 
+    "Moderate Risk", 
+    "High Risk", 
+    "Very High Risk", 
+    "Extreme Risk"
+]
 
 cluster_risk = {}
 for i, (cluster_idx, _) in enumerate(sorted_clusters):
     cluster_risk[cluster_idx] = risk_labels[i]
 
-# saving the files for API to use
+# saving processed data and trained models for api use
 prices.to_csv(os.path.join(BASE_DIR, "data", "prices.csv"))
 df.to_csv(os.path.join(BASE_DIR, "data", "features.csv"), index=False)
 
@@ -130,5 +128,3 @@ with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "wb") as
 
 with open(os.path.join(BASE_DIR, "models", "feature_columns.pkl"), "wb") as f:
     pickle.dump(features, f)
-
-print("Assets built")

@@ -10,22 +10,19 @@ headers = {
     "User-Agent": "Mozilla/5.0"
 }
 
+# fetching sp500 company list from wikipedia
 response = requests.get(url, headers=headers)
-
-# reading the first table from the wikipedia page which contains the list of S&P 500 companies
 html = StringIO(response.text)
-
 tables = pd.read_html(html)
-
 sp500 = tables[0]
 
 symbols = sp500["Symbol"].tolist()
 
 data = []
 stock_map = {}
-
 existing_symbols = set()
 
+# fetching stock metadata for sp500 companies
 for symbol in symbols[:200]:  
     try:
         symbol = symbol.replace(".", "-")
@@ -52,22 +49,19 @@ for symbol in symbols[:200]:
 
         existing_symbols.add(symbol)
 
-        print(f"Fetched {symbol}")
+    except Exception:
+        continue
 
-    except Exception as e:
-        print(f"Error with {symbol}: {e}")
-
-nasdaq_url = "https://en.wikipedia.org/wiki/Nasdaq-100"
-
+# fetching additional stocks from nasdaq 100
 response = requests.get(nasdaq_url, headers=headers)
 html = StringIO(response.text)
 tables = pd.read_html(html)
-
 nasdaq = tables[4]
-nasdaq_symbols = nasdaq["Ticker"].tolist()
 
+nasdaq_symbols = nasdaq["Ticker"].tolist()
 added = 0
 
+# adding additional unique stocks to diversify dataset
 for symbol in nasdaq_symbols:
     if added >= 50:
         break
@@ -101,18 +95,13 @@ for symbol in nasdaq_symbols:
         existing_symbols.add(symbol)
         added += 1
 
-        print(f"Fetched NASDAQ {symbol}")
+    except Exception:
+        continue
 
-    except Exception as e:
-        print(f"Error with NASDAQ {symbol}: {e}")
-
+# saving stock data for frontend and backend usage
 df = pd.DataFrame(data)
 
-# frontend file
 df.to_json("stocks.json", orient="records", indent=2)
 
-# backend lookup file
 with open("stock_data.json", "w") as f:
     json.dump(stock_map, f, indent=2)
-
-print("Done")

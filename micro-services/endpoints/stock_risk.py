@@ -8,6 +8,7 @@ import pickle
 import json
 import logging
 
+# setting up router and loading required datasets and models
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,7 @@ df_prices.columns = df_prices.columns.astype(str).str.strip().str.upper()
 with open(STOCK_META_PATH, "r") as f:
     STOCK_DATA = json.load(f)
 
+# building lookup for stock metadata
 STOCK_LOOKUP = {
     stock["symbol"].replace(".", "-").upper(): stock
     for stock in STOCK_DATA
@@ -49,6 +51,7 @@ STOCK_LOOKUP = {
 with open(CLUSTER_RISK_PATH, "rb") as f:
     CLUSTER_CATEGORY = pickle.load(f)
 
+# retrieving combined static and dynamic features for a stock
 def calculate_dynamic_features(symbol: str):
     symbol = str(symbol).strip().upper().replace(".", "-")
 
@@ -74,9 +77,11 @@ def calculate_dynamic_features(symbol: str):
         "sharpe": float(features["sharpe"]),
     }
 
+# mapping cluster label to human readable risk category
 def map_cluster_to_risk(cluster_label: int):
     return CLUSTER_CATEGORY.get(cluster_label, "Unknown")
 
+# calculating portfolio level risk metrics for simulation
 def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
     if not stocks:
         return None
@@ -93,6 +98,7 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
 
     holding_values = {}
 
+    # calculating portfolio weights from holdings
     for stock in stocks:
         symbol = str(stock.symbol).strip().upper().replace(".", "-")
 
@@ -127,6 +133,7 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
     if len(portfolio_symbols) == 0:
         return None
 
+    # computing returns and risk metrics for portfolio
     prices = prices[portfolio_symbols]
     returns = prices.pct_change().dropna()
 
@@ -159,6 +166,7 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
         "sharpe": round(portfolio_sharpe, 3),
     }
 
+# checking risk classification for a single stock
 @router.post("/api/check-stock-risk")
 def check_stock_risk(request: StockRiskCheckRequest):
     try:
@@ -168,9 +176,7 @@ def check_stock_risk(request: StockRiskCheckRequest):
             raise ValueError(f"Symbol '{symbol}' not found")
 
         stock_features = calculate_dynamic_features(symbol)
-
         cluster_label = int(stock_features["cluster_labels"])
-
         risk_label = map_cluster_to_risk(cluster_label)
 
         return {
@@ -192,6 +198,7 @@ def check_stock_risk(request: StockRiskCheckRequest):
         logger.warning("Stock risk validation failed for symbol '%s': %s", request.symbol, str(e))
         raise HTTPException(status_code=400, detail=str(e))
 
+# simulating impact of adding a new stock to portfolio
 @router.post("/api/simulate-stock")
 def simulate_stock(request: SimulateStockRequest):
     try:
@@ -210,6 +217,7 @@ def simulate_stock(request: SimulateStockRequest):
         if symbol not in STOCK_LOOKUP:
             raise HTTPException(status_code=400, detail=f"Symbol '{symbol}' not found")
 
+        # comparing before and after metrics to show impact
         return {
             "success": True,
             "symbol": symbol,

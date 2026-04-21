@@ -7,6 +7,7 @@ import numpy as np
 import pickle
 import pandas as pd
 
+# setting up api router and loading datasets
 router = APIRouter() 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -18,7 +19,7 @@ df_features = pd.read_csv(FEATURES_PATH)
 df_prices = pd.read_csv(PRICES_PATH, index_col=0, parse_dates=True)
 df_features.columns = df_features.columns.str.lower()
 
-# the cluster risk mapping is needed to assign the risk category to the stocks based on the predicted cluster label from the gmm model
+# loading cluster to risk mapping from trained model output
 CLUSTER_RISK_PATH = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
 with open(CLUSTER_RISK_PATH, "rb") as f:
     cluster_risk_mapping = pickle.load(f)
@@ -27,7 +28,7 @@ CLUSTER_CATEGORY = cluster_risk_mapping
 
 feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
-# pydantic models for request validation and type checking
+# request and response models for risk endpoints
 class Stock(BaseModel):
     symbol: str  
     shares: float 
@@ -56,6 +57,7 @@ class StockRiskCategoryResponse(BaseModel):
 def root():
     return {"message": "Risk metrics API"}
 
+# calculating overall portfolio risk metrics using historical price data
 @router.post("/api/risk-metrics")
 def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
     if len(portfolio_request.stocks) == 0:
@@ -65,6 +67,7 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
 
     prices = df_prices.copy()
 
+    # filtering available symbols and preparing price data
     available_symbols = [symbol for symbol in symbols if symbol in prices.columns]
 
     if len(available_symbols) == 0:
@@ -87,6 +90,7 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
     weights = {}
     portfolio_value = 0
 
+    # calculating portfolio weights based on current market value
     for stock in portfolio_request.stocks:
         symbol = stock.symbol.replace(".", "-")
 
@@ -109,6 +113,7 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
     if len(portfolio_symbols) == 0:
         raise HTTPException(status_code=404, detail="No return data for the tickers")
 
+    # computing portfolio level return series and risk metrics
     weights_array = np.array([weights[symbol] for symbol in portfolio_symbols])
     portfolio_returns = returns[portfolio_symbols].mul(weights_array, axis=1).sum(axis=1)
 
@@ -126,7 +131,8 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
         portfolio_sharpe = 0
     else:
         portfolio_sharpe = (portfolio_annual_return - risk_free_rate) / portfolio_volatility
-        
+
+    # converting metrics to percentage format for output
     portfolio_volatility *= 100
     portfolio_annual_return *= 100
     portfolio_max_drawdown *= 100
@@ -144,7 +150,7 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
         "portfolio_value": round(portfolio_value, 2)
     }
 
-# this endpoint gets the risk category for each stock in the portfolio based on the model
+# assigning each stock to a risk category using cluster mapping
 @router.post("/api/stock-risk-categories", response_model=StockRiskCategoryResponse)
 def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
 
@@ -167,19 +173,16 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
 
     cluster_counts = {}
 
-    # assigning the risk categegory for each stock 
+    # mapping each stock to its risk bucket using precomputed clusters
     for symbol in symbols:
 
         symbol = symbol.replace(".", "-")  
-
         features = feature_map.get(symbol)
 
         if not features:
             continue
 
-        # using the precomputed cluster label from the features CSV
         cluster_label = int(features["cluster_labels"])
-
         category = CLUSTER_CATEGORY.get(cluster_label, "Moderate Risk")
 
         cluster_counts[category] = cluster_counts.get(category, 0) + 1
@@ -195,15 +198,14 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
                 var_95=round(features["var_95"] * 100, 2),
             )
         )
-        
+
     total = sum(len(v) for v in categories.values())
 
+    # determining overall portfolio risk based on majority category
     if not cluster_counts:
         overall_risk = "Unknown"
     else:
         overall_risk = max(cluster_counts, key=cluster_counts.get)
-
-    print("API returning categories:", categories)
 
     return {
         "success": True,
