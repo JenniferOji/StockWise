@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
-const serverUrl = Platform.OS === 'web' ? 'http://localhost:8080' : 'http://172.18.0.3:8080'; // a device accessible IP for mobile
-// const serverUrl = process.env.EXPO_PUBLIC_API_URL ;
+// const serverUrl = Platform.OS === 'web' ? 'http://localhost:8080' : 'http://172.18.0.3:8080'; // a device accessible IP for mobile
+const serverUrl = process.env.EXPO_PUBLIC_API_URL ;
 
 const api = "/api";
 const users = "/users";
@@ -12,6 +12,7 @@ const usersEndpoint = serverUrl + api + users;
 const sessionsEndpoint = serverUrl + api + sessions;
 const portfoliosEndpoint = serverUrl + api + portfolios;
 const stocksEndpoint = serverUrl + api + stocks;
+
 
 export const endpoints = {
   register: usersEndpoint + "/",
