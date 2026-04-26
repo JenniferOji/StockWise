@@ -268,29 +268,107 @@ const styles = StyleSheet.create({
 	container: { paddingVertical: 8, paddingHorizontal: 16 },
 	subtitle: { fontSize: 12, color: '#64748b', marginBottom: 10 },
 
-	sideBySide: { flexDirection: 'row', gap: 16 },
+	sideBySide: { flexDirection: 'row', gap: 16, alignItems: 'flex-start' },
 	sideItem: { flex: 1 },
 
-	card: { backgroundColor: '#fff', borderRadius: 16, padding: 16 },
-	cardLabel: { fontSize: 11, fontWeight: '600', marginBottom: 4 },
+	card: { 
+		backgroundColor: '#fff', 
+		borderRadius: 16, 
+		padding: 16, 
+		borderWidth: 1, 
+		borderColor: '#e7edf5' 
+	},
+	cardLabel: { 
+		fontSize: 11, 
+		fontWeight: '600', 
+		color: '#94a3b8', 
+		textTransform: 'uppercase', 
+		letterSpacing: 0.7, 
+		marginBottom: 2 
+	},
 
-	chartArea: { alignItems: 'center' },
+	chartArea: { 
+		alignItems: 'center', 
+		justifyContent: 'center', 
+		paddingVertical: 8 
+	},
 
 	barRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-	barTrack: { flex: 1, height: 28, backgroundColor: '#f1f5f9', borderRadius: 6 },
-	barFill: { height: '100%' },
-	barValue: { width: 44, fontSize: 11, textAlign: 'right' },
+	barTrack: { 
+		flex: 1, 
+		height: 28, 
+		backgroundColor: '#f1f5f9', 
+		borderRadius: 6, 
+		overflow: 'hidden' 
+	},
+	barFill: { height: '100%', borderRadius: 6 },
+	barValue: { 
+		width: 44, 
+		fontSize: 11, 
+		fontWeight: '600', 
+		color: '#64748b', 
+		textAlign: 'right', 
+		marginLeft: 4 
+	},
 
-	dotsRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 10 },
-	pageDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#cbd5e1' },
-	pageDotActive: { width: 18, backgroundColor: '#2563eb' },
+	dotsRow: { 
+		flexDirection: 'row', 
+		justifyContent: 'center', 
+		alignItems: 'center', 
+		gap: 6, 
+		marginTop: 10 
+	},
+	pageDot: { 
+		width: 6, 
+		height: 6, 
+		borderRadius: 3, 
+		backgroundColor: '#cbd5e1' 
+	},
+	pageDotActive: { 
+		width: 18, 
+		backgroundColor: '#2563eb' 
+	},
 
-	detailsCard: { marginTop: 10, padding: 14, backgroundColor: '#f8fafc' },
-	detailsTitle: { fontSize: 15, fontWeight: '700' },
-	detailsSubtitle: { fontSize: 12, marginBottom: 10 },
+	detailsCard: { 
+		marginTop: 10, 
+		backgroundColor: '#f8fafc', 
+		borderRadius: 14, 
+		padding: 14, 
+		borderWidth: 1, 
+		borderColor: '#e7edf5' 
+	},
+	detailsTitle: { 
+		fontSize: 15, 
+		fontWeight: '700', 
+		color: '#0f172a' 
+	},
+	detailsSubtitle: { 
+		fontSize: 12, 
+		color: '#64748b', 
+		marginBottom: 10 
+	},
 
-	stockRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8 },
-	stockSymbol: { fontWeight: '700' },
-	stockCompany: { fontSize: 11, color: '#64748b' },
-	stockShares: { fontSize: 12 },
+	stockRow: { 
+		flexDirection: 'row', 
+		justifyContent: 'space-between', 
+		alignItems: 'center', 
+		paddingVertical: 8, 
+		borderBottomWidth: 1, 
+		borderBottomColor: '#eef2f7' 
+	},
+	stockSymbol: { 
+		fontWeight: '700', 
+		color: '#0f172a', 
+		fontSize: 13 
+	},
+	stockCompany: { 
+		fontSize: 11, 
+		color: '#64748b', 
+		marginTop: 1 
+	},
+	stockShares: { 
+		fontSize: 12, 
+		fontWeight: '600', 
+		color: '#475569' 
+	},
 });

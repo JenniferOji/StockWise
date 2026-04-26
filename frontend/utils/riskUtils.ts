@@ -32,7 +32,7 @@ export function getActiveBand(label: string, rawValue: string, riskPref: string)
 }
 
 // builds explanation text for each metric card
-export function getMetricInsight(label: string, rawValue: string, riskPref: string): { what: string; score: string; tip: string } {
+export function getMetricInsight(label: string, rawValue: string, riskPref: string): { what: string; score: string; } {
 	const value = parseFloat(rawValue)
 	const band = getActiveBand(label, rawValue, riskPref)
 
@@ -63,16 +63,8 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 		}
 
 		const score = scoreMap[riskPref][band.label]
-		// decides when to show a follow up action tip
-		const showTip =
-			(riskPref === 'Low Risk' && band.label !== 'Good') ||
-			(riskPref === 'Moderate Risk' && (band.label === 'High' || band.label === 'Severe')) ||
-			(riskPref === 'High Risk' && band.label === 'Extreme')
-		const tip = showTip
-			? 'In the Stock Risk Categories below, try filtering by "High Volatility" to see which of your stocks are driving this score.'
-			: ''
 
-		return { what, score, tip }
+		return { what, score }
 	}
 
 	// handles sharpe ratio explanations and tips
@@ -102,13 +94,8 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 		}
 
 		const score = scoreMap[riskPref][band.label]
-		// tip appears when sharpe is weak
-		const showTip = band.label === 'Poor' || band.label === 'Fair'
-		const tip = showTip
-			? 'In the Stock Risk Categories below, filter by "High Returns" to see which stocks are earning the most and consider whether your high-risk holdings justify their place.'
-			: ''
 
-		return { what, score, tip }
+		return { what, score }
 	}
 
 	// handles max drawdown explanations and tips
@@ -138,13 +125,8 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 		}
 
 		const score = scoreMap[riskPref][band.label]
-		// tip appears when drawdown is outside safe range
-		const showTip = band.label !== 'Good' && band.label !== 'Expected'
-		const tip = showTip
-			? 'In the Stock Risk Categories below, filter by "High Drawdown" to see which of your stocks have had the biggest historical drops.'
-			: ''
-
-		return { what, score, tip }
+		
+		return { what, score }
 	}
 
 	// handles var explanations and tips
@@ -174,15 +156,9 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 		}
 
 		const score = scoreMap[riskPref][band.label]
-		// tip appears when daily risk is elevated
-		const showTip = band.label !== 'Good' && band.label !== 'Expected'
-		const tip = showTip
-			? 'In the Stock Risk Categories below, filter by "High Volatility" to identify the stocks most likely contributing to your day-to-day risk.'
-			: ''
-
-		return { what, score, tip }
+		return { what, score }
 	}
 
 	// default empty response for unsupported labels
-	return { what: '', score: '', tip: '' }
+	return { what: '', score: '' }
 }
