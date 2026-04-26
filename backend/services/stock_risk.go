@@ -46,7 +46,7 @@ func CheckStockRisk(symbol string) (*StockRiskCheckResponse, error) {
 		return nil, fmt.Errorf("ML_API_URL not set")
 	}
 
-	// build request payload
+	// build the request
 	requestBody := StockRiskCheckRequest{
 		Symbol: symbol,
 	}
@@ -56,7 +56,7 @@ func CheckStockRisk(symbol string) (*StockRiskCheckResponse, error) {
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	// call ml service
+	// call the ml service
 	url := mlApiUrl + endpoint
 
 	resp, err := http.Post(
@@ -69,13 +69,13 @@ func CheckStockRisk(symbol string) (*StockRiskCheckResponse, error) {
 	}
 	defer resp.Body.Close()
 
-	// read response body
+	// read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response: %w", err)
 	}
 
-	// pass back upstream error details
+	// pass the error details
 	if resp.StatusCode >= 400 {
 		return nil, &UpstreamHTTPError{
 			StatusCode: resp.StatusCode,
@@ -83,7 +83,7 @@ func CheckStockRisk(symbol string) (*StockRiskCheckResponse, error) {
 		}
 	}
 
-	// parse json response
+	// parse the json response
 	var stockRiskResp StockRiskCheckResponse
 	if err := json.Unmarshal(body, &stockRiskResp); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)

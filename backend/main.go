@@ -32,6 +32,7 @@ func main() {
 
 	app.Validator = validator.New()
 
+	// define routes
 	users := app.Party("/api/users")
 	{
 		users.Post("", routes.Register)
@@ -43,11 +44,13 @@ func main() {
 		users.Patch("/{userId:uint}/risk-preference", routes.UpdateRisk)
 	}
 
+	// session related routes
 	sessions := app.Party("/api/sessions")
 	{
 		sessions.Post("", routes.Login)
 	}
 
+	// portfolio related routes
 	portfolios := app.Party("/api/portfolios")
 	{
 		portfolios.Post("/risk-metrics", routes.GetRiskMetrics)
@@ -58,6 +61,7 @@ func main() {
 		portfolios.Post("/simulations", routes.SimulateStock)
 	}
 
+	// stock related routes
 	stocks := app.Party("/api/stocks")
 	{
 		stocks.Get("/{symbol:string}/news", routes.GetStockNews)

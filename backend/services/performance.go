@@ -88,7 +88,7 @@ func CalculatePerformanceMetrics(req PerformanceMetricsRequest) (*PerformanceMet
 		return nil, fmt.Errorf("performance metrics service error: %s", string(body))
 	}
 
-	// parse json response
+	// parse the json response
 	var result PerformanceMetricsResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, err

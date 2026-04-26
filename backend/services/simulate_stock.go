@@ -47,7 +47,7 @@ func SimulateStock(symbol string, quantity float64, current []PortfolioStock) (*
 		return nil, fmt.Errorf("ML_API_URL not set")
 	}
 
-	// build request payload
+	// build the request from the parameters
 	requestBody := SimulateStockRequest{
 		CurrentStocks: current,
 		NewStock: PortfolioStock{
@@ -61,7 +61,7 @@ func SimulateStock(symbol string, quantity float64, current []PortfolioStock) (*
 		return nil, fmt.Errorf("failed to marshal request: %w", err)
 	}
 
-	// call ml service
+	// call the ml service
 	url := mlApiUrl + endpoint
 
 	resp, err := http.Post(
@@ -74,13 +74,13 @@ func SimulateStock(symbol string, quantity float64, current []PortfolioStock) (*
 	}
 	defer resp.Body.Close()
 
-	// read response body
+	// read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response: %w", err)
 	}
 
-	// pass back upstream error details
+	// pass back error details
 	if resp.StatusCode >= 400 {
 		return nil, &UpstreamHTTPError{
 			StatusCode: resp.StatusCode,
@@ -88,7 +88,7 @@ func SimulateStock(symbol string, quantity float64, current []PortfolioStock) (*
 		}
 	}
 
-	// parse json response
+	// parse the json response
 	var result SimulateStockResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)

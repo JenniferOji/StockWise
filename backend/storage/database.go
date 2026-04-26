@@ -12,13 +12,8 @@ import (
 
 var DB *gorm.DB
 
-// connectToDatabase opens a connection and returns the *gorm.DB so callers can use it
+// opens a connection to the db
 func connectToDatabase() *gorm.DB {
-	// err := godotenv.Load()
-	// // if there is an error loading .env file raise a panic
-	// if err != nil {
-	// 	panic("Error loading .env file")
-	// }
 
 	_ = godotenv.Load()
 
@@ -41,7 +36,7 @@ func connectToDatabase() *gorm.DB {
 
 // takes in a database connection and performs auto migrations which is creating tables based on models
 func performMigrations(db *gorm.DB) {
-	// auto migrate the User model to create/update the users table
+	// auto migrate the User model to create or update the users table
 	db.AutoMigrate(
 		&models.Users{},
 		&models.Stock{},

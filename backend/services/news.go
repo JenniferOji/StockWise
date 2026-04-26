@@ -124,14 +124,14 @@ func GetStockSentiment(req NewsRequest) (map[string]StockSentiment, int, []byte,
 	}
 	defer resp.Body.Close()
 
-	// read response body
+	// read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, http.StatusInternalServerError, nil, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, resp.StatusCode, body, fmt.Errorf("upstream sentiment service returned %d", resp.StatusCode)
+		return nil, resp.StatusCode, body, fmt.Errorf("sentiment service returned %d", resp.StatusCode)
 	}
 
 	// parse json response

@@ -32,6 +32,7 @@ func GetRiskMetrics(ctx iris.Context) {
 	ctx.JSON(result)
 }
 
+// handles the stock risk categories request
 func GetStockRiskCategories(ctx iris.Context) {
 	// read request body
 	var req services.StockRiskCategoriesRequest
@@ -41,14 +42,14 @@ func GetStockRiskCategories(ctx iris.Context) {
 		return
 	}
 
-	// check stock list is present
+	// check that the stock list is present
 	if req.Stocks == nil || len(req.Stocks) == 0 {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.JSON(iris.Map{"error": "No stocks provided"})
 		return
 	}
 
-	// run category mapping in service layer
+	// run the stock risk categories calculation in service layer
 	result, err := services.CalculateStockRiskCategories(req.Stocks)
 	if err != nil {
 		ctx.StatusCode(iris.StatusInternalServerError)

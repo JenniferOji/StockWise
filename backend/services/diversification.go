@@ -68,7 +68,7 @@ func GetDiversificationSuggestions(req DiversificationRequest) (*Diversification
 		return nil, fmt.Errorf("ML_API_URL not set")
 	}
 
-	// build request payload
+	// building the request 
 	reqBody, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func GetDiversificationSuggestions(req DiversificationRequest) (*Diversification
 	}
 	defer resp.Body.Close()
 
-	// read response body
+	// read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -110,13 +110,13 @@ func GetRandomSuggestions(req DiversificationRequest) (*RandomSuggestionResponse
 		return nil, fmt.Errorf("ML_API_URL not set")
 	}
 
-	// build request payload
+	// build the request payload
 	reqBody, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
 
-	// call ml service
+	// call the ml service
 	url := mlApiUrl + endpoint
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(reqBody))
 	if err != nil {
@@ -124,7 +124,7 @@ func GetRandomSuggestions(req DiversificationRequest) (*RandomSuggestionResponse
 	}
 	defer resp.Body.Close()
 
-	// read response body
+	// read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -134,7 +134,7 @@ func GetRandomSuggestions(req DiversificationRequest) (*RandomSuggestionResponse
 		return nil, fmt.Errorf("random suggestions service error: %s", string(body))
 	}
 
-	// parse json response
+	// parse the json response
 	var result RandomSuggestionResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, err

@@ -20,14 +20,14 @@ func SimulateStock(ctx iris.Context) {
 		return
 	}
 
-	// validate required symbol
+	// validate a stock symbol is provided
 	if req.NewStock.Symbol == "" {
 		ctx.StatusCode(iris.StatusBadRequest)
 		ctx.JSON(iris.Map{"detail": "Symbol is required"})
 		return
 	}
 
-	// normalise optional quantity
+	// the default quantity is 0 if none is provided
 	quantity := 0.0
 	if req.NewStock.Quantity != nil {
 		quantity = *req.NewStock.Quantity

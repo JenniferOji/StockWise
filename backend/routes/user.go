@@ -121,15 +121,9 @@ func Login(ctx iris.Context) {
 		return
 	}
 
-	// reject unknown users
+	// rejecting unkown accounts 
 	if userExists == false {
 		utils.CreateError(iris.StatusUnauthorized, "Credentials Error", errMsg, ctx)
-		return
-	}
-
-	// reject password login for social accounts
-	if existingUser.SocialLogin == true {
-		utils.CreateError(iris.StatusUnauthorized, "Credentials Error", "Social Login account.", ctx)
 		return
 	}
 
@@ -192,7 +186,7 @@ func AddStock(ctx iris.Context) {
 
 	stockInput.UserID = uint(userID)
 
-	// normalize and validate symbol
+	// validating the symbol input
 	capitalSymbol := strings.ToUpper(strings.TrimSpace(stockInput.Symbol))
 	if capitalSymbol == "" {
 		utils.CreateError(iris.StatusBadRequest, "Bad Request", "Stock symbol is required", ctx)
@@ -354,7 +348,7 @@ func UpdateRisk(ctx iris.Context) {
 		return
 	}
 
-	// load user and apply new risk value
+	// load the user and apply the new risk value
 	var user models.Users
 	result := storage.DB.First(&user, uint(userID))
 	if result.Error != nil {

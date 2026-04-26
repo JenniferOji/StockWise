@@ -56,7 +56,7 @@ func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
 		return nil, fmt.Errorf("ML_API_URL not set")
 	}
 
-	// build request payload
+	// build the request 
 	requestBody := RiskMetricsRequest{
 		Stocks: stocks,
 	}
@@ -85,7 +85,7 @@ func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
 		return nil, err
 	}
 
-	// handle upstream errors
+	// handle errors
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("risk metrics service error: %s", string(body))
 	}
@@ -101,7 +101,7 @@ func CalculateRiskMetrics(stocks []Stock) (*RiskMetricsResponse, error) {
 
 // calls stock risk categories endpoint
 func CalculateStockRiskCategories(stocks []Stock) (*StockRiskCategoriesResponse, error) {
-	// build request payload
+	// build the request payload
 	requestBody := StockRiskCategoriesRequest{
 		Stocks: stocks,
 	}
@@ -111,7 +111,7 @@ func CalculateStockRiskCategories(stocks []Stock) (*StockRiskCategoriesResponse,
 		return nil, err
 	}
 
-	// get ml service url
+	// get the ml service url
 	mlApiUrl := os.Getenv("ML_API_URL")
 	endpoint := "/api/stock-risk-categories"
 
@@ -119,7 +119,7 @@ func CalculateStockRiskCategories(stocks []Stock) (*StockRiskCategoriesResponse,
 		return nil, fmt.Errorf("ML_API_URL not set")
 	}
 
-	// call ml service
+	// call the ml service
 	url := mlApiUrl + endpoint
 
 	resp, err := http.Post(
@@ -132,7 +132,7 @@ func CalculateStockRiskCategories(stocks []Stock) (*StockRiskCategoriesResponse,
 	}
 	defer resp.Body.Close()
 
-	// read response body
+	// read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -142,7 +142,7 @@ func CalculateStockRiskCategories(stocks []Stock) (*StockRiskCategoriesResponse,
 		return nil, fmt.Errorf("stock risk categories service error: %s", string(body))
 	}
 
-	// parse json response
+	// parse the json response
 	var result StockRiskCategoriesResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, err

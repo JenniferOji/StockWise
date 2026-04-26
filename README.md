@@ -2,6 +2,8 @@
 
 Stock Wise is a portfolio analytics application designed to help retail investors better understand their investments. It focuses on risk analysis, diversification, and performance insights using a combination of financial metrics and machine learning.
 
+Screencast: [SharePoint video](https://atlantictu-my.sharepoint.com/:v:/g/personal/g00413791_atu_ie/IQBp8Dg70NoFSKE-GPQO3yASAWbmH8ZopOPoNubV4TIc58o?e=qva7d4)
+
 ---
 
 ## Project Overview
