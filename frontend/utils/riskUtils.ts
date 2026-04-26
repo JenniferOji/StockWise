@@ -102,30 +102,28 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 	if (label === 'Max Drawdown') {
 		const what = 'Max Drawdown shows the largest drop your portfolio has experienced from its highest point to its lowest. Think of it as the worst-case loss you have seen during a bad stretch in the market.'
 
-		// messages based on risk preference and band
 		const scoreMap: Record<string, Record<string, string>> = {
 			'Low Risk': {
-				Good: `Your score of ${value}% is low. Your portfolio has weathered market dips well, which is exactly what a low-risk strategy should do.`,
+				Low: `Your score of ${value}% is low. Your portfolio has weathered market dips well, which is exactly what a low-risk strategy should do.`,
 				Moderate: `Your score of ${value}% means you have had some notable dips. For a low-risk investor, this is starting to push the boundaries of what is comfortable.`,
 				High: `Your score of ${value}% is high for a low-risk portfolio. You have experienced significant losses at some point, which may not align with your risk comfort.`,
-				Severe: `Your score of ${value}% is severe. A low-risk investor should not be experiencing drops of this magnitude. This warrants a review of your holdings.`,
+				Extreme: `Your score of ${value}% is extreme. A low-risk investor should not be experiencing drops of this magnitude. This warrants a review of your holdings.`,
 			},
 			'Moderate Risk': {
-				Good: `Your score of ${value}% is healthy. Your portfolio has avoided major crashes, which is a good sign for a balanced strategy.`,
+				Low: `Your score of ${value}% is healthy. Your portfolio has avoided major crashes, which is a good sign for a balanced strategy.`,
 				Moderate: `Your score of ${value}% is acceptable for a moderate-risk investor. Meaningful drops have occurred but within a manageable range.`,
 				High: `Your score of ${value}% is on the high side. You have seen substantial losses at some point that may be worth addressing.`,
-				Severe: `Your score of ${value}% is severe. Even for a moderate-risk portfolio, this level of loss from peak is significant.`,
+				Extreme: `Your score of ${value}% is extreme. Even for a moderate-risk portfolio, this level of loss from peak is significant.`,
 			},
 			'High Risk': {
-				Expected: `Your score of ${value}% is within the expected range for a high-risk investor. Larger drawdowns are a natural part of aggressive investing.`,
-				Elevated: `Your score of ${value}% is elevated but not unusual for high-risk strategies during volatile periods. Ensure you are comfortable holding through large dips.`,
+				Low: `Your score of ${value}% is within the expected range for a high-risk investor. Larger drawdowns are a natural part of aggressive investing.`,
+				Moderate: `Your score of ${value}% is elevated but not unusual for high-risk strategies during volatile periods. Ensure you are comfortable holding through large dips.`,
 				High: `Your score of ${value}% is high even for an aggressive portfolio. Consider whether concentration in a few volatile positions is increasing your downside exposure.`,
 				Extreme: `Your score of ${value}% is extreme. Even for a high-risk investor, this level of drawdown suggests significant concentration risk or heavy exposure to very volatile assets.`,
 			},
 		}
 
 		const score = scoreMap[riskPref][band.label]
-		
 		return { what, score }
 	}
 
@@ -133,23 +131,22 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 	if (label === 'VaR (95%)') {
 		const what = 'Value at Risk (VaR) estimates the maximum amount you could expect to lose on a bad day. In simple terms: on 95% of days your losses should stay below this number.'
 
-		// messages based on risk preference and band
 		const scoreMap: Record<string, Record<string, string>> = {
 			'Low Risk': {
-				Good: `Your score of ${value}% is low. On a bad day, your losses are well-contained. This is great for a low-risk portfolio.`,
+				Low: `Your score of ${value}% is low. On a bad day, your losses are well-contained. This is great for a low-risk portfolio.`,
 				Moderate: `Your score of ${value}% is moderate. On rough market days, you could see losses around this level, which is slightly above ideal for a conservative investor.`,
 				High: `Your score of ${value}% is high for a low-risk investor. Your daily downside exposure is greater than it should be for your profile.`,
-				Severe: `Your score of ${value}% is severe. A low-risk portfolio should not have this level of potential daily loss. Consider reviewing your most volatile holdings.`,
+				Extreme: `Your score of ${value}% is extreme. A low-risk portfolio should not have this level of potential daily loss. Consider reviewing your most volatile holdings.`,
 			},
 			'Moderate Risk': {
-				Good: `Your score of ${value}% is low. Your portfolio is well-protected against short-term market shocks.`,
+				Low: `Your score of ${value}% is low. Your portfolio is well-protected against short-term market shocks.`,
 				Moderate: `Your score of ${value}% is moderate. On a difficult day, you could see losses around this level, which is normal for a balanced portfolio.`,
 				High: `Your score of ${value}% is high. Your portfolio has meaningful exposure to short-term market swings.`,
-				Severe: `Your score of ${value}% is severe. You are carrying significant daily risk that may be worth reducing.`,
+				Extreme: `Your score of ${value}% is extreme. You are carrying significant daily risk that may be worth reducing.`,
 			},
 			'High Risk': {
-				Expected: `Your score of ${value}% is within the expected range for a high-risk investor. Higher daily risk is a trade-off that comes with pursuing stronger long-term returns.`,
-				Elevated: `Your score of ${value}% is elevated, even for a high-risk strategy. Ensure this level of potential daily loss is something you can stomach.`,
+				Low: `Your score of ${value}% is within the expected range for a high-risk investor. Higher daily risk is a trade-off that comes with pursuing stronger long-term returns.`,
+				Moderate: `Your score of ${value}% is elevated, even for a high-risk strategy. Ensure this level of potential daily loss is something you can stomach.`,
 				High: `Your score of ${value}% is high even by aggressive standards. Your portfolio is significantly exposed to short-term swings.`,
 				Extreme: `Your score of ${value}% is extreme. Even high-risk portfolios rarely reach this level. This may indicate heavy concentration in a few very volatile positions.`,
 			},
