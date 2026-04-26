@@ -9,11 +9,11 @@ import warnings
 import os
 warnings.filterwarnings("ignore")
 
-# setting up directories for saving data and trained models
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 MODELS_DIR = os.path.join(BASE_DIR, "models")
 
+# defining the stock universe across different the speculated risk categories for clustering diversity
 sp500_large_cap = [
     "AAPL","MSFT","AMZN","GOOGL","GOOG","META","NVDA","TSLA","BRK-B","JPM",
     "V","UNH","JNJ","WMT","PG","MA","HD","BAC","PFE","DIS",
@@ -23,16 +23,16 @@ sp500_large_cap = [
 ]
 
 nasdaq_growth = [
-    "NVDA","TSLA","AMD","ADBE","CRM","ORCL","INTC","QCOM","TXN","AVGO",
-    "AMZN","GOOGL","META","NFLX","SHOP","PYPL","SNOW","MDB","CRWD",
-    "NET","ZS","OKTA","ROKU","TWLO","UBER","LYFT","DASH","PLTR","COIN"
+    "AMD","SHOP","PYPL","SNOW","MDB","CRWD","NET","ZS","OKTA","ROKU",
+    "TWLO","UBER","LYFT","DASH","PLTR","COIN","DDOG","PANW","FTNT","TEAM",
+    "SMCI","ANET","CDNS","SNPS","MU","ARM","APP","AFRM","TTD"
 ]
 
 defensive_stocks = [
-    "KO","PEP","PG","WMT","COST",
     "CL","KMB","MDLZ","HSY","KHC",
-    "DUK","SO","NEE","AEP","ED",
-    "EXC","XEL","D","WEC","SRE"
+    "DUK","SO","AEP","ED","EXC",
+    "XEL","D","WEC","SRE","GIS",
+    "CAG","SJM","KR","CPB","MO"
 ]
 
 speculative_stocks = [
@@ -46,7 +46,6 @@ speculative_stocks = [
     "HOOD","DKNG","SKLZ"
 ]
 
-# defining stock universe across different categories for better clustering diversity
 tickers = list(set(
     sp500_large_cap +
     nasdaq_growth +
@@ -54,7 +53,7 @@ tickers = list(set(
     speculative_stocks
 ))
 
-# downloading historical price data and cleaning missing values
+# downloading the historical price data and cleaning missing values
 stocks_histories = yf.download(tickers, period="1y", auto_adjust=True)['Close']
 stocks_histories = stocks_histories.dropna(axis=1, how='all')
 stocks_histories = stocks_histories.ffill().bfill()
@@ -103,6 +102,7 @@ covariance_types = ['full', 'tied', 'diag', 'spherical']
 for cov_type in covariance_types:
     for n in range(3, 8):
         try:
+            # fitting the gmm model and predicting cluster labels
             gmm = GaussianMixture(
                 n_components=n,
                 covariance_type=cov_type,
@@ -112,11 +112,6 @@ for cov_type in covariance_types:
             )
             gmm.fit(Xs)
             labels = gmm.predict(Xs)
-
-            # skipping weak cluster configurations
-            unique, counts = np.unique(labels, return_counts=True)
-            if len(unique) < n or any(counts < 3):
-                continue
 
             bic = gmm.bic(Xs)
 
@@ -128,24 +123,14 @@ for cov_type in covariance_types:
         except Exception:
             continue
 
-# fallback model if no valid clustering found
-if best_gmm is None:
-    best_gmm = GaussianMixture(
-        n_components=5,
-        covariance_type='full',
-        n_init=10,
-        random_state=42,
-        max_iter=500
-    )
-    best_gmm.fit(Xs)
-    best_labels = best_gmm.predict(Xs)
 
 df2['Cluster_labels'] = best_labels
 n_components = best_gmm.n_components
 
-# ranking clusters by risk using volatility and downside risk
+
 cluster_risk_scores = {}
 
+# calculating the composite risk score for each cluster based on volatility and value at risk
 for cluster_idx in range(n_components):
     cluster_data = df2[df2['Cluster_labels'] == cluster_idx]
 
@@ -161,7 +146,6 @@ for cluster_idx in range(n_components):
 
 sorted_clusters = sorted(cluster_risk_scores.items(), key=lambda x: x[1])
 
-# assigning human readable risk labels to clusters
 risk_labels = [
     "Very Low Risk",
     "Low Risk",
@@ -172,13 +156,13 @@ risk_labels = [
 ]
 
 cluster_risk = {}
+
+# mapping the clusters to the risk categories based on their composite risk scores
 for i, (cluster_idx, _) in enumerate(sorted_clusters):
     cluster_risk[cluster_idx] = risk_labels[i]
 
-# evaluating clustering quality
+# evaluating the quality of the clustering 
 final_sil = silhouette_score(Xs, best_labels)
-db_score = davies_bouldin_score(Xs, best_labels)
-ch_score = calinski_harabasz_score(Xs, best_labels)
 
 # saving processed features and trained models
 df2.to_csv(os.path.join(DATA_DIR, "features.csv"), index=False)

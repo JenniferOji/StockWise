@@ -17,7 +17,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 df_features = load_features()
 feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
-# request models for portfolio input
 class Stock(BaseModel):
 	symbol: str
 	shares: float
@@ -27,7 +26,6 @@ class PortfolioRequest(BaseModel):
 	stocks: List[Stock]
 	days: int = 365
 
-# response model for performance output
 class PerformanceMetricsResponse(BaseModel):
 	success: bool
 	metrics: dict
@@ -41,11 +39,11 @@ class PerformanceMetricsResponse(BaseModel):
 def root():
 	return {"message": "Performance metrics API"}
 
-# calculating portfolio performance metrics including returns and profit
+# calculating returns and profit 
 @router.post("/api/performance-metrics")
 def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 
-	# converting request into usable portfolio dictionary
+	# building portfolio from the request 
 	portfolio = {}
 	for stock in portfolio_request.stocks:
 		portfolio[stock.symbol] = {
@@ -95,7 +93,7 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 	if not returns:
 		raise HTTPException(status_code=404, detail="No valid symbols in data")
 
-	# identifying best and worst performing stocks
+	# identifying the best and worst performing stocks
 	best_performer_symbol = max(profit_map, key=profit_map.get)
 	worst_performer_symbol = min(profit_map, key=profit_map.get)
 
@@ -111,22 +109,20 @@ def calculate_performance_metrics(portfolio_request: PortfolioRequest):
 		"return_pct": round(returns[worst_performer_symbol] * 100, 2)
 	}
 
-	# calculating total portfolio return and profit
-	total_invested = sum(holding['shares'] * holding['purchase_price'] for holding in portfolio.values())
-	overall_return = (total_value - total_invested) / total_invested if total_invested else 0
+	# calculating the total portfolio return and profit
+	total_invested = 0
+	for holding in portfolio.values():
+		invested_for_stock = holding["shares"] * holding["purchase_price"]
+		total_invested += invested_for_stock
+
+	if total_invested == 0:
+		overall_return = 0
+	else:
+		overall_return = (total_value - total_invested) / total_invested
+
 	profit_loss = total_value - total_invested
 
-	# calculating annualised return using cagr formula
-	n_years = portfolio_request.days / 365
-
-	if total_invested and n_years > 0:
-		growth_factor = total_value / total_invested
-		annual_growth_rate = 1 / n_years
-		cagr = (growth_factor ** annual_growth_rate) - 1
-	else:
-		cagr = 0
-
-	# formatting final metrics output
+	# creating the final performance metrics output
 	metrics = {
 		"overall_return": f"{overall_return * 100:.2f}%",
 		"returns_by_symbol": {k: f"{v * 100:.2f}%" for k, v in returns.items()},

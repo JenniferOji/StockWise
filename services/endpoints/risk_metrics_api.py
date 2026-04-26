@@ -10,7 +10,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from db import load_features, load_prices, load_cluster_risk
 
-# setting up api router and loading datasets
 router = APIRouter() 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,7 +22,6 @@ CLUSTER_CATEGORY = cluster_risk_mapping
 
 feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
-# request and response models for risk endpoints
 class Stock(BaseModel):
     symbol: str  
     shares: float 
@@ -52,7 +50,7 @@ class StockRiskCategoryResponse(BaseModel):
 def root():
     return {"message": "Risk metrics API"}
 
-# calculating overall portfolio risk metrics using historical price data
+# calculating the overall portfolio risk metrics using historical price data
 @router.post("/api/risk-metrics")
 def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
     if len(portfolio_request.stocks) == 0:
@@ -62,12 +60,18 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
 
     prices = df_prices.copy()
 
-    # filtering available symbols and preparing price data
-    available_symbols = [symbol for symbol in symbols if symbol in prices.columns]
+    # keeping only the prices of symbols the user actually selected 
+    available_symbols = []
+
+    for symbol in symbols:
+        if symbol in prices.columns:
+            available_symbols.append(symbol)
+            
 
     if len(available_symbols) == 0:
         raise HTTPException(status_code=404, detail="No data for the tickers")
 
+    # handling missing price data 
     prices = prices[available_symbols]
     prices = prices.dropna(axis=1, how="all")
     prices.ffill(inplace=True)
@@ -85,7 +89,7 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
     weights = {}
     portfolio_value = 0
 
-    # calculating portfolio weights based on current market value
+    # calculating the portfolio weights based on its current market value
     for stock in portfolio_request.stocks:
         symbol = stock.symbol.replace(".", "-")
 
@@ -103,18 +107,26 @@ def calculate_portfolio_risk_metrics(portfolio_request: PortfolioRequest):
     for symbol in weights:
         weights[symbol] = weights[symbol] / portfolio_value
 
-    portfolio_symbols = [symbol for symbol in weights.keys() if symbol in returns.columns]
+    portfolio_symbols = []
+
+    for symbol in weights.keys():
+        if symbol in returns.columns:
+            portfolio_symbols.append(symbol)
 
     if len(portfolio_symbols) == 0:
         raise HTTPException(status_code=404, detail="No return data for the tickers")
 
-    # computing portfolio level return series and risk metrics
+    # computing the portfolio level return series and risk metrics
     weights_array = np.array([weights[symbol] for symbol in portfolio_symbols])
-    portfolio_returns = returns[portfolio_symbols].mul(weights_array, axis=1).sum(axis=1)
+    
+    weighted_returns = returns[portfolio_symbols].copy()
 
+    for i, symbol in enumerate(portfolio_symbols):
+        weighted_returns[symbol] = weighted_returns[symbol] * weights_array[i]
+
+    portfolio_returns = weighted_returns.sum(axis=1)
     portfolio_annual_return = portfolio_returns.mean() * 252
     portfolio_volatility = portfolio_returns.std() * np.sqrt(252)
-    portfolio_var_95 = abs(np.percentile(portfolio_returns, 5)) * np.sqrt(252)
     portfolio_var_95 = abs(np.percentile(portfolio_returns, 5))
 
     cumulative = (1 + portfolio_returns).cumprod()
@@ -197,7 +209,7 @@ def calculate_stock_risk_categories(portfolio_request: PortfolioRequest):
 
     total = sum(len(v) for v in categories.values())
 
-    # determining overall portfolio risk based on majority category
+    # determining the overall portfolio risk based on majority risk category
     if not cluster_counts:
         overall_risk = "Unknown"
     else:

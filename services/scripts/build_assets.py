@@ -10,29 +10,28 @@ import json
 import os
 
 load_dotenv()
+
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# loading stock data and preparing symbol list
 with open(os.path.join(BASE_DIR, "data", "stocks.json"), "r") as f:
     STOCK_DATA = json.load(f)
 
 RISK_FREE_RATE = 0.02
 
-# converting symbols to yahoo finance format
 symbols = [stock["symbol"].replace(".", "-") for stock in STOCK_DATA]
-
-print("Total symbols requested:", len(symbols))
 
 all_prices = []
 batch_size = 50
 
+# downloading the historical price data in batches
 for i in range(0, len(symbols), batch_size):
-    batch = symbols[i:i + batch_size]
-    print(f"Downloading batch {i} to {i + len(batch)}")
+    start_index = i
+    end_index = i + batch_size
+    batch = symbols[start_index:end_index]
 
     try:
         data = yf.download(batch, period="1y", auto_adjust=True)["Close"]
@@ -45,13 +44,17 @@ for i in range(0, len(symbols), batch_size):
     except Exception as e:
         print("Batch failed:", batch, e)
 
-# combine all batches
+# combining all batches
 prices = pd.concat(all_prices, axis=1)
 
-# remove duplicate columns if any
-prices = prices.loc[:, ~prices.columns.duplicated()]
+is_duplicate = prices.columns.duplicated()
+keep_columns = []
 
-print("Total symbols downloaded:", len(prices.columns))
+for i in range(len(is_duplicate)):
+    if is_duplicate[i] == False:
+        keep_columns.append(prices.columns[i])
+
+prices = prices[keep_columns]
 
 prices = prices.dropna(axis=1, how="all")
 prices.ffill(inplace=True)
@@ -87,7 +90,7 @@ sharpe_ratios = np.where(
     (annual_returns - RISK_FREE_RATE) / volatility
 )
 
-# building feature dataset used for clustering
+# building the feature dataset used for clustering
 df = pd.DataFrame({
     "symbol": variances.index,
     "returns": annual_returns.values,
@@ -119,6 +122,7 @@ gmm = GaussianMixture(
     random_state=42,
     max_iter=500
 )
+
 gmm.fit(Xs)
 labels = gmm.predict(Xs)
 
@@ -136,7 +140,7 @@ for cluster_idx in range(6):
         0.40 * cluster_data["var_95"].mean()
     )
 
-# assigning human readable risk labels
+# assigning the risk labels
 sorted_clusters = sorted(cluster_risk_scores.items(), key=lambda x: x[1])
 
 risk_labels = [
@@ -163,7 +167,7 @@ records = df[[
 
 supabase.table("stock_features").upsert(records).execute()
 
-# save prices to supabase
+# saving the prices to supabase
 prices_df = prices.reset_index().melt(
     id_vars="Date",
     var_name="symbol",
@@ -178,13 +182,17 @@ prices_records = prices_df.dropna().to_dict(orient="records")
 BATCH_SIZE = 500
 table = supabase.table("stock_prices")
 
-for i in range(0, len(prices_records), BATCH_SIZE):
-    batch = prices_records[i:i + BATCH_SIZE]
-    print(f"Uploading batch {i} to {i + len(batch)}")
+start = 0
+
+while start < len(prices_records):
+    end = start + BATCH_SIZE
+    batch = prices_records[start:end]
 
     table.upsert(
         batch,
         on_conflict="symbol,date"
     ).execute()
+
+    start = end
 
 print("Data successfully saved to supabase")

@@ -15,7 +15,6 @@ import nltk
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
-# loading environment variables and setting up api router
 load_dotenv()
 router = APIRouter()
 
@@ -26,13 +25,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 model_path = os.path.join(BASE_DIR, "models", "svm_model.onnx")
 model_sess = ort.InferenceSession(model_path, providers=["CPUExecutionProvider"])
 
-# mapping model outputs to sentiment labels
 labels = ["negative", "neutral", "positive"]
 
 class StockRequest(BaseModel):
     names: List[str]
 
-# extracting simplified company name for search queries
+# getting a simplified company name for search queries
 def split_company_name(company_name: str):
     name = company_name.split('(')[0].strip()
     name = name.split(',')[0].strip()
@@ -41,7 +39,7 @@ def split_company_name(company_name: str):
     words = name.split()
     return words[0] if words else company_name
 
-# checking if article headline actually mentions the company
+# checking if the article headline actually mentions the company name
 def title_mentions_stock(headline: str, company_name: str, shortened_company_name: str, symbol: str):
     headline_lower = headline.lower()
     company_base = company_name.split('(')[0].strip().lower()
@@ -55,7 +53,7 @@ def title_mentions_stock(headline: str, company_name: str, shortened_company_nam
 
     return False
 
-# converting timestamps into readable date format
+# converting the timestamps into an easier to read format 
 def format_date(value: str):
     if value is None:
         return None
@@ -68,7 +66,7 @@ def format_date(value: str):
 
     return dt.strftime("%d %b %Y")
 
-# normalising repeated characters in text
+# reducing any repeated characters in text
 def reduce_lengthening(text):
     pattern = re.compile(r"(.)\1{2,}")
     return pattern.sub(r"\1\1", text)
@@ -107,7 +105,7 @@ def get_sentiment_labels(texts: List[str]):
             result.append(labels[int(pred)])
     return result
 
-# mapping sentiment labels to numeric scores
+# mapping sentiment labels to the numeric scores
 SENTIMENT_SCORE = {
     "positive": 1,
     "neutral": 0,
@@ -160,7 +158,7 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
 
     search_terms = [split_company_name(name) for name in names]
 
-    # calculating date range for news query
+    # only looking at articles from the past day 
     to_date = datetime.utcnow().date()
     if look_back_days <= 1:
         from_date = to_date
@@ -173,7 +171,7 @@ def fetch_news_by_names(request: StockRequest, look_back_days: int = 0):
     article_texts = []
     article_refs = []
 
-    # fetching company symbols and related news from api
+    # fetching the company symbols and related news from api
     for i, search_term in enumerate(search_terms):
         try:
             search_resp = requests.get(

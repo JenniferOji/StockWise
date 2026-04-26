@@ -21,8 +21,6 @@ app.include_router(news_router)
 app.include_router(performance_metrics_router)
 app.include_router(stock_risk_router)
 
-
-# cors to allow the go backend to make requests to the fastapi 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  

@@ -12,17 +12,14 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from db import load_features, load_cluster_risk
 
-# setting up the api router for endpoints
 router = APIRouter()
 
-# getting base directory for file paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# loading features and cluster mappings from shared db helpers
+# loading the features and cluster mappings from shared db helpers
 df_features = load_features()
 cluster_risk = load_cluster_risk()
 
-# loading stock metadata from json file
 stock_data_path = os.path.join(BASE_DIR, "data", "stocks.json")
 with open(stock_data_path, 'r') as f:
     STOCK_DATA = json.load(f)
@@ -30,14 +27,13 @@ with open(stock_data_path, 'r') as f:
 # creating lookup dictionary for stock features
 feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
-# building stock lookup dictionary for quick access
 STOCK_LOOKUP = {
     stock["symbol"].replace(".", "-"): stock
     for stock in STOCK_DATA
 }
 
 # helper function to get sector of a company using symbol
-def get_company_sector(symbol: str) -> Optional[str]:
+def get_company_sector(symbol: str):
     lookup_symbol = symbol.replace("-", ".")
     company = STOCK_LOOKUP.get(lookup_symbol)
     if not company:
@@ -91,7 +87,7 @@ def sector_breakdown(stocks: List[StockHolding]):
     total_stocks = len(stocks)
     breakdown = []
 
-    # converting sector counts into percentage values
+    # converting the sector counts into percentage values
     for sector_name, count in sector_counts.items():
         percent = round((count / total_stocks) * 100, 1)
         breakdown.append({
@@ -103,10 +99,7 @@ def sector_breakdown(stocks: List[StockHolding]):
     breakdown.sort(key=itemgetter("percentage"), reverse=True)
     return breakdown
 
-# rebuilding feature map for safety
-feature_map = df_features.set_index("symbol").to_dict(orient="index")
-
-# endpoint to generate optimised diversification suggestions
+# endpoint to generate optimised stock suggestions
 @router.post("/api/diversification-suggestions")
 def get_diversification_suggestions(request: DiversificationRequest):
     try:
@@ -123,12 +116,9 @@ def get_diversification_suggestions(request: DiversificationRequest):
             "Extreme Risk",
         ]
 
-        if request.user_risk_preference not in risk_levels:
-            raise HTTPException(status_code=400, detail="Invalid risk preference")
-
         user_index = risk_levels.index(request.user_risk_preference)
 
-        # preparing clean dataset for filtering and clustering logic
+        # cleaning the dataset by dropping rows that are missing the critical features 
         df_runtime = df_features.copy()
         df_runtime = df_runtime.dropna(subset=["log_variances", "volatility", "var_95", "cluster_labels"])
         df_runtime["cluster_labels"] = df_runtime["cluster_labels"].astype(int)
@@ -151,20 +141,7 @@ def get_diversification_suggestions(request: DiversificationRequest):
             available_stocks['cluster_labels'].isin(target_clusters)
         ]
 
-        # handling case where no suitable stocks exist
-        if len(suggested_stocks) == 0:
-            return {
-                "success": False,
-                "message": "No stocks match your risk preference",
-                "suggestions": [],
-                "risk_preference": request.user_risk_preference,
-                "comparison": {
-                    "current_volatility": current_portfolio_volatility,
-                    "with_suggestions_volatility": current_portfolio_volatility,
-                },
-            }
-
-        # building candidate pool based on whether user prefers higher or lower risk
+        # building the potential stock pool based on whether user prefers higher or lower risk
         if request.user_risk_preference in ["High Risk", "Very High Risk"]:
             candidate_pool = suggested_stocks.sort_values(by="volatility", ascending=False).head(10)
         else:
@@ -173,13 +150,13 @@ def get_diversification_suggestions(request: DiversificationRequest):
         candidate_symbols = candidate_pool["symbol"].tolist()
         combos = []
 
-        # generating combinations of stocks to test different portfolio outcomes
+        # generating different combinations of stocks to test different outcomes on the portoflio volatility
         for r in range(1, 4):
             combos.extend(combinations(candidate_symbols, r))
 
         results = []
 
-        # evaluating each combination by recalculating portfolio volatility
+        # evaluating each of the generated combinations by recalculating portfolio volatility
         for combo in combos:
             projected = list(request.current_stocks)
 
@@ -207,7 +184,7 @@ def get_diversification_suggestions(request: DiversificationRequest):
         if not results:
             raise HTTPException(status_code=500, detail="Could not compute volatility")
 
-        # selecting best combination depending on risk strategy
+        # selecting the best combination depending on risk the users perfered risk preference
         if request.user_risk_preference == "Low Risk":
             best = min(results, key=lambda x: x["volatility"])
 
@@ -215,15 +192,15 @@ def get_diversification_suggestions(request: DiversificationRequest):
             best = max(results, key=lambda x: x["volatility"])
 
         else:
-            # choosing option closest to median volatility for balanced risk
+            # choosing the options closest to median volatility for moderate risk preferences
             vols = sorted(r["volatility"] for r in results)
-            median_vol = vols[len(vols)//2]
+            median_vol = np.median(vols)
             best = min(results, key=lambda x: abs(x["volatility"] - median_vol))
 
         best_symbols = best["symbols"]
         suggestions = []
 
-        # building response objects for selected stocks
+        # building the response for selected stocks
         for symbol in best_symbols:
             company = STOCK_LOOKUP.get(symbol)
 
@@ -239,7 +216,7 @@ def get_diversification_suggestions(request: DiversificationRequest):
 
         projected_holdings = list(request.current_stocks)
 
-        # simulating portfolio after adding suggested stocks
+        # simulating the portfolio after adding the suggested stocks 
         for symbol in best_symbols:
             company = STOCK_LOOKUP.get(symbol)
 
@@ -268,14 +245,12 @@ def get_diversification_suggestions(request: DiversificationRequest):
         raise HTTPException(status_code=500, detail=str(e))
     
 
-# endpoint to generate random diversification suggestions with sector awareness
+# endpoint to generate random diversification suggestions based on risk preference
 @router.post("/api/random-suggestions")
 def get_random_suggestions(request: DiversificationRequest):
     try:
-        # extracting current portfolio symbols
         current_stock_symbols = [stock.symbol for stock in request.current_stocks]
 
-        # calculating current sector breakdown
         current_stock_breakdown = sector_breakdown(request.current_stocks)
 
         # collecting sectors already present in portfolio
@@ -285,7 +260,6 @@ def get_random_suggestions(request: DiversificationRequest):
             if stock.sector
         }
 
-        # defining risk levels
         risk_levels = [
             "Very Low Risk",
             "Low Risk",
@@ -295,12 +269,9 @@ def get_random_suggestions(request: DiversificationRequest):
             "Extreme Risk",
         ]
 
-        if request.user_risk_preference not in risk_levels:
-            raise HTTPException(status_code=400, detail="Invalid risk preference")
-
         user_index = risk_levels.index(request.user_risk_preference)
 
-        # preparing dataset
+        # cleaning the dataset by dropping rows that are missing the necessary features
         df_runtime = df_features.copy()
         df_runtime = df_runtime.dropna(subset=["log_variances", "volatility", "var_95", "cluster_labels"])
         df_runtime["cluster_labels"] = df_runtime["cluster_labels"].astype(int)
@@ -352,13 +323,14 @@ def get_random_suggestions(request: DiversificationRequest):
                 },
             }
 
-        # randomly sampling stocks for simple suggestions
+        # randomly getting stocks for the suggestions
         candidate_pool = suggested_stocks.sample(n=min(3, len(suggested_stocks)))
 
         suggestions = []
 
-        # building suggestion output
-        for _, row in candidate_pool.iterrows():
+        # building the suggestions output
+        for i in range(len(candidate_pool)):
+            row = candidate_pool.iloc[i]
             symbol = row["symbol"]
 
             company = STOCK_LOOKUP.get(symbol)
@@ -375,7 +347,7 @@ def get_random_suggestions(request: DiversificationRequest):
 
         projected_holdings = list(request.current_stocks)
 
-        # simulating updated portfolio with new stocks
+        # simulating the updated portfolio with new stocks
         for suggestion in suggestions:
             projected_holdings.append(
                 StockHolding(
@@ -384,7 +356,7 @@ def get_random_suggestions(request: DiversificationRequest):
                 )
             )
 
-        # recalculating sector breakdown after suggestions
+        # recalculating sector breakdown after the suggestions
         projected_stock_breakdown = sector_breakdown(projected_holdings)
 
         return {

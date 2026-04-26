@@ -24,17 +24,17 @@ func GetPerformanceMetrics(ctx iris.Context) {
 	for i, stock := range req.Stocks {
 		if stock.Symbol == "" {
 			ctx.StatusCode(iris.StatusBadRequest)
-			ctx.JSON(iris.Map{"error": "Invalid stock payload", "details": "symbol is required", "index": i})
+			ctx.JSON(iris.Map{"error": "Invalid stock", "details": "symbol required", "index": i})
 			return
 		}
 		if stock.Shares <= 0 {
 			ctx.StatusCode(iris.StatusBadRequest)
-			ctx.JSON(iris.Map{"error": "Invalid stock payload", "details": "shares must be greater than 0", "index": i})
+			ctx.JSON(iris.Map{"error": "Invalid stock", "details": "shares must be greater than 0", "index": i})
 			return
 		}
 	}
 
-	// run performance calculation in service layer
+	// run the performance calculation in service layer
 	result, err := services.CalculatePerformanceMetrics(req)
 	if err != nil {
 		ctx.StatusCode(iris.StatusInternalServerError)

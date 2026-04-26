@@ -2,7 +2,6 @@ import pandas as pd
 import json
 from pathlib import Path
 
-# loading sp500 company list from local csv file
 BASE_DIR = Path(__file__).resolve().parent
 DATASET_PATH = BASE_DIR.parent / "ml" / "training_data" / "constituents.csv"
 OUTPUT_STOCKS_PATH = BASE_DIR.parent / "data" / "stocks.json"
@@ -10,7 +9,7 @@ OUTPUT_STOCK_MAP_PATH = BASE_DIR.parent / "data" / "stock_data.json"
 
 sp500 = pd.read_csv(DATASET_PATH)
 
-# extracting symbols and company names
+# extracting the symbols and company names from the file 
 sp500 = sp500.dropna(subset=["Symbol", "Security"])
 sp500["Symbol"] = sp500["Symbol"].astype(str).str.strip()
 sp500["Security"] = sp500["Security"].astype(str).str.strip()

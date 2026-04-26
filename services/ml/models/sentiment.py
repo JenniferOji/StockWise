@@ -31,20 +31,18 @@ MODELS_DIR = os.path.join(BASE_DIR, "models")
 
 news_sentiment_path = os.path.join(BASE_DIR, "training_data", "news_sentiment_data.csv")
 
-# loading dataset and preparing training data
 df = pd.read_csv(news_sentiment_path, encoding="ISO-8859-1", low_memory=False)
 
 x = df.Headline.astype(str).values
 y = df.Sentiment.astype(str)
 
-# splitting data into training and testing sets
 x_train, x_test, y_train, y_test = train_test_split(
     x, y, test_size=0.3, random_state=0
 )
 
 lemm = WordNetLemmatizer()
 
-# reducing repeated characters to normalise informal text
+# reducing any repeated characters in the text 
 def reduce_lengthening(text):
     pattern = re.compile(r"(.)\1{2,}")
     return pattern.sub(r"\1\1", text)
@@ -65,11 +63,11 @@ def text_preprocess(doc):
 
     return " ".join(tokens)
 
-# applying preprocessing to training and test data
+# applying the preprocessing to training and test data
 x_train_clean = [text_preprocess(x) for x in x_train]
 x_test_clean = [text_preprocess(x) for x in x_test]
 
-# building feature extraction pipeline using ngrams and tfidf weighting
+# vectorising the text
 features = Pipeline([
     ("vectorizer", CountVectorizer(
         analyzer="word",
@@ -82,7 +80,7 @@ features = Pipeline([
     ("tfidf", TfidfTransformer())
 ])
 
-# combining feature extraction with linear svm classifier
+# creating the full snetiment model pipeline
 pipeline = Pipeline([
     ("features", features),
     ("clf", LinearSVC(
@@ -96,29 +94,25 @@ pipeline = Pipeline([
     ))
 ])
 
-# training the model
 pipeline.fit(x_train_clean, y_train)
 
-# evaluating model performance
 predictions = pipeline.predict(x_test_clean)
 
 print("accuracy:", accuracy_score(y_test, predictions))
 print(classification_report(y_test, predictions))
 
-# exporting trained model to onnx format for fast inference in api
+# exporting the trained model to onnx format
 onnx_model = convert_sklearn(
     pipeline,
     initial_types=[("input", StringTensorType([None]))],
     options={id(pipeline.named_steps["clf"]): {"raw_scores": True}}
 )
 
-# saving onnx model to disk for loading in api
 model_path = os.path.join(MODELS_DIR, "svm_model.onnx")
 
 with open(model_path, "wb") as f:
     f.write(onnx_model.SerializeToString())
 
-# generating confusion matrix to visualise performance
 labels = ["negative", "neutral", "positive"]
 cm = confusion_matrix(y_test, predictions, labels=labels)
 

@@ -7,9 +7,7 @@ import numpy as np
 import json
 import logging
 
-# setting up router and loading required datasets and models
 router = APIRouter()
-logger = logging.getLogger(__name__)
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -31,7 +29,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STOCK_META_PATH = os.path.join(BASE_DIR, "data", "stocks.json")
 
 df_features = load_features()
-df_features["symbol"] = df_features["symbol"].astype(str).str.strip().str.upper().str.replace(".", "-", regex=False)
 feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
 df_prices = load_prices()
@@ -40,7 +37,6 @@ df_prices.columns = df_prices.columns.astype(str).str.strip().str.upper()
 with open(STOCK_META_PATH, "r") as f:
     STOCK_DATA = json.load(f)
 
-# building lookup for stock metadata
 STOCK_LOOKUP = {
     stock["symbol"].replace(".", "-").upper(): stock
     for stock in STOCK_DATA
@@ -49,8 +45,8 @@ STOCK_LOOKUP = {
 
 CLUSTER_CATEGORY = load_cluster_risk()
 
-# retrieving combined static and dynamic features for a stock
-def calculate_dynamic_features(symbol: str):
+# 
+def calculate_features(symbol: str):
     symbol = str(symbol).strip().upper().replace(".", "-")
 
     if symbol not in STOCK_LOOKUP:
@@ -106,13 +102,19 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
         if symbol not in latest_prices.index:
             continue
 
-        quantity = stock.quantity if stock.quantity else 1
+        if stock.quantity is None:
+            quantity = 1
+        else:
+            quantity = stock.quantity
+
+        # calculating the current market value of the holding
         latest_price = float(latest_prices[symbol])
         holding_value = quantity * latest_price
 
         if holding_value <= 0:
             continue
 
+        # getting the total value of the holding for the portfolio weight calculation
         if symbol in holding_values:
             holding_values[symbol] += holding_value
         else:
@@ -126,19 +128,31 @@ def calculate_portfolio_metrics(stocks: List[PortfolioStock]):
     if portfolio_value <= 0:
         return None
 
-    portfolio_symbols = [symbol for symbol in holding_values.keys() if symbol in prices.columns]
+    portfolio_symbols = []
+
+    for symbol in holding_values.keys():
+        if symbol in prices.columns:
+            portfolio_symbols.append(symbol)
 
     if len(portfolio_symbols) == 0:
         return None
 
-    # computing returns and risk metrics for portfolio
+    # computing the returns and risk metrics for the portfolio
     prices = prices[portfolio_symbols]
     returns = prices.pct_change().dropna()
 
     if returns.empty:
         return None
 
-    weights = np.array([holding_values[symbol] / portfolio_value for symbol in portfolio_symbols])
+    weights_list = []
+
+    # calculating the portfolio level return and risk metrics
+    for symbol in portfolio_symbols:
+        weight = holding_values[symbol] / portfolio_value
+        weights_list.append(weight)
+
+    weights = np.array(weights_list)
+
     portfolio_returns = returns.mul(weights, axis=1).sum(axis=1)
 
     portfolio_annual_return = float(portfolio_returns.mean() * 252)
@@ -173,7 +187,8 @@ def check_stock_risk(request: StockRiskCheckRequest):
         if symbol not in STOCK_LOOKUP:
             raise ValueError(f"Symbol '{symbol}' not found")
 
-        stock_features = calculate_dynamic_features(symbol)
+        # calculating the features and risk category for the stock
+        stock_features = calculate_features(symbol)
         cluster_label = int(stock_features["cluster_labels"])
         risk_label = map_cluster_to_risk(cluster_label)
 
@@ -193,13 +208,13 @@ def check_stock_risk(request: StockRiskCheckRequest):
         }
 
     except ValueError as e:
-        logger.warning("Stock risk validation failed for symbol '%s': %s", request.symbol, str(e))
         raise HTTPException(status_code=400, detail=str(e))
 
-# simulating impact of adding a new stock to portfolio
+# simulating the impact of adding a new stock to the portfolio
 @router.post("/api/simulate-stock")
 def simulate_stock(request: SimulateStockRequest):
     try:
+        # calculating the current portfolio metrics before adding the new stock
         current_metrics = calculate_portfolio_metrics(request.current_stocks)
 
         projected_portfolio = list(request.current_stocks)
@@ -215,7 +230,7 @@ def simulate_stock(request: SimulateStockRequest):
         if symbol not in STOCK_LOOKUP:
             raise HTTPException(status_code=400, detail=f"Symbol '{symbol}' not found")
 
-        # comparing before and after metrics to show impact
+        # comparing the before and after metrics to show its impact on the portoflio
         return {
             "success": True,
             "symbol": symbol,
