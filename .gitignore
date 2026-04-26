@@ -7,14 +7,14 @@ ml/progress
 .expo
 frontend/.expo
 frontend/.vscode
-micro-services/__pycache__
+services/__pycache__
 ml/models/kmeans_stock_clustering.onnx
-micro-services/.env
-micro-services/.venv
+services/.env
+services/.venv
 ml/models/.venv
-micro-services/models/finbert/*.onnx
+services/models/finbert/*.onnx
 
-# micro-services/models/*.onnx
-# micro-services/models/*.pkl
-# micro-services/models/*.csv
-micro-services/models/finbert/*
+# services/models/*.onnx
+# services/models/*.pkl
+# services/models/*.csv
+services/models/finbert/*

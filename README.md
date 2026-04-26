@@ -1,104 +1,88 @@
 # Stock Wise
 
-Stock Wise is a portfolio analytics app that helps retail investors understand risk, diversification, and stock performance with ML-powered insights.
+Stock Wise is a portfolio analytics application designed to help retail investors better understand their investments. It focuses on risk analysis, diversification, and performance insights using a combination of financial metrics and machine learning.
 
-## Overview
+---
 
-The project is split into 3 main parts:
+## Project Overview
 
-- Frontend app (React) in [frontend](frontend)
-- Backend API (Go + Iris) in [backend](backend)
-- ML service (Python + FastAPI) in [micro-services](micro-services)
+This project is built as a multi-service system made up of three main components:
 
-The backend handles user and portfolio operations, then calls the ML service for analytics such as risk metrics, risk categories, diversification suggestions, performance metrics, sentiment, and simulations.
+- **Frontend (React Native + Expo)** – user interface for interacting with the app  
+- **Backend API (Go + Iris)** – handles requests, business logic, and database interaction  
+- **ML Service (Python + FastAPI)** – performs financial analytics and machine learning tasks  
 
-## Features
+The backend acts as the main controller, receiving requests from the frontend and calling the ML service when advanced analytics (such as risk calculations or clustering) are required.
 
-- Portfolio holdings management (add, update, delete, list)
-- Portfolio risk metrics (volatility, sharpe, max drawdown, VaR)
-- Stock risk categories by risk level
-- Performance metrics and comparisons
-- Diversification suggestions and random suggestions
-- Stock-level news and sentiment analysis
+---
+
+## Key Features
+
+The application includes the following features:
+
+- Portfolio management (add, update, delete, and view holdings)
+- Risk analysis metrics:
+  - Portfolio volatility  
+  - Sharpe ratio  
+  - Value at Risk (VaR)  
+  - Maximum Drawdown (MDD)
+- Machine learning-based stock risk categorisation
+- Portfolio performance evaluation and comparison
+- Diversification suggestions based on user risk preference
+- Simulation of portfolio changes before applying them
+- Financial news retrieval with sentiment analysis (positive, negative, neutral)
+
+---
+
+## System Architecture
+
+- Frontend communicates with the Go backend via REST API  
+- Backend validates requests and interacts with PostgreSQL  
+- Backend forwards analytics-related requests to FastAPI  
+- FastAPI processes data using trained ML models and returns results  
+- Results are sent back to the frontend for display  
+
+---
 
 ## Tech Stack
 
-- Frontend: Expo + React Native + TypeScript
-- Backend API: Go + Iris
-- ML service: Python + FastAPI + scikit-learn/pandas/numpy
-- Database: PostgreSQL
-- Container runtime: Docker + Docker Compose
+- **Frontend:** React Native (Expo), TypeScript  
+- **Backend:** Go (Iris framework)  
+- **ML Service:** Python (FastAPI, scikit-learn, pandas, numpy)  
+- **Database:** PostgreSQL  
+- **Containerisation:** Docker & Docker Compose  
 
-## Repository Layout
+---
 
-- [frontend](frontend): mobile/web UI and client services
-- [backend](backend): REST API routes, services, and DB models
-- [micro-services](micro-services): ML endpoints and model assets
-- [docker-compose.yml](docker-compose.yml): local multi-service orchestration
+## Repository Structure
+
+- `frontend/` – mobile/web UI and API calls  
+- `backend/` – REST API, business logic, database models  
+- `services/` – ML models and FastAPI endpoints  
+- `docker-compose.yml` – multi-service setup  
+
+---
 
 ## Prerequisites
 
-- Docker Desktop (or Docker Engine + Compose plugin)
-- Docker Compose v2+
-- Node.js 18+ and npm (for running frontend outside containers)
+Before running the project, ensure you have:
 
-## Run With Docker Compose
+- Docker Desktop (or Docker Engine + Compose)
+- Docker Compose (v2 or higher)
+- Node.js (v18+) and npm (only if running frontend locally)
 
-This starts:
+---
 
-- `postgres` on `5432`
-- `backend` on `8080`
-- `fastapi` on `8000`
+## Running the Project (Docker)
 
-From the project root, run:
+The easiest way to run the project is using Docker Compose.
+
+This will start:
+- PostgreSQL database on **port 5432**
+- Go backend API on **port 8080**
+- FastAPI ML service on **port 8000**
+
+### Build and run:
 
 ```bash
 docker-compose up --build
-```
-
-Run detached:
-
-```bash
-docker-compose up --build -d
-```
-
-Stop services:
-
-```bash
-docker-compose down
-```
-
-Stop and remove DB volume too (full reset):
-
-```bash
-docker-compose down -v
-```
-
-Tail logs:
-
-```bash
-docker-compose logs -f
-```
-
-## Run Frontend Locally
-
-The frontend is not currently included in [docker-compose.yml](docker-compose.yml), so run it locally.
-
-1. Set API URL environment variable:
-
-```bash
-# mac/linux
-export EXPO_PUBLIC_API_URL=http://localhost:8080
-
-# windows powershell
-$env:EXPO_PUBLIC_API_URL="http://localhost:8080"
-```
-
-2. Start frontend:
-
-```bash
-cd frontend
-npm install
-npx expo start
-```
-

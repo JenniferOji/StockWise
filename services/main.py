@@ -10,10 +10,11 @@ from endpoints.news_api import router as news_router
 from endpoints.performance_metrics_api import router as performance_metrics_router
 from endpoints.stock_risk import router as stock_risk_router
 
-# resource used: https://fastapi.tiangolo.com/#example-upgrade
+# resource used to help create fastAPI service: https://fastapi.tiangolo.com/#example-upgrade
 
 app = FastAPI()
 
+# including routers for different API endpoints
 app.include_router(diversification_router)  
 app.include_router(risk_metrics_router) 
 app.include_router(news_router) 
