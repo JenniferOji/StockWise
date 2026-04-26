@@ -1,13 +1,16 @@
 from fastapi import APIRouter, HTTPException  
 from pydantic import BaseModel
 from typing import List, Optional
-import pandas as pd
-import pickle
+import sys
 import os
 import json
 from operator import itemgetter
 from itertools import combinations
 import numpy as np
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from db import load_features, load_cluster_risk
 
 # setting up the api router for endpoints
 router = APIRouter()
@@ -15,21 +18,15 @@ router = APIRouter()
 # getting base directory for file paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# loading features dataset path
-FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")  
-
-# loading cluster to risk mapping model
-with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "rb") as f:
-    cluster_risk = pickle.load(f)
+# loading features and cluster mappings from shared db helpers
+df_features = load_features()
+df_features.columns = df_features.columns.str.lower()
+cluster_risk = load_cluster_risk()
 
 # loading stock metadata from json file
 stock_data_path = os.path.join(BASE_DIR, "data", "stocks.json")
 with open(stock_data_path, 'r') as f:
     STOCK_DATA = json.load(f)
-
-# reading features csv into dataframe and standardising column names
-df_features = pd.read_csv(FEATURES_PATH)
-df_features.columns = df_features.columns.str.lower()
 
 # creating lookup dictionary for stock features
 feature_map = df_features.set_index("symbol").to_dict(orient="index")

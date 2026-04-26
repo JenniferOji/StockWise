@@ -18,3 +18,4 @@ services/models/finbert/*.onnx
 # services/models/*.pkl
 # services/models/*.csv
 services/models/finbert/*
+.venv

@@ -2,16 +2,19 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
 import numpy as np
-import pandas as pd
+import sys
 import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from db import load_features
 
 # setting up api router and loading dataset
 router = APIRouter()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
 
-df_features = pd.read_csv(FEATURES_PATH)
+df_features = load_features()
 feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
 # request models for portfolio input

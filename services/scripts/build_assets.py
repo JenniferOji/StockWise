@@ -1,3 +1,5 @@
+from supabase import create_client
+from dotenv import load_dotenv
 import numpy as np
 import pandas as pd
 import yfinance as yf
@@ -7,6 +9,10 @@ from sklearn.mixture import GaussianMixture
 import json
 import os
 
+load_dotenv()
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -114,17 +120,20 @@ for i, (cluster_idx, _) in enumerate(sorted_clusters):
     cluster_risk[cluster_idx] = risk_labels[i]
 
 # saving processed data and trained models for api use
-prices.to_csv(os.path.join(BASE_DIR, "data", "prices.csv"))
-df.to_csv(os.path.join(BASE_DIR, "data", "features.csv"), index=False)
+df["risk_label"] = df["cluster_labels"].map(cluster_risk)
+records = df[[
+    "symbol", "returns", "variance", "var_95",
+    "max_drawdown", "sharpe", "close", "log_variances",
+    "volatility", "cluster_labels", "risk_label"
+]].to_dict(orient="records")
 
-with open(os.path.join(BASE_DIR, "models", "stock_scaler.pkl"), "wb") as f:
-    pickle.dump(scaler, f)
+supabase.table("stock_features").upsert(records).execute()
 
-with open(os.path.join(BASE_DIR, "models", "gmm_model.pkl"), "wb") as f:
-    pickle.dump(gmm, f)
+# save prices to supabase
+prices_df = prices.reset_index().melt(id_vars="Date", var_name="symbol", value_name="close")
+prices_df.columns = ["date", "symbol", "close"]
+prices_df["date"] = prices_df["date"].astype(str)
+prices_records = prices_df.dropna().to_dict(orient="records")
+supabase.table("stock_prices").upsert(prices_records).execute()
 
-with open(os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl"), "wb") as f:
-    pickle.dump(cluster_risk, f)
-
-with open(os.path.join(BASE_DIR, "models", "feature_columns.pkl"), "wb") as f:
-    pickle.dump(features, f)
+print("Data successfully saved to superbase")

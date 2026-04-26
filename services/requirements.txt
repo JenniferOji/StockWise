@@ -17,6 +17,8 @@ textblob
 vaderSentiment
 newsapi-python
 lxml
+supabase
+python-dotenv
 # torch
 # transformers
 # huggingface_hub

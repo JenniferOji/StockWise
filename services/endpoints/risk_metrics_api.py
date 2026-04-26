@@ -2,27 +2,23 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
 from datetime import datetime, timedelta
+import sys
 import os
 import numpy as np
-import pickle
-import pandas as pd
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from db import load_features, load_prices, load_cluster_risk
 
 # setting up api router and loading datasets
 router = APIRouter() 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
-PRICES_PATH = os.path.join(BASE_DIR, "data", "prices.csv")
-
-df_features = pd.read_csv(FEATURES_PATH)
-df_prices = pd.read_csv(PRICES_PATH, index_col=0, parse_dates=True)
+df_features = load_features()
 df_features.columns = df_features.columns.str.lower()
-
-# loading cluster to risk mapping from trained model output
-CLUSTER_RISK_PATH = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
-with open(CLUSTER_RISK_PATH, "rb") as f:
-    cluster_risk_mapping = pickle.load(f)
+df_prices = load_prices()
+cluster_risk_mapping = load_cluster_risk()
 
 CLUSTER_CATEGORY = cluster_risk_mapping
 

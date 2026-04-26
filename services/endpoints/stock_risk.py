@@ -1,16 +1,19 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
+import sys
 import os
 import numpy as np
-import pandas as pd
-import pickle
 import json
 import logging
 
 # setting up router and loading required datasets and models
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from db import load_features, load_prices, load_cluster_risk
 
 class StockRiskCheckRequest(BaseModel):
     symbol: str
@@ -25,17 +28,14 @@ class SimulateStockRequest(BaseModel):
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-CLUSTER_RISK_PATH = os.path.join(BASE_DIR, "models", "cluster_risk_mapping.pkl")
-FEATURES_PATH = os.path.join(BASE_DIR, "data", "features.csv")
-PRICES_PATH = os.path.join(BASE_DIR, "data", "prices.csv")
 STOCK_META_PATH = os.path.join(BASE_DIR, "data", "stocks.json")
 
-df_features = pd.read_csv(FEATURES_PATH)
+df_features = load_features()
 df_features["symbol"] = df_features["symbol"].astype(str).str.strip().str.upper().str.replace(".", "-", regex=False)
 df_features.columns = df_features.columns.str.lower()
 feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
-df_prices = pd.read_csv(PRICES_PATH, index_col=0, parse_dates=True)
+df_prices = load_prices()
 df_prices.columns = df_prices.columns.astype(str).str.strip().str.upper()
 
 with open(STOCK_META_PATH, "r") as f:
@@ -48,8 +48,7 @@ STOCK_LOOKUP = {
     if stock.get("symbol")
 }
 
-with open(CLUSTER_RISK_PATH, "rb") as f:
-    CLUSTER_CATEGORY = pickle.load(f)
+CLUSTER_CATEGORY = load_cluster_risk()
 
 # retrieving combined static and dynamic features for a stock
 def calculate_dynamic_features(symbol: str):
