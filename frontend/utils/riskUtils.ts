@@ -42,24 +42,24 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 
 		// messages based on risk preference and band
 		const scoreMap: Record<string, Record<string, string>> = {
-			'Low Risk': {
-				Good: `Your score of ${value}% is low. Your portfolio is very stable, which is exactly what a low-risk strategy aims for.`,
-				Moderate: `Your score of ${value}% is starting to show some movement. It is manageable but worth watching for a low-risk investor.`,
-				High: `Your score of ${value}% is high for a low-risk portfolio. Your balance is swinging more than expected for your profile.`,
-				Severe: `Your score of ${value}% is very high for a low-risk investor. This level of fluctuation would likely be uncomfortable and is outside your risk profile.`,
-			},
-			'Moderate Risk': {
-				Good: `Your score of ${value}% is healthy for a moderate-risk investor. You are capturing market growth without too much instability.`,
-				Moderate: `Your score of ${value}% is within normal range for your profile. Some fluctuation is expected and acceptable.`,
-				High: `Your score of ${value}% is on the higher side for a moderate-risk investor. Your portfolio is moving around more than ideal.`,
-				Severe: `Your score of ${value}% is very high even for a moderate-risk portfolio. This suggests significant exposure to volatile assets.`,
-			},
-			'High Risk': {
-				Expected: `Your score of ${value}% is well within the expected range for a high-risk investor. Higher volatility comes with the territory when pursuing stronger returns.`,
-				Elevated: `Your score of ${value}% is elevated, even for a high-risk portfolio. Make sure you are comfortable with the potential swings this implies.`,
-				High: `Your score of ${value}% is high even by aggressive investment standards. Ensure this aligns with your actual comfort level.`,
-				Extreme: `Your score of ${value}% is extreme. This is significantly above what most high-risk portfolios experience and may indicate over-concentration in very volatile assets.`,
-			},
+		'Low Risk': {
+			Low: `Your score of ${value}% is low. Your portfolio is very stable, which is ideal for a low-risk strategy.`,
+			Moderate: `Your score of ${value}% shows some movement. This is manageable but slightly above ideal for a low-risk investor.`,
+			High: `Your score of ${value}% is high for a low-risk portfolio. Your investments are more volatile than expected.`,
+			Extreme: `Your score of ${value}% is extremely high for a low-risk investor and likely outside your comfort zone.`,
+		},
+		'Moderate Risk': {
+			Low: `Your score of ${value}% is low. Your portfolio is stable, though you may be sacrificing some growth.`,
+			Moderate: `Your score of ${value}% is within a normal range for your profile.`,
+			High: `Your score of ${value}% is on the higher side. Your portfolio is more volatile than ideal.`,
+			Extreme: `Your score of ${value}% is very high and may expose you to large swings in value.`,
+		},
+		'High Risk': {
+			Low: `Your score of ${value}% is lower than expected for a high-risk strategy.`,
+			Moderate: `Your score of ${value}% is acceptable for a high-risk portfolio.`,
+			High: `Your score of ${value}% is high, which aligns with aggressive investing.`,
+			Extreme: `Your score of ${value}% is extremely high, even for a high-risk strategy.`,
+		},
 		}
 
 		const score = scoreMap[riskPref][band.label]
