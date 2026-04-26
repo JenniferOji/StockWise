@@ -28,14 +28,37 @@ def load_features():
 
 
 def load_prices():
-    response = supabase.table("stock_prices").select("*").execute()
-    df = pd.DataFrame(response.data or [])
+    all_data = []
+    start = 0
+    batch_size = 1000
+
+    while True:
+        response = (
+            supabase
+            .table("stock_prices")
+            .select("*")
+            .range(start, start + batch_size - 1)
+            .execute()
+        )
+
+        if not response.data:
+            break
+
+        all_data.extend(response.data)
+
+        if len(response.data) < batch_size:
+            break
+
+        start += batch_size
+
+    df = pd.DataFrame(all_data)
 
     if df.empty:
         return df
 
     df["date"] = pd.to_datetime(df["date"])
     df = df.pivot(index="date", columns="symbol", values="close")
+
     return df
 
 
