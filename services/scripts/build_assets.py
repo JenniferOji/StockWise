@@ -25,11 +25,38 @@ RISK_FREE_RATE = 0.02
 # converting symbols to yahoo finance format
 symbols = [stock["symbol"].replace(".", "-") for stock in STOCK_DATA]
 
-# downloading historical price data and cleaning missing values
-prices = yf.download(symbols, period="1y", auto_adjust=True)["Close"]
+print("Total symbols requested:", len(symbols))
+
+all_prices = []
+batch_size = 50
+
+for i in range(0, len(symbols), batch_size):
+    batch = symbols[i:i + batch_size]
+    print(f"Downloading batch {i} to {i + len(batch)}")
+
+    try:
+        data = yf.download(batch, period="1y", auto_adjust=True)["Close"]
+
+        if isinstance(data, pd.Series):
+            data = data.to_frame()
+
+        all_prices.append(data)
+
+    except Exception as e:
+        print("Batch failed:", batch, e)
+
+# combine all batches
+prices = pd.concat(all_prices, axis=1)
+
+# remove duplicate columns if any
+prices = prices.loc[:, ~prices.columns.duplicated()]
+
+print("Total symbols downloaded:", len(prices.columns))
+
 prices = prices.dropna(axis=1, how="all")
 prices.ffill(inplace=True)
 prices.bfill(inplace=True)
+
 latest_prices = prices.iloc[-1]
 
 returns = prices.pct_change().dropna()
@@ -76,22 +103,28 @@ df["log_variances"] = np.log1p(np.clip(df["variance"], 0, 2))
 df["volatility"] = np.sqrt(df["variance"])
 df.dropna(inplace=True)
 
-# selecting features used for clustering based on prior testing
+# selecting features used for clustering
 features = ["log_variances", "volatility", "var_95"]
 X = df[features].values
 
-# scaling features before applying gmm
+# scaling features
 scaler = StandardScaler()
 Xs = scaler.fit_transform(X)
 
-# fitting gaussian mixture model to cluster stocks by risk profile
-gmm = GaussianMixture(n_components=6, covariance_type="full", n_init=10, random_state=42, max_iter=500)
+# fitting gaussian mixture model
+gmm = GaussianMixture(
+    n_components=6,
+    covariance_type="full",
+    n_init=10,
+    random_state=42,
+    max_iter=500
+)
 gmm.fit(Xs)
 labels = gmm.predict(Xs)
 
 df["cluster_labels"] = labels
 
-# ranking clusters by risk using volatility and var
+# ranking clusters by risk
 cluster_risk_scores = {}
 for cluster_idx in range(6):
     cluster_data = df[df["cluster_labels"] == cluster_idx]
@@ -103,15 +136,15 @@ for cluster_idx in range(6):
         0.40 * cluster_data["var_95"].mean()
     )
 
-# assigning human readable risk labels to clusters
+# assigning human readable risk labels
 sorted_clusters = sorted(cluster_risk_scores.items(), key=lambda x: x[1])
 
 risk_labels = [
     "Very Low Risk",
-    "Low Risk", 
-    "Moderate Risk", 
-    "High Risk", 
-    "Very High Risk", 
+    "Low Risk",
+    "Moderate Risk",
+    "High Risk",
+    "Very High Risk",
     "Extreme Risk"
 ]
 
@@ -119,8 +152,9 @@ cluster_risk = {}
 for i, (cluster_idx, _) in enumerate(sorted_clusters):
     cluster_risk[cluster_idx] = risk_labels[i]
 
-# saving processed data and trained models for api use
+# saving processed data
 df["risk_label"] = df["cluster_labels"].map(cluster_risk)
+
 records = df[[
     "symbol", "returns", "variance", "var_95",
     "max_drawdown", "sharpe", "close", "log_variances",
@@ -130,10 +164,27 @@ records = df[[
 supabase.table("stock_features").upsert(records).execute()
 
 # save prices to supabase
-prices_df = prices.reset_index().melt(id_vars="Date", var_name="symbol", value_name="close")
+prices_df = prices.reset_index().melt(
+    id_vars="Date",
+    var_name="symbol",
+    value_name="close"
+)
+
 prices_df.columns = ["date", "symbol", "close"]
 prices_df["date"] = prices_df["date"].astype(str)
-prices_records = prices_df.dropna().to_dict(orient="records")
-supabase.table("stock_prices").upsert(prices_records).execute()
 
-print("Data successfully saved to superbase")
+prices_records = prices_df.dropna().to_dict(orient="records")
+
+BATCH_SIZE = 500
+table = supabase.table("stock_prices")
+
+for i in range(0, len(prices_records), BATCH_SIZE):
+    batch = prices_records[i:i + BATCH_SIZE]
+    print(f"Uploading batch {i} to {i + len(batch)}")
+
+    table.upsert(
+        batch,
+        on_conflict="symbol,date"
+    ).execute()
+
+print("Data successfully saved to supabase")
