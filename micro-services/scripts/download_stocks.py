@@ -1,99 +1,54 @@
-import yfinance as yf
 import pandas as pd
-import requests
-from io import StringIO
 import json
+from pathlib import Path
 
-url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+# loading sp500 company list from local csv file
+BASE_DIR = Path(__file__).resolve().parent
+DATASET_PATH = BASE_DIR.parent / "ml" / "training_data" / "constituents.csv"
+OUTPUT_STOCKS_PATH = BASE_DIR.parent / "data" / "stocks.json"
+OUTPUT_STOCK_MAP_PATH = BASE_DIR.parent / "data" / "stock_data.json"
 
-headers = {
-    "User-Agent": "Mozilla/5.0"
-}
+sp500 = pd.read_csv(DATASET_PATH)
 
-# fetching sp500 company list from wikipedia
-response = requests.get(url, headers=headers)
-html = StringIO(response.text)
-tables = pd.read_html(html)
-sp500 = tables[0]
+# extracting symbols and company names
+sp500 = sp500.dropna(subset=["Symbol", "Security"])
+sp500["Symbol"] = sp500["Symbol"].astype(str).str.strip()
+sp500["Security"] = sp500["Security"].astype(str).str.strip()
+sp500["GICS Sector"] = sp500["GICS Sector"].fillna("Unknown").astype(str).str.strip()
 
 symbols = sp500["Symbol"].tolist()
+name_map = dict(zip(sp500["Symbol"], sp500["Security"]))
+sector_map = dict(zip(sp500["Symbol"], sp500["GICS Sector"]))
 
 data = []
 stock_map = {}
 existing_symbols = set()
 
-# fetching stock metadata for sp500 companies
-for symbol in symbols[:200]:  
+# fetching stock data for the sp500 companies
+for symbol in symbols:
     try:
-        symbol = symbol.replace(".", "-")
+        csv_symbol = symbol
 
-        ticker = yf.Ticker(symbol)
-        info = ticker.info
+        # use company name from csv mapping only
+        name = name_map.get(csv_symbol, "")
 
-        name = info.get("longName", "") or info.get("shortName", "")
-        sector = info.get("sector", "Unknown")
+        sector = sector_map.get(csv_symbol, "Unknown")
 
         data.append({
-            "symbol": symbol,
+            "symbol": csv_symbol,
             "companyName": name,
             "shares": 0,
             "purchasePrice": 0,
             "sector": sector,
-            "imageUrl": f"https://financialmodelingprep.com/image-stock/{symbol}.png"
+            "imageUrl": f"https://financialmodelingprep.com/image-stock/{csv_symbol}.png"
         })
 
-        stock_map[symbol] = {
+        stock_map[csv_symbol] = {
             "name": name,
             "sector": sector
         }
 
-        existing_symbols.add(symbol)
-
-    except Exception:
-        continue
-
-# fetching additional stocks from nasdaq 100
-response = requests.get(nasdaq_url, headers=headers)
-html = StringIO(response.text)
-tables = pd.read_html(html)
-nasdaq = tables[4]
-
-nasdaq_symbols = nasdaq["Ticker"].tolist()
-added = 0
-
-# adding additional unique stocks to diversify dataset
-for symbol in nasdaq_symbols:
-    if added >= 50:
-        break
-
-    try:
-        symbol = symbol.replace(".", "-")
-
-        if symbol in existing_symbols:
-            continue
-
-        ticker = yf.Ticker(symbol)
-        info = ticker.info
-
-        name = info.get("longName", "") or info.get("shortName", "")
-        sector = info.get("sector", "Unknown")
-
-        data.append({
-            "symbol": symbol,
-            "companyName": name,
-            "shares": 0,
-            "purchasePrice": 0,
-            "sector": sector,
-            "imageUrl": f"https://financialmodelingprep.com/image-stock/{symbol}.png"
-        })
-
-        stock_map[symbol] = {
-            "name": name,
-            "sector": sector
-        }
-
-        existing_symbols.add(symbol)
-        added += 1
+        existing_symbols.add(csv_symbol)
 
     except Exception:
         continue
@@ -101,7 +56,7 @@ for symbol in nasdaq_symbols:
 # saving stock data for frontend and backend usage
 df = pd.DataFrame(data)
 
-df.to_json("stocks.json", orient="records", indent=2)
+df.to_json(OUTPUT_STOCKS_PATH, orient="records", indent=2)
 
-with open("stock_data.json", "w") as f:
+with open(OUTPUT_STOCK_MAP_PATH, "w") as f:
     json.dump(stock_map, f, indent=2)

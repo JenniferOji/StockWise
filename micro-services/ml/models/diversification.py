@@ -97,6 +97,7 @@ best_bic = np.inf
 best_gmm = None
 best_labels = None
 
+# trying different covariance types and number of clusters to find best fit based on BIC
 covariance_types = ['full', 'tied', 'diag', 'spherical']
 
 for cov_type in covariance_types:

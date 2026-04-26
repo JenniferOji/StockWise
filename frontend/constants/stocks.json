@@ -1,7 +1,7 @@
 [
   {
     "symbol":"MMM",
-    "companyName":"3M Company",
+    "companyName":"3M",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -9,7 +9,7 @@
   },
   {
     "symbol":"AOS",
-    "companyName":"A. O. Smith Corporation",
+    "companyName":"A. O. Smith",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -20,23 +20,23 @@
     "companyName":"Abbott Laboratories",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ABT.png"
   },
   {
     "symbol":"ABBV",
-    "companyName":"AbbVie Inc.",
+    "companyName":"AbbVie",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ABBV.png"
   },
   {
     "symbol":"ACN",
-    "companyName":"Accenture plc",
+    "companyName":"Accenture",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ACN.png"
   },
   {
@@ -44,20 +44,20 @@
     "companyName":"Adobe Inc.",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ADBE.png"
   },
   {
     "symbol":"AMD",
-    "companyName":"Advanced Micro Devices, Inc.",
+    "companyName":"Advanced Micro Devices",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AMD.png"
   },
   {
     "symbol":"AES",
-    "companyName":"The AES Corporation",
+    "companyName":"AES Corporation",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -65,42 +65,42 @@
   },
   {
     "symbol":"AFL",
-    "companyName":"Aflac Incorporated",
+    "companyName":"Aflac",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AFL.png"
   },
   {
     "symbol":"A",
-    "companyName":"Agilent Technologies, Inc.",
+    "companyName":"Agilent Technologies",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/A.png"
   },
   {
     "symbol":"APD",
-    "companyName":"Air Products and Chemicals, Inc.",
+    "companyName":"Air Products",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Basic Materials",
+    "sector":"Materials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/APD.png"
   },
   {
     "symbol":"ABNB",
-    "companyName":"Airbnb, Inc.",
+    "companyName":"Airbnb",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ABNB.png"
   },
   {
     "symbol":"AKAM",
-    "companyName":"Akamai Technologies, Inc.",
+    "companyName":"Akamai Technologies",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AKAM.png"
   },
   {
@@ -108,12 +108,12 @@
     "companyName":"Albemarle Corporation",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Basic Materials",
+    "sector":"Materials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ALB.png"
   },
   {
     "symbol":"ARE",
-    "companyName":"Alexandria Real Estate Equities, Inc.",
+    "companyName":"Alexandria Real Estate Equities",
     "shares":0,
     "purchasePrice":0,
     "sector":"Real Estate",
@@ -121,15 +121,15 @@
   },
   {
     "symbol":"ALGN",
-    "companyName":"Align Technology, Inc.",
+    "companyName":"Align Technology",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ALGN.png"
   },
   {
     "symbol":"ALLE",
-    "companyName":"Allegion plc",
+    "companyName":"Allegion",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -137,7 +137,7 @@
   },
   {
     "symbol":"LNT",
-    "companyName":"Alliant Energy Corporation",
+    "companyName":"Alliant Energy",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -145,15 +145,15 @@
   },
   {
     "symbol":"ALL",
-    "companyName":"The Allstate Corporation",
+    "companyName":"Allstate",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ALL.png"
   },
   {
     "symbol":"GOOGL",
-    "companyName":"Alphabet Inc.",
+    "companyName":"Alphabet Inc. (Class A)",
     "shares":0,
     "purchasePrice":0,
     "sector":"Communication Services",
@@ -161,7 +161,7 @@
   },
   {
     "symbol":"GOOG",
-    "companyName":"Alphabet Inc.",
+    "companyName":"Alphabet Inc. (Class C)",
     "shares":0,
     "purchasePrice":0,
     "sector":"Communication Services",
@@ -169,31 +169,31 @@
   },
   {
     "symbol":"MO",
-    "companyName":"Altria Group, Inc.",
+    "companyName":"Altria",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MO.png"
   },
   {
     "symbol":"AMZN",
-    "companyName":"Amazon.com, Inc.",
+    "companyName":"Amazon",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AMZN.png"
   },
   {
     "symbol":"AMCR",
-    "companyName":"Amcor plc",
+    "companyName":"Amcor",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Materials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AMCR.png"
   },
   {
     "symbol":"AEE",
-    "companyName":"Ameren Corporation",
+    "companyName":"Ameren",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -201,7 +201,7 @@
   },
   {
     "symbol":"AEP",
-    "companyName":"American Electric Power Company, Inc.",
+    "companyName":"American Electric Power",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -209,23 +209,23 @@
   },
   {
     "symbol":"AXP",
-    "companyName":"American Express Company",
+    "companyName":"American Express",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AXP.png"
   },
   {
     "symbol":"AIG",
-    "companyName":"American International Group, Inc.",
+    "companyName":"American International Group",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AIG.png"
   },
   {
     "symbol":"AMT",
-    "companyName":"American Tower Corporation",
+    "companyName":"American Tower",
     "shares":0,
     "purchasePrice":0,
     "sector":"Real Estate",
@@ -233,7 +233,7 @@
   },
   {
     "symbol":"AWK",
-    "companyName":"American Water Works Company, Inc.",
+    "companyName":"American Water Works",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -241,15 +241,15 @@
   },
   {
     "symbol":"AMP",
-    "companyName":"Ameriprise Financial, Inc.",
+    "companyName":"Ameriprise Financial",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AMP.png"
   },
   {
     "symbol":"AME",
-    "companyName":"AMETEK, Inc.",
+    "companyName":"Ametek",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -257,26 +257,26 @@
   },
   {
     "symbol":"AMGN",
-    "companyName":"Amgen Inc.",
+    "companyName":"Amgen",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AMGN.png"
   },
   {
     "symbol":"APH",
-    "companyName":"Amphenol Corporation",
+    "companyName":"Amphenol",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/APH.png"
   },
   {
     "symbol":"ADI",
-    "companyName":"Analog Devices, Inc.",
+    "companyName":"Analog Devices",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ADI.png"
   },
   {
@@ -284,7 +284,7 @@
     "companyName":"Aon plc",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AON.png"
   },
   {
@@ -297,10 +297,10 @@
   },
   {
     "symbol":"APO",
-    "companyName":"Apollo Global Management, Inc.",
+    "companyName":"Apollo Global Management",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/APO.png"
   },
   {
@@ -308,63 +308,63 @@
     "companyName":"Apple Inc.",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AAPL.png"
   },
   {
     "symbol":"AMAT",
-    "companyName":"Applied Materials, Inc.",
+    "companyName":"Applied Materials",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AMAT.png"
   },
   {
     "symbol":"APP",
-    "companyName":"AppLovin Corporation",
+    "companyName":"AppLovin",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Communication Services",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/APP.png"
   },
   {
     "symbol":"APTV",
-    "companyName":"Aptiv PLC",
+    "companyName":"Aptiv",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/APTV.png"
   },
   {
     "symbol":"ACGL",
-    "companyName":"Arch Capital Group Ltd.",
+    "companyName":"Arch Capital Group",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ACGL.png"
   },
   {
     "symbol":"ADM",
-    "companyName":"Archer-Daniels-Midland Company",
+    "companyName":"Archer Daniels Midland",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ADM.png"
   },
   {
     "symbol":"ARES",
-    "companyName":"Ares Management Corporation",
+    "companyName":"Ares Management",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ARES.png"
   },
   {
     "symbol":"ANET",
-    "companyName":"Arista Networks, Inc.",
+    "companyName":"Arista Networks",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ANET.png"
   },
   {
@@ -372,20 +372,20 @@
     "companyName":"Arthur J. Gallagher & Co.",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AJG.png"
   },
   {
     "symbol":"AIZ",
-    "companyName":"Assurant, Inc.",
+    "companyName":"Assurant",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AIZ.png"
   },
   {
     "symbol":"T",
-    "companyName":"AT&T Inc.",
+    "companyName":"AT&T",
     "shares":0,
     "purchasePrice":0,
     "sector":"Communication Services",
@@ -393,7 +393,7 @@
   },
   {
     "symbol":"ATO",
-    "companyName":"Atmos Energy Corporation",
+    "companyName":"Atmos Energy",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -401,31 +401,31 @@
   },
   {
     "symbol":"ADSK",
-    "companyName":"Autodesk, Inc.",
+    "companyName":"Autodesk",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ADSK.png"
   },
   {
     "symbol":"ADP",
-    "companyName":"Automatic Data Processing, Inc.",
+    "companyName":"Automatic Data Processing",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Industrials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ADP.png"
   },
   {
     "symbol":"AZO",
-    "companyName":"AutoZone, Inc.",
+    "companyName":"AutoZone",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AZO.png"
   },
   {
     "symbol":"AVB",
-    "companyName":"AvalonBay Communities, Inc.",
+    "companyName":"AvalonBay Communities",
     "shares":0,
     "purchasePrice":0,
     "sector":"Real Estate",
@@ -433,15 +433,15 @@
   },
   {
     "symbol":"AVY",
-    "companyName":"Avery Dennison Corporation",
+    "companyName":"Avery Dennison",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Materials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AVY.png"
   },
   {
     "symbol":"AXON",
-    "companyName":"Axon Enterprise, Inc.",
+    "companyName":"Axon Enterprise",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -449,7 +449,7 @@
   },
   {
     "symbol":"BKR",
-    "companyName":"Baker Hughes Company",
+    "companyName":"Baker Hughes",
     "shares":0,
     "purchasePrice":0,
     "sector":"Energy",
@@ -460,71 +460,71 @@
     "companyName":"Ball Corporation",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Materials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BALL.png"
   },
   {
     "symbol":"BAC",
-    "companyName":"Bank of America Corporation",
+    "companyName":"Bank of America",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BAC.png"
   },
   {
     "symbol":"BAX",
-    "companyName":"Baxter International Inc.",
+    "companyName":"Baxter International",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BAX.png"
   },
   {
     "symbol":"BDX",
-    "companyName":"Becton, Dickinson and Company",
+    "companyName":"Becton Dickinson",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BDX.png"
   },
   {
-    "symbol":"BRK-B",
-    "companyName":"Berkshire Hathaway Inc.",
+    "symbol":"BRK.B",
+    "companyName":"Berkshire Hathaway",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
-    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BRK-B.png"
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BRK.B.png"
   },
   {
     "symbol":"BBY",
-    "companyName":"Best Buy Co., Inc.",
+    "companyName":"Best Buy",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BBY.png"
   },
   {
     "symbol":"TECH",
-    "companyName":"Bio-Techne Corporation",
+    "companyName":"Bio-Techne",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TECH.png"
   },
   {
     "symbol":"BIIB",
-    "companyName":"Biogen Inc.",
+    "companyName":"Biogen",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BIIB.png"
   },
   {
     "symbol":"BLK",
-    "companyName":"BlackRock, Inc.",
+    "companyName":"BlackRock",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BLK.png"
   },
   {
@@ -532,7 +532,7 @@
     "companyName":"Blackstone Inc.",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BX.png"
   },
   {
@@ -540,20 +540,20 @@
     "companyName":"Block, Inc.",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/XYZ.png"
   },
   {
     "symbol":"BK",
-    "companyName":"The Bank of New York Mellon Corporation",
+    "companyName":"BNY Mellon",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BK.png"
   },
   {
     "symbol":"BA",
-    "companyName":"The Boeing Company",
+    "companyName":"Boeing",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -561,63 +561,63 @@
   },
   {
     "symbol":"BKNG",
-    "companyName":"Booking Holdings Inc.",
+    "companyName":"Booking Holdings",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BKNG.png"
   },
   {
     "symbol":"BSX",
-    "companyName":"Boston Scientific Corporation",
+    "companyName":"Boston Scientific",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BSX.png"
   },
   {
     "symbol":"BMY",
-    "companyName":"Bristol-Myers Squibb Company",
+    "companyName":"Bristol Myers Squibb",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BMY.png"
   },
   {
     "symbol":"AVGO",
-    "companyName":"Broadcom Inc.",
+    "companyName":"Broadcom",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/AVGO.png"
   },
   {
     "symbol":"BR",
-    "companyName":"Broadridge Financial Solutions, Inc.",
+    "companyName":"Broadridge Financial Solutions",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Industrials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BR.png"
   },
   {
     "symbol":"BRO",
-    "companyName":"Brown & Brown, Inc.",
+    "companyName":"Brown & Brown",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BRO.png"
   },
   {
-    "symbol":"BF-B",
-    "companyName":"Brown-Forman Corporation",
+    "symbol":"BF.B",
+    "companyName":"Brown\u2013Forman",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
-    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BF-B.png"
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BF.B.png"
   },
   {
     "symbol":"BLDR",
-    "companyName":"Builders FirstSource, Inc.",
+    "companyName":"Builders FirstSource",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -625,10 +625,10 @@
   },
   {
     "symbol":"BG",
-    "companyName":"Bunge Global SA",
+    "companyName":"Bunge Global",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BG.png"
   },
   {
@@ -641,7 +641,7 @@
   },
   {
     "symbol":"CHRW",
-    "companyName":"C.H. Robinson Worldwide, Inc.",
+    "companyName":"C.H. Robinson",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -649,10 +649,10 @@
   },
   {
     "symbol":"CDNS",
-    "companyName":"Cadence Design Systems, Inc.",
+    "companyName":"Cadence Design Systems",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CDNS.png"
   },
   {
@@ -665,39 +665,39 @@
   },
   {
     "symbol":"CPB",
-    "companyName":"The Campbell's Company",
+    "companyName":"Campbell's Company (The)",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CPB.png"
   },
   {
     "symbol":"COF",
-    "companyName":"Capital One Financial Corporation",
+    "companyName":"Capital One",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/COF.png"
   },
   {
     "symbol":"CAH",
-    "companyName":"Cardinal Health, Inc.",
+    "companyName":"Cardinal Health",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CAH.png"
   },
   {
     "symbol":"CCL",
-    "companyName":"Carnival Corporation & plc",
+    "companyName":"Carnival",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CCL.png"
   },
   {
     "symbol":"CARR",
-    "companyName":"Carrier Global Corporation",
+    "companyName":"Carrier Global",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -705,11 +705,19 @@
   },
   {
     "symbol":"CVNA",
-    "companyName":"Carvana Co.",
+    "companyName":"Carvana",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CVNA.png"
+  },
+  {
+    "symbol":"CASY",
+    "companyName":"Casey's",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CASY.png"
   },
   {
     "symbol":"CAT",
@@ -721,15 +729,15 @@
   },
   {
     "symbol":"CBOE",
-    "companyName":"Cboe Global Markets, Inc.",
+    "companyName":"Cboe Global Markets",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CBOE.png"
   },
   {
     "symbol":"CBRE",
-    "companyName":"CBRE Group, Inc.",
+    "companyName":"CBRE Group",
     "shares":0,
     "purchasePrice":0,
     "sector":"Real Estate",
@@ -740,15 +748,15 @@
     "companyName":"CDW Corporation",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CDW.png"
   },
   {
     "symbol":"COR",
-    "companyName":"Cencora, Inc.",
+    "companyName":"Cencora",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/COR.png"
   },
   {
@@ -756,12 +764,12 @@
     "companyName":"Centene Corporation",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CNC.png"
   },
   {
     "symbol":"CNP",
-    "companyName":"CenterPoint Energy, Inc.",
+    "companyName":"CenterPoint Energy",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -769,31 +777,31 @@
   },
   {
     "symbol":"CF",
-    "companyName":"CF Industries Holdings, Inc.",
+    "companyName":"CF Industries",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Basic Materials",
+    "sector":"Materials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CF.png"
   },
   {
     "symbol":"CRL",
-    "companyName":"Charles River Laboratories International, Inc.",
+    "companyName":"Charles River Laboratories",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CRL.png"
   },
   {
     "symbol":"SCHW",
-    "companyName":"The Charles Schwab Corporation",
+    "companyName":"Charles Schwab Corporation",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SCHW.png"
   },
   {
     "symbol":"CHTR",
-    "companyName":"Charter Communications, Inc.",
+    "companyName":"Charter Communications",
     "shares":0,
     "purchasePrice":0,
     "sector":"Communication Services",
@@ -809,10 +817,10 @@
   },
   {
     "symbol":"CMG",
-    "companyName":"Chipotle Mexican Grill, Inc.",
+    "companyName":"Chipotle Mexican Grill",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CMG.png"
   },
   {
@@ -820,44 +828,44 @@
     "companyName":"Chubb Limited",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CB.png"
   },
   {
     "symbol":"CHD",
-    "companyName":"Church & Dwight Co., Inc.",
+    "companyName":"Church & Dwight",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CHD.png"
   },
   {
     "symbol":"CIEN",
-    "companyName":"Ciena Corporation",
+    "companyName":"Ciena",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CIEN.png"
   },
   {
     "symbol":"CI",
-    "companyName":"The Cigna Group",
+    "companyName":"Cigna",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CI.png"
   },
   {
     "symbol":"CINF",
-    "companyName":"Cincinnati Financial Corporation",
+    "companyName":"Cincinnati Financial",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CINF.png"
   },
   {
     "symbol":"CTAS",
-    "companyName":"Cintas Corporation",
+    "companyName":"Cintas",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -865,47 +873,47 @@
   },
   {
     "symbol":"CSCO",
-    "companyName":"Cisco Systems, Inc.",
+    "companyName":"Cisco",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CSCO.png"
   },
   {
     "symbol":"C",
-    "companyName":"Citigroup Inc.",
+    "companyName":"Citigroup",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/C.png"
   },
   {
     "symbol":"CFG",
-    "companyName":"Citizens Financial Group, Inc.",
+    "companyName":"Citizens Financial Group",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CFG.png"
   },
   {
     "symbol":"CLX",
-    "companyName":"The Clorox Company",
+    "companyName":"Clorox",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CLX.png"
   },
   {
     "symbol":"CME",
-    "companyName":"CME Group Inc.",
+    "companyName":"CME Group",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CME.png"
   },
   {
     "symbol":"CMS",
-    "companyName":"CMS Energy Corporation",
+    "companyName":"CMS Energy",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -913,18 +921,18 @@
   },
   {
     "symbol":"KO",
-    "companyName":"The Coca-Cola Company",
+    "companyName":"Coca-Cola Company (The)",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KO.png"
   },
   {
     "symbol":"CTSH",
-    "companyName":"Cognizant Technology Solutions Corporation",
+    "companyName":"Cognizant",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CTSH.png"
   },
   {
@@ -932,28 +940,28 @@
     "companyName":"Coherent Corp.",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/COHR.png"
   },
   {
     "symbol":"COIN",
-    "companyName":"Coinbase Global, Inc.",
+    "companyName":"Coinbase",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/COIN.png"
   },
   {
     "symbol":"CL",
-    "companyName":"Colgate-Palmolive Company",
+    "companyName":"Colgate-Palmolive",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CL.png"
   },
   {
     "symbol":"CMCSA",
-    "companyName":"Comcast Corporation",
+    "companyName":"Comcast",
     "shares":0,
     "purchasePrice":0,
     "sector":"Communication Services",
@@ -961,7 +969,7 @@
   },
   {
     "symbol":"FIX",
-    "companyName":"Comfort Systems USA, Inc.",
+    "companyName":"Comfort Systems USA",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -969,10 +977,10 @@
   },
   {
     "symbol":"CAG",
-    "companyName":"Conagra Brands, Inc.",
+    "companyName":"Conagra Brands",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CAG.png"
   },
   {
@@ -985,7 +993,7 @@
   },
   {
     "symbol":"ED",
-    "companyName":"Consolidated Edison, Inc.",
+    "companyName":"Consolidated Edison",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -993,15 +1001,15 @@
   },
   {
     "symbol":"STZ",
-    "companyName":"Constellation Brands, Inc.",
+    "companyName":"Constellation Brands",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/STZ.png"
   },
   {
     "symbol":"CEG",
-    "companyName":"Constellation Energy Corporation",
+    "companyName":"Constellation Energy",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -1009,15 +1017,15 @@
   },
   {
     "symbol":"COO",
-    "companyName":"The Cooper Companies, Inc.",
+    "companyName":"Cooper Companies (The)",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/COO.png"
   },
   {
     "symbol":"CPRT",
-    "companyName":"Copart, Inc.",
+    "companyName":"Copart",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -1025,31 +1033,31 @@
   },
   {
     "symbol":"GLW",
-    "companyName":"Corning Incorporated",
+    "companyName":"Corning Inc.",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GLW.png"
   },
   {
     "symbol":"CPAY",
-    "companyName":"Corpay, Inc.",
+    "companyName":"Corpay",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CPAY.png"
   },
   {
     "symbol":"CTVA",
-    "companyName":"Corteva, Inc.",
+    "companyName":"Corteva",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Basic Materials",
+    "sector":"Materials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CTVA.png"
   },
   {
     "symbol":"CSGP",
-    "companyName":"CoStar Group, Inc.",
+    "companyName":"CoStar Group",
     "shares":0,
     "purchasePrice":0,
     "sector":"Real Estate",
@@ -1057,15 +1065,15 @@
   },
   {
     "symbol":"COST",
-    "companyName":"Costco Wholesale Corporation",
+    "companyName":"Costco",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/COST.png"
   },
   {
     "symbol":"CTRA",
-    "companyName":"Coterra Energy Inc.",
+    "companyName":"Coterra",
     "shares":0,
     "purchasePrice":0,
     "sector":"Energy",
@@ -1076,20 +1084,20 @@
     "companyName":"CRH plc",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Basic Materials",
+    "sector":"Materials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CRH.png"
   },
   {
     "symbol":"CRWD",
-    "companyName":"CrowdStrike Holdings, Inc.",
+    "companyName":"CrowdStrike",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CRWD.png"
   },
   {
     "symbol":"CCI",
-    "companyName":"Crown Castle Inc.",
+    "companyName":"Crown Castle",
     "shares":0,
     "purchasePrice":0,
     "sector":"Real Estate",
@@ -1105,7 +1113,7 @@
   },
   {
     "symbol":"CMI",
-    "companyName":"Cummins Inc.",
+    "companyName":"Cummins",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -1113,10 +1121,10 @@
   },
   {
     "symbol":"CVS",
-    "companyName":"CVS Health Corporation",
+    "companyName":"CVS Health",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CVS.png"
   },
   {
@@ -1124,39 +1132,39 @@
     "companyName":"Danaher Corporation",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DHR.png"
   },
   {
     "symbol":"DRI",
-    "companyName":"Darden Restaurants, Inc.",
+    "companyName":"Darden Restaurants",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DRI.png"
   },
   {
     "symbol":"DDOG",
-    "companyName":"Datadog, Inc.",
+    "companyName":"Datadog",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DDOG.png"
   },
   {
     "symbol":"DVA",
-    "companyName":"DaVita Inc.",
+    "companyName":"DaVita",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DVA.png"
   },
   {
     "symbol":"DECK",
-    "companyName":"Deckers Outdoor Corporation",
+    "companyName":"Deckers Brands",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DECK.png"
   },
   {
@@ -1169,15 +1177,15 @@
   },
   {
     "symbol":"DELL",
-    "companyName":"Dell Technologies Inc.",
+    "companyName":"Dell Technologies",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DELL.png"
   },
   {
     "symbol":"DAL",
-    "companyName":"Delta Air Lines, Inc.",
+    "companyName":"Delta Air Lines",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -1185,7 +1193,7 @@
   },
   {
     "symbol":"DVN",
-    "companyName":"Devon Energy Corporation",
+    "companyName":"Devon Energy",
     "shares":0,
     "purchasePrice":0,
     "sector":"Energy",
@@ -1193,15 +1201,15 @@
   },
   {
     "symbol":"DXCM",
-    "companyName":"DexCom, Inc.",
+    "companyName":"Dexcom",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DXCM.png"
   },
   {
     "symbol":"FANG",
-    "companyName":"Diamondback Energy, Inc.",
+    "companyName":"Diamondback Energy",
     "shares":0,
     "purchasePrice":0,
     "sector":"Energy",
@@ -1209,7 +1217,7 @@
   },
   {
     "symbol":"DLR",
-    "companyName":"Digital Realty Trust, Inc.",
+    "companyName":"Digital Realty",
     "shares":0,
     "purchasePrice":0,
     "sector":"Real Estate",
@@ -1217,23 +1225,23 @@
   },
   {
     "symbol":"DG",
-    "companyName":"Dollar General Corporation",
+    "companyName":"Dollar General",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DG.png"
   },
   {
     "symbol":"DLTR",
-    "companyName":"Dollar Tree, Inc.",
+    "companyName":"Dollar Tree",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DLTR.png"
   },
   {
     "symbol":"D",
-    "companyName":"Dominion Energy, Inc.",
+    "companyName":"Dominion Energy",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -1241,18 +1249,18 @@
   },
   {
     "symbol":"DPZ",
-    "companyName":"Domino's Pizza, Inc.",
+    "companyName":"Domino's",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DPZ.png"
   },
   {
     "symbol":"DASH",
-    "companyName":"DoorDash, Inc.",
+    "companyName":"DoorDash",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DASH.png"
   },
   {
@@ -1268,20 +1276,20 @@
     "companyName":"Dow Inc.",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Basic Materials",
+    "sector":"Materials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DOW.png"
   },
   {
     "symbol":"DHI",
-    "companyName":"D.R. Horton, Inc.",
+    "companyName":"D. R. Horton",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DHI.png"
   },
   {
     "symbol":"DTE",
-    "companyName":"DTE Energy Company",
+    "companyName":"DTE Energy",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -1289,7 +1297,7 @@
   },
   {
     "symbol":"DUK",
-    "companyName":"Duke Energy Corporation",
+    "companyName":"Duke Energy",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -1297,15 +1305,15 @@
   },
   {
     "symbol":"DD",
-    "companyName":"DuPont de Nemours, Inc.",
+    "companyName":"DuPont",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Basic Materials",
+    "sector":"Materials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DD.png"
   },
   {
     "symbol":"ETN",
-    "companyName":"Eaton Corporation plc",
+    "companyName":"Eaton Corporation",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -1316,12 +1324,12 @@
     "companyName":"eBay Inc.",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/EBAY.png"
   },
   {
     "symbol":"SATS",
-    "companyName":"EchoStar Corporation",
+    "companyName":"EchoStar",
     "shares":0,
     "purchasePrice":0,
     "sector":"Communication Services",
@@ -1329,10 +1337,10 @@
   },
   {
     "symbol":"ECL",
-    "companyName":"Ecolab Inc.",
+    "companyName":"Ecolab",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Basic Materials",
+    "sector":"Materials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ECL.png"
   },
   {
@@ -1345,15 +1353,15 @@
   },
   {
     "symbol":"EW",
-    "companyName":"Edwards Lifesciences Corporation",
+    "companyName":"Edwards Lifesciences",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/EW.png"
   },
   {
     "symbol":"EA",
-    "companyName":"Electronic Arts Inc.",
+    "companyName":"Electronic Arts",
     "shares":0,
     "purchasePrice":0,
     "sector":"Communication Services",
@@ -1361,15 +1369,15 @@
   },
   {
     "symbol":"ELV",
-    "companyName":"Elevance Health, Inc.",
+    "companyName":"Elevance Health",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ELV.png"
   },
   {
     "symbol":"EME",
-    "companyName":"EMCOR Group, Inc.",
+    "companyName":"Emcor",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -1377,7 +1385,7 @@
   },
   {
     "symbol":"EMR",
-    "companyName":"Emerson Electric Co.",
+    "companyName":"Emerson Electric",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -1385,7 +1393,7 @@
   },
   {
     "symbol":"ETR",
-    "companyName":"Entergy Corporation",
+    "companyName":"Entergy",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -1393,7 +1401,7 @@
   },
   {
     "symbol":"EOG",
-    "companyName":"EOG Resources, Inc.",
+    "companyName":"EOG Resources",
     "shares":0,
     "purchasePrice":0,
     "sector":"Energy",
@@ -1401,10 +1409,10 @@
   },
   {
     "symbol":"EPAM",
-    "companyName":"EPAM Systems, Inc.",
+    "companyName":"EPAM Systems",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/EPAM.png"
   },
   {
@@ -1417,7 +1425,7 @@
   },
   {
     "symbol":"EFX",
-    "companyName":"Equifax Inc.",
+    "companyName":"Equifax",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -1425,7 +1433,7 @@
   },
   {
     "symbol":"EQIX",
-    "companyName":"Equinix, Inc.",
+    "companyName":"Equinix",
     "shares":0,
     "purchasePrice":0,
     "sector":"Real Estate",
@@ -1441,15 +1449,15 @@
   },
   {
     "symbol":"ERIE",
-    "companyName":"Erie Indemnity Company",
+    "companyName":"Erie Indemnity",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ERIE.png"
   },
   {
     "symbol":"ESS",
-    "companyName":"Essex Property Trust, Inc.",
+    "companyName":"Essex Property Trust",
     "shares":0,
     "purchasePrice":0,
     "sector":"Real Estate",
@@ -1457,23 +1465,23 @@
   },
   {
     "symbol":"EL",
-    "companyName":"The Est\u00e9e Lauder Companies Inc.",
+    "companyName":"Est\u00e9e Lauder Companies (The)",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/EL.png"
   },
   {
     "symbol":"EG",
-    "companyName":"Everest Group, Ltd.",
+    "companyName":"Everest Group",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/EG.png"
   },
   {
     "symbol":"EVRG",
-    "companyName":"Evergy, Inc.",
+    "companyName":"Evergy",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -1489,7 +1497,7 @@
   },
   {
     "symbol":"EXC",
-    "companyName":"Exelon Corporation",
+    "companyName":"Exelon",
     "shares":0,
     "purchasePrice":0,
     "sector":"Utilities",
@@ -1497,7 +1505,7 @@
   },
   {
     "symbol":"EXE",
-    "companyName":"Expand Energy Corporation",
+    "companyName":"Expand Energy",
     "shares":0,
     "purchasePrice":0,
     "sector":"Energy",
@@ -1505,15 +1513,15 @@
   },
   {
     "symbol":"EXPE",
-    "companyName":"Expedia Group, Inc.",
+    "companyName":"Expedia Group",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/EXPE.png"
   },
   {
     "symbol":"EXPD",
-    "companyName":"Expeditors International of Washington, Inc.",
+    "companyName":"Expeditors International",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -1521,7 +1529,7 @@
   },
   {
     "symbol":"EXR",
-    "companyName":"Extra Space Storage Inc.",
+    "companyName":"Extra Space Storage",
     "shares":0,
     "purchasePrice":0,
     "sector":"Real Estate",
@@ -1529,7 +1537,7 @@
   },
   {
     "symbol":"XOM",
-    "companyName":"Exxon Mobil Corporation",
+    "companyName":"ExxonMobil",
     "shares":0,
     "purchasePrice":0,
     "sector":"Energy",
@@ -1540,28 +1548,28 @@
     "companyName":"F5, Inc.",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FFIV.png"
   },
   {
     "symbol":"FDS",
-    "companyName":"FactSet Research Systems Inc.",
+    "companyName":"FactSet",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FDS.png"
   },
   {
     "symbol":"FICO",
-    "companyName":"Fair Isaac Corporation",
+    "companyName":"Fair Isaac",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FICO.png"
   },
   {
     "symbol":"FAST",
-    "companyName":"Fastenal Company",
+    "companyName":"Fastenal",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -1577,7 +1585,7 @@
   },
   {
     "symbol":"FDX",
-    "companyName":"FedEx Corporation",
+    "companyName":"FedEx",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
@@ -1585,10 +1593,10 @@
   },
   {
     "symbol":"FIS",
-    "companyName":"Fidelity National Information Services, Inc.",
+    "companyName":"Fidelity National Information Services",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FIS.png"
   },
   {
@@ -1596,407 +1604,2423 @@
     "companyName":"Fifth Third Bancorp",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FITB.png"
   },
   {
-    "symbol":"ALNY",
-    "companyName":"Alnylam Pharmaceuticals, Inc.",
+    "symbol":"FSLR",
+    "companyName":"First Solar",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
-    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ALNY.png"
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FSLR.png"
   },
   {
-    "symbol":"ARM",
-    "companyName":"Arm Holdings plc",
+    "symbol":"FE",
+    "companyName":"FirstEnergy",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
-    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ARM.png"
+    "sector":"Utilities",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FE.png"
   },
   {
-    "symbol":"ASML",
-    "companyName":"ASML Holding N.V.",
+    "symbol":"FISV",
+    "companyName":"Fiserv",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
-    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ASML.png"
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FISV.png"
   },
   {
-    "symbol":"TEAM",
-    "companyName":"Atlassian Corporation",
+    "symbol":"F",
+    "companyName":"Ford Motor Company",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
-    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TEAM.png"
-  },
-  {
-    "symbol":"CCEP",
-    "companyName":"Coca-Cola Europacific Partners PLC",
-    "shares":0,
-    "purchasePrice":0,
-    "sector":"Consumer Defensive",
-    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CCEP.png"
-  },
-  {
-    "symbol":"FER",
-    "companyName":"Ferrovial SE",
-    "shares":0,
-    "purchasePrice":0,
-    "sector":"Industrials",
-    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FER.png"
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/F.png"
   },
   {
     "symbol":"FTNT",
-    "companyName":"Fortinet, Inc.",
+    "companyName":"Fortinet",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FTNT.png"
   },
   {
-    "symbol":"GEHC",
-    "companyName":"GE HealthCare Technologies Inc.",
+    "symbol":"FTV",
+    "companyName":"Fortive",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FTV.png"
+  },
+  {
+    "symbol":"FOXA",
+    "companyName":"Fox Corporation (Class A)",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FOXA.png"
+  },
+  {
+    "symbol":"FOX",
+    "companyName":"Fox Corporation (Class B)",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FOX.png"
+  },
+  {
+    "symbol":"BEN",
+    "companyName":"Franklin Resources",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/BEN.png"
+  },
+  {
+    "symbol":"FCX",
+    "companyName":"Freeport-McMoRan",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/FCX.png"
+  },
+  {
+    "symbol":"GRMN",
+    "companyName":"Garmin",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GRMN.png"
+  },
+  {
+    "symbol":"IT",
+    "companyName":"Gartner",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/IT.png"
+  },
+  {
+    "symbol":"GE",
+    "companyName":"GE Aerospace",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GE.png"
+  },
+  {
+    "symbol":"GEHC",
+    "companyName":"GE HealthCare",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GEHC.png"
   },
   {
-    "symbol":"GILD",
-    "companyName":"Gilead Sciences, Inc.",
+    "symbol":"GEV",
+    "companyName":"GE Vernova",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GEV.png"
+  },
+  {
+    "symbol":"GEN",
+    "companyName":"Gen Digital",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GEN.png"
+  },
+  {
+    "symbol":"GNRC",
+    "companyName":"Generac",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GNRC.png"
+  },
+  {
+    "symbol":"GD",
+    "companyName":"General Dynamics",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GD.png"
+  },
+  {
+    "symbol":"GIS",
+    "companyName":"General Mills",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GIS.png"
+  },
+  {
+    "symbol":"GM",
+    "companyName":"General Motors",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GM.png"
+  },
+  {
+    "symbol":"GPC",
+    "companyName":"Genuine Parts Company",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GPC.png"
+  },
+  {
+    "symbol":"GILD",
+    "companyName":"Gilead Sciences",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GILD.png"
   },
   {
+    "symbol":"GPN",
+    "companyName":"Global Payments",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GPN.png"
+  },
+  {
+    "symbol":"GL",
+    "companyName":"Globe Life",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GL.png"
+  },
+  {
+    "symbol":"GDDY",
+    "companyName":"GoDaddy",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GDDY.png"
+  },
+  {
+    "symbol":"GS",
+    "companyName":"Goldman Sachs",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GS.png"
+  },
+  {
+    "symbol":"HAL",
+    "companyName":"Halliburton",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Energy",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HAL.png"
+  },
+  {
+    "symbol":"HIG",
+    "companyName":"Hartford (The)",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HIG.png"
+  },
+  {
+    "symbol":"HAS",
+    "companyName":"Hasbro",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HAS.png"
+  },
+  {
+    "symbol":"HCA",
+    "companyName":"HCA Healthcare",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HCA.png"
+  },
+  {
+    "symbol":"DOC",
+    "companyName":"Healthpeak Properties",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DOC.png"
+  },
+  {
+    "symbol":"HSIC",
+    "companyName":"Henry Schein",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HSIC.png"
+  },
+  {
+    "symbol":"HSY",
+    "companyName":"Hershey Company (The)",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HSY.png"
+  },
+  {
+    "symbol":"HPE",
+    "companyName":"Hewlett Packard Enterprise",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HPE.png"
+  },
+  {
+    "symbol":"HLT",
+    "companyName":"Hilton Worldwide",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HLT.png"
+  },
+  {
+    "symbol":"HD",
+    "companyName":"Home Depot (The)",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HD.png"
+  },
+  {
     "symbol":"HON",
-    "companyName":"Honeywell International Inc.",
+    "companyName":"Honeywell",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HON.png"
   },
   {
-    "symbol":"IDXX",
-    "companyName":"IDEXX Laboratories, Inc.",
+    "symbol":"HRL",
+    "companyName":"Hormel Foods",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HRL.png"
+  },
+  {
+    "symbol":"HST",
+    "companyName":"Host Hotels & Resorts",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HST.png"
+  },
+  {
+    "symbol":"HWM",
+    "companyName":"Howmet Aerospace",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HWM.png"
+  },
+  {
+    "symbol":"HPQ",
+    "companyName":"HP Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HPQ.png"
+  },
+  {
+    "symbol":"HUBB",
+    "companyName":"Hubbell Incorporated",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HUBB.png"
+  },
+  {
+    "symbol":"HUM",
+    "companyName":"Humana",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HUM.png"
+  },
+  {
+    "symbol":"HBAN",
+    "companyName":"Huntington Bancshares",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HBAN.png"
+  },
+  {
+    "symbol":"HII",
+    "companyName":"Huntington Ingalls Industries",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HII.png"
+  },
+  {
+    "symbol":"IBM",
+    "companyName":"IBM",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/IBM.png"
+  },
+  {
+    "symbol":"IEX",
+    "companyName":"IDEX Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/IEX.png"
+  },
+  {
+    "symbol":"IDXX",
+    "companyName":"Idexx Laboratories",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/IDXX.png"
   },
   {
-    "symbol":"INSM",
-    "companyName":"Insmed Incorporated",
+    "symbol":"ITW",
+    "companyName":"Illinois Tool Works",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
-    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/INSM.png"
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ITW.png"
+  },
+  {
+    "symbol":"INCY",
+    "companyName":"Incyte",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/INCY.png"
+  },
+  {
+    "symbol":"IR",
+    "companyName":"Ingersoll Rand",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/IR.png"
+  },
+  {
+    "symbol":"PODD",
+    "companyName":"Insulet Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PODD.png"
   },
   {
     "symbol":"INTC",
-    "companyName":"Intel Corporation",
+    "companyName":"Intel",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/INTC.png"
   },
   {
-    "symbol":"INTU",
-    "companyName":"Intuit Inc.",
+    "symbol":"IBKR",
+    "companyName":"Interactive Brokers",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/IBKR.png"
+  },
+  {
+    "symbol":"ICE",
+    "companyName":"Intercontinental Exchange",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ICE.png"
+  },
+  {
+    "symbol":"IFF",
+    "companyName":"International Flavors & Fragrances",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/IFF.png"
+  },
+  {
+    "symbol":"IP",
+    "companyName":"International Paper",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/IP.png"
+  },
+  {
+    "symbol":"INTU",
+    "companyName":"Intuit",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/INTU.png"
   },
   {
     "symbol":"ISRG",
-    "companyName":"Intuitive Surgical, Inc.",
+    "companyName":"Intuitive Surgical",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ISRG.png"
   },
   {
-    "symbol":"KDP",
-    "companyName":"Keurig Dr Pepper Inc.",
+    "symbol":"IVZ",
+    "companyName":"Invesco",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/IVZ.png"
+  },
+  {
+    "symbol":"INVH",
+    "companyName":"Invitation Homes",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/INVH.png"
+  },
+  {
+    "symbol":"IQV",
+    "companyName":"IQVIA",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/IQV.png"
+  },
+  {
+    "symbol":"IRM",
+    "companyName":"Iron Mountain",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/IRM.png"
+  },
+  {
+    "symbol":"JBHT",
+    "companyName":"J.B. Hunt",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/JBHT.png"
+  },
+  {
+    "symbol":"JBL",
+    "companyName":"Jabil",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/JBL.png"
+  },
+  {
+    "symbol":"JKHY",
+    "companyName":"Jack Henry & Associates",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/JKHY.png"
+  },
+  {
+    "symbol":"J",
+    "companyName":"Jacobs Solutions",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/J.png"
+  },
+  {
+    "symbol":"JNJ",
+    "companyName":"Johnson & Johnson",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/JNJ.png"
+  },
+  {
+    "symbol":"JCI",
+    "companyName":"Johnson Controls",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/JCI.png"
+  },
+  {
+    "symbol":"JPM",
+    "companyName":"JPMorgan Chase",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/JPM.png"
+  },
+  {
+    "symbol":"KVUE",
+    "companyName":"Kenvue",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KVUE.png"
+  },
+  {
+    "symbol":"KDP",
+    "companyName":"Keurig Dr Pepper",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KDP.png"
+  },
+  {
+    "symbol":"KEY",
+    "companyName":"KeyCorp",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KEY.png"
+  },
+  {
+    "symbol":"KEYS",
+    "companyName":"Keysight Technologies",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KEYS.png"
+  },
+  {
+    "symbol":"KMB",
+    "companyName":"Kimberly-Clark",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KMB.png"
+  },
+  {
+    "symbol":"KIM",
+    "companyName":"Kimco Realty",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KIM.png"
+  },
+  {
+    "symbol":"KMI",
+    "companyName":"Kinder Morgan",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Energy",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KMI.png"
+  },
+  {
+    "symbol":"KKR",
+    "companyName":"KKR & Co.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KKR.png"
   },
   {
     "symbol":"KLAC",
     "companyName":"KLA Corporation",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KLAC.png"
   },
   {
     "symbol":"KHC",
-    "companyName":"The Kraft Heinz Company",
+    "companyName":"Kraft Heinz",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KHC.png"
   },
   {
-    "symbol":"LRCX",
-    "companyName":"Lam Research Corporation",
+    "symbol":"KR",
+    "companyName":"Kroger",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/KR.png"
+  },
+  {
+    "symbol":"LHX",
+    "companyName":"L3Harris",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LHX.png"
+  },
+  {
+    "symbol":"LH",
+    "companyName":"Labcorp",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LH.png"
+  },
+  {
+    "symbol":"LRCX",
+    "companyName":"Lam Research",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LRCX.png"
+  },
+  {
+    "symbol":"LVS",
+    "companyName":"Las Vegas Sands",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LVS.png"
+  },
+  {
+    "symbol":"LDOS",
+    "companyName":"Leidos",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LDOS.png"
+  },
+  {
+    "symbol":"LEN",
+    "companyName":"Lennar",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LEN.png"
+  },
+  {
+    "symbol":"LII",
+    "companyName":"Lennox International",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LII.png"
+  },
+  {
+    "symbol":"LLY",
+    "companyName":"Lilly (Eli)",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LLY.png"
   },
   {
     "symbol":"LIN",
     "companyName":"Linde plc",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Basic Materials",
+    "sector":"Materials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LIN.png"
   },
   {
-    "symbol":"MAR",
-    "companyName":"Marriott International, Inc.",
+    "symbol":"LYV",
+    "companyName":"Live Nation Entertainment",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LYV.png"
+  },
+  {
+    "symbol":"LMT",
+    "companyName":"Lockheed Martin",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LMT.png"
+  },
+  {
+    "symbol":"L",
+    "companyName":"Loews Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/L.png"
+  },
+  {
+    "symbol":"LOW",
+    "companyName":"Lowe's",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LOW.png"
+  },
+  {
+    "symbol":"LULU",
+    "companyName":"Lululemon Athletica",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LULU.png"
+  },
+  {
+    "symbol":"LITE",
+    "companyName":"Lumentum",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LITE.png"
+  },
+  {
+    "symbol":"LYB",
+    "companyName":"LyondellBasell",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LYB.png"
+  },
+  {
+    "symbol":"MTB",
+    "companyName":"M&T Bank",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MTB.png"
+  },
+  {
+    "symbol":"MPC",
+    "companyName":"Marathon Petroleum",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Energy",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MPC.png"
+  },
+  {
+    "symbol":"MAR",
+    "companyName":"Marriott International",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MAR.png"
   },
   {
-    "symbol":"MRVL",
-    "companyName":"Marvell Technology, Inc.",
+    "symbol":"MRSH",
+    "companyName":"Marsh McLennan",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
-    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MRVL.png"
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MRSH.png"
   },
   {
-    "symbol":"MELI",
-    "companyName":"MercadoLibre, Inc.",
+    "symbol":"MLM",
+    "companyName":"Martin Marietta Materials",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
-    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MELI.png"
+    "sector":"Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MLM.png"
+  },
+  {
+    "symbol":"MAS",
+    "companyName":"Masco",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MAS.png"
+  },
+  {
+    "symbol":"MA",
+    "companyName":"Mastercard",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MA.png"
+  },
+  {
+    "symbol":"MKC",
+    "companyName":"McCormick & Company",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MKC.png"
+  },
+  {
+    "symbol":"MCD",
+    "companyName":"McDonald's",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MCD.png"
+  },
+  {
+    "symbol":"MCK",
+    "companyName":"McKesson Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MCK.png"
+  },
+  {
+    "symbol":"MDT",
+    "companyName":"Medtronic",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MDT.png"
+  },
+  {
+    "symbol":"MRK",
+    "companyName":"Merck & Co.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MRK.png"
   },
   {
     "symbol":"META",
-    "companyName":"Meta Platforms, Inc.",
+    "companyName":"Meta Platforms",
     "shares":0,
     "purchasePrice":0,
     "sector":"Communication Services",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/META.png"
   },
   {
-    "symbol":"MCHP",
-    "companyName":"Microchip Technology Incorporated",
+    "symbol":"MET",
+    "companyName":"MetLife",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MET.png"
+  },
+  {
+    "symbol":"MTD",
+    "companyName":"Mettler Toledo",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MTD.png"
+  },
+  {
+    "symbol":"MGM",
+    "companyName":"MGM Resorts",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MGM.png"
+  },
+  {
+    "symbol":"MCHP",
+    "companyName":"Microchip Technology",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MCHP.png"
   },
   {
     "symbol":"MU",
-    "companyName":"Micron Technology, Inc.",
+    "companyName":"Micron Technology",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MU.png"
   },
   {
     "symbol":"MSFT",
-    "companyName":"Microsoft Corporation",
+    "companyName":"Microsoft",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MSFT.png"
   },
   {
-    "symbol":"MSTR",
-    "companyName":"Strategy Inc",
+    "symbol":"MAA",
+    "companyName":"Mid-America Apartment Communities",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
-    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MSTR.png"
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MAA.png"
+  },
+  {
+    "symbol":"MRNA",
+    "companyName":"Moderna",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MRNA.png"
+  },
+  {
+    "symbol":"TAP",
+    "companyName":"Molson Coors Beverage Company",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TAP.png"
   },
   {
     "symbol":"MDLZ",
-    "companyName":"Mondelez International, Inc.",
+    "companyName":"Mondelez International",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MDLZ.png"
   },
   {
     "symbol":"MPWR",
-    "companyName":"Monolithic Power Systems, Inc.",
+    "companyName":"Monolithic Power Systems",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MPWR.png"
   },
   {
     "symbol":"MNST",
-    "companyName":"Monster Beverage Corporation",
+    "companyName":"Monster Beverage",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MNST.png"
   },
   {
+    "symbol":"MCO",
+    "companyName":"Moody's Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MCO.png"
+  },
+  {
+    "symbol":"MS",
+    "companyName":"Morgan Stanley",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MS.png"
+  },
+  {
+    "symbol":"MOS",
+    "companyName":"Mosaic Company (The)",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MOS.png"
+  },
+  {
+    "symbol":"MSI",
+    "companyName":"Motorola Solutions",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MSI.png"
+  },
+  {
+    "symbol":"MSCI",
+    "companyName":"MSCI Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/MSCI.png"
+  },
+  {
+    "symbol":"NDAQ",
+    "companyName":"Nasdaq, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NDAQ.png"
+  },
+  {
+    "symbol":"NTAP",
+    "companyName":"NetApp",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NTAP.png"
+  },
+  {
     "symbol":"NFLX",
-    "companyName":"Netflix, Inc.",
+    "companyName":"Netflix",
     "shares":0,
     "purchasePrice":0,
     "sector":"Communication Services",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NFLX.png"
   },
   {
-    "symbol":"NVDA",
-    "companyName":"NVIDIA Corporation",
+    "symbol":"NEM",
+    "companyName":"Newmont",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NEM.png"
+  },
+  {
+    "symbol":"NWSA",
+    "companyName":"News Corp (Class A)",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NWSA.png"
+  },
+  {
+    "symbol":"NWS",
+    "companyName":"News Corp (Class B)",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NWS.png"
+  },
+  {
+    "symbol":"NEE",
+    "companyName":"NextEra Energy",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Utilities",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NEE.png"
+  },
+  {
+    "symbol":"NKE",
+    "companyName":"Nike, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NKE.png"
+  },
+  {
+    "symbol":"NI",
+    "companyName":"NiSource",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Utilities",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NI.png"
+  },
+  {
+    "symbol":"NDSN",
+    "companyName":"Nordson Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NDSN.png"
+  },
+  {
+    "symbol":"NSC",
+    "companyName":"Norfolk Southern",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NSC.png"
+  },
+  {
+    "symbol":"NTRS",
+    "companyName":"Northern Trust",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NTRS.png"
+  },
+  {
+    "symbol":"NOC",
+    "companyName":"Northrop Grumman",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NOC.png"
+  },
+  {
+    "symbol":"NCLH",
+    "companyName":"Norwegian Cruise Line Holdings",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NCLH.png"
+  },
+  {
+    "symbol":"NRG",
+    "companyName":"NRG Energy",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Utilities",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NRG.png"
+  },
+  {
+    "symbol":"NUE",
+    "companyName":"Nucor",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NUE.png"
+  },
+  {
+    "symbol":"NVDA",
+    "companyName":"Nvidia",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NVDA.png"
   },
   {
-    "symbol":"NXPI",
-    "companyName":"NXP Semiconductors N.V.",
+    "symbol":"NVR",
+    "companyName":"NVR, Inc.",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NVR.png"
+  },
+  {
+    "symbol":"NXPI",
+    "companyName":"NXP Semiconductors",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NXPI.png"
   },
   {
     "symbol":"ORLY",
-    "companyName":"O'Reilly Automotive, Inc.",
+    "companyName":"O\u2019Reilly Automotive",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ORLY.png"
   },
   {
+    "symbol":"OXY",
+    "companyName":"Occidental Petroleum",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Energy",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/OXY.png"
+  },
+  {
     "symbol":"ODFL",
-    "companyName":"Old Dominion Freight Line, Inc.",
+    "companyName":"Old Dominion",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ODFL.png"
   },
   {
+    "symbol":"OMC",
+    "companyName":"Omnicom Group",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/OMC.png"
+  },
+  {
+    "symbol":"ON",
+    "companyName":"ON Semiconductor",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ON.png"
+  },
+  {
+    "symbol":"OKE",
+    "companyName":"Oneok",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Energy",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/OKE.png"
+  },
+  {
+    "symbol":"ORCL",
+    "companyName":"Oracle Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ORCL.png"
+  },
+  {
+    "symbol":"OTIS",
+    "companyName":"Otis Worldwide",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/OTIS.png"
+  },
+  {
     "symbol":"PCAR",
-    "companyName":"PACCAR Inc",
+    "companyName":"Paccar",
     "shares":0,
     "purchasePrice":0,
     "sector":"Industrials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PCAR.png"
   },
   {
-    "symbol":"PLTR",
-    "companyName":"Palantir Technologies Inc.",
+    "symbol":"PKG",
+    "companyName":"Packaging Corporation of America",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PKG.png"
+  },
+  {
+    "symbol":"PLTR",
+    "companyName":"Palantir Technologies",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PLTR.png"
   },
   {
     "symbol":"PANW",
-    "companyName":"Palo Alto Networks, Inc.",
+    "companyName":"Palo Alto Networks",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PANW.png"
   },
   {
-    "symbol":"PAYX",
-    "companyName":"Paychex, Inc.",
+    "symbol":"PSKY",
+    "companyName":"Paramount Skydance Corporation",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PSKY.png"
+  },
+  {
+    "symbol":"PH",
+    "companyName":"Parker Hannifin",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PH.png"
+  },
+  {
+    "symbol":"PAYX",
+    "companyName":"Paychex",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PAYX.png"
   },
   {
     "symbol":"PYPL",
-    "companyName":"PayPal Holdings, Inc.",
+    "companyName":"PayPal",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Financial Services",
+    "sector":"Financials",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PYPL.png"
   },
   {
-    "symbol":"PDD",
-    "companyName":"PDD Holdings Inc.",
+    "symbol":"PNR",
+    "companyName":"Pentair",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
-    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PDD.png"
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PNR.png"
   },
   {
     "symbol":"PEP",
-    "companyName":"PepsiCo, Inc.",
+    "companyName":"PepsiCo",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Defensive",
+    "sector":"Consumer Staples",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PEP.png"
   },
   {
-    "symbol":"QCOM",
-    "companyName":"QUALCOMM Incorporated",
+    "symbol":"PFE",
+    "companyName":"Pfizer",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PFE.png"
+  },
+  {
+    "symbol":"PCG",
+    "companyName":"PG&E Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Utilities",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PCG.png"
+  },
+  {
+    "symbol":"PM",
+    "companyName":"Philip Morris International",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PM.png"
+  },
+  {
+    "symbol":"PSX",
+    "companyName":"Phillips 66",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Energy",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PSX.png"
+  },
+  {
+    "symbol":"PNW",
+    "companyName":"Pinnacle West Capital",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Utilities",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PNW.png"
+  },
+  {
+    "symbol":"PNC",
+    "companyName":"PNC Financial Services",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PNC.png"
+  },
+  {
+    "symbol":"POOL",
+    "companyName":"Pool Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/POOL.png"
+  },
+  {
+    "symbol":"PPG",
+    "companyName":"PPG Industries",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PPG.png"
+  },
+  {
+    "symbol":"PPL",
+    "companyName":"PPL Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Utilities",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PPL.png"
+  },
+  {
+    "symbol":"PFG",
+    "companyName":"Principal Financial Group",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PFG.png"
+  },
+  {
+    "symbol":"PG",
+    "companyName":"Procter & Gamble",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PG.png"
+  },
+  {
+    "symbol":"PGR",
+    "companyName":"Progressive Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PGR.png"
+  },
+  {
+    "symbol":"PLD",
+    "companyName":"Prologis",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PLD.png"
+  },
+  {
+    "symbol":"PRU",
+    "companyName":"Prudential Financial",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PRU.png"
+  },
+  {
+    "symbol":"PEG",
+    "companyName":"Public Service Enterprise Group",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Utilities",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PEG.png"
+  },
+  {
+    "symbol":"PTC",
+    "companyName":"PTC Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PTC.png"
+  },
+  {
+    "symbol":"PSA",
+    "companyName":"Public Storage",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PSA.png"
+  },
+  {
+    "symbol":"PHM",
+    "companyName":"PulteGroup",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PHM.png"
+  },
+  {
+    "symbol":"PWR",
+    "companyName":"Quanta Services",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/PWR.png"
+  },
+  {
+    "symbol":"QCOM",
+    "companyName":"Qualcomm",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/QCOM.png"
   },
   {
-    "symbol":"REGN",
-    "companyName":"Regeneron Pharmaceuticals, Inc.",
+    "symbol":"DGX",
+    "companyName":"Quest Diagnostics",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Healthcare",
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DGX.png"
+  },
+  {
+    "symbol":"Q",
+    "companyName":"Qnity Electronics",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/Q.png"
+  },
+  {
+    "symbol":"RL",
+    "companyName":"Ralph Lauren Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/RL.png"
+  },
+  {
+    "symbol":"RJF",
+    "companyName":"Raymond James Financial",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/RJF.png"
+  },
+  {
+    "symbol":"RTX",
+    "companyName":"RTX Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/RTX.png"
+  },
+  {
+    "symbol":"O",
+    "companyName":"Realty Income",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/O.png"
+  },
+  {
+    "symbol":"REG",
+    "companyName":"Regency Centers",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/REG.png"
+  },
+  {
+    "symbol":"REGN",
+    "companyName":"Regeneron Pharmaceuticals",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/REGN.png"
   },
   {
-    "symbol":"ROP",
-    "companyName":"Roper Technologies, Inc.",
+    "symbol":"RF",
+    "companyName":"Regions Financial Corporation",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/RF.png"
+  },
+  {
+    "symbol":"RSG",
+    "companyName":"Republic Services",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/RSG.png"
+  },
+  {
+    "symbol":"RMD",
+    "companyName":"ResMed",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/RMD.png"
+  },
+  {
+    "symbol":"RVTY",
+    "companyName":"Revvity",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/RVTY.png"
+  },
+  {
+    "symbol":"HOOD",
+    "companyName":"Robinhood Markets",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/HOOD.png"
+  },
+  {
+    "symbol":"ROK",
+    "companyName":"Rockwell Automation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ROK.png"
+  },
+  {
+    "symbol":"ROL",
+    "companyName":"Rollins, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ROL.png"
+  },
+  {
+    "symbol":"ROP",
+    "companyName":"Roper Technologies",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ROP.png"
   },
   {
     "symbol":"ROST",
-    "companyName":"Ross Stores, Inc.",
+    "companyName":"Ross Stores",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ROST.png"
   },
   {
-    "symbol":"STX",
-    "companyName":"Seagate Technology Holdings plc",
+    "symbol":"RCL",
+    "companyName":"Royal Caribbean Group",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/RCL.png"
+  },
+  {
+    "symbol":"SPGI",
+    "companyName":"S&P Global",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SPGI.png"
+  },
+  {
+    "symbol":"CRM",
+    "companyName":"Salesforce",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/CRM.png"
+  },
+  {
+    "symbol":"SNDK",
+    "companyName":"Sandisk",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SNDK.png"
+  },
+  {
+    "symbol":"SBAC",
+    "companyName":"SBA Communications",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SBAC.png"
+  },
+  {
+    "symbol":"SLB",
+    "companyName":"Schlumberger",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Energy",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SLB.png"
+  },
+  {
+    "symbol":"STX",
+    "companyName":"Seagate Technology",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/STX.png"
   },
   {
-    "symbol":"SHOP",
-    "companyName":"Shopify Inc.",
+    "symbol":"SRE",
+    "companyName":"Sempra",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Technology",
-    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SHOP.png"
+    "sector":"Utilities",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SRE.png"
+  },
+  {
+    "symbol":"NOW",
+    "companyName":"ServiceNow",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/NOW.png"
+  },
+  {
+    "symbol":"SHW",
+    "companyName":"Sherwin-Williams",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SHW.png"
+  },
+  {
+    "symbol":"SPG",
+    "companyName":"Simon Property Group",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SPG.png"
+  },
+  {
+    "symbol":"SWKS",
+    "companyName":"Skyworks Solutions",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SWKS.png"
+  },
+  {
+    "symbol":"SJM",
+    "companyName":"J.M. Smucker Company (The)",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SJM.png"
+  },
+  {
+    "symbol":"SW",
+    "companyName":"Smurfit Westrock",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SW.png"
+  },
+  {
+    "symbol":"SNA",
+    "companyName":"Snap-on",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SNA.png"
+  },
+  {
+    "symbol":"SOLV",
+    "companyName":"Solventum",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SOLV.png"
+  },
+  {
+    "symbol":"SO",
+    "companyName":"Southern Company",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Utilities",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SO.png"
+  },
+  {
+    "symbol":"LUV",
+    "companyName":"Southwest Airlines",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/LUV.png"
+  },
+  {
+    "symbol":"SWK",
+    "companyName":"Stanley Black & Decker",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SWK.png"
   },
   {
     "symbol":"SBUX",
-    "companyName":"Starbucks Corporation",
+    "companyName":"Starbucks",
     "shares":0,
     "purchasePrice":0,
-    "sector":"Consumer Cyclical",
+    "sector":"Consumer Discretionary",
     "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SBUX.png"
+  },
+  {
+    "symbol":"STT",
+    "companyName":"State Street Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/STT.png"
+  },
+  {
+    "symbol":"STLD",
+    "companyName":"Steel Dynamics",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/STLD.png"
+  },
+  {
+    "symbol":"STE",
+    "companyName":"Steris",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/STE.png"
+  },
+  {
+    "symbol":"SYK",
+    "companyName":"Stryker Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SYK.png"
+  },
+  {
+    "symbol":"SMCI",
+    "companyName":"Supermicro",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SMCI.png"
+  },
+  {
+    "symbol":"SYF",
+    "companyName":"Synchrony Financial",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SYF.png"
+  },
+  {
+    "symbol":"SNPS",
+    "companyName":"Synopsys",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SNPS.png"
+  },
+  {
+    "symbol":"SYY",
+    "companyName":"Sysco",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/SYY.png"
+  },
+  {
+    "symbol":"TMUS",
+    "companyName":"T-Mobile US",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TMUS.png"
+  },
+  {
+    "symbol":"TROW",
+    "companyName":"T. Rowe Price",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TROW.png"
+  },
+  {
+    "symbol":"TTWO",
+    "companyName":"Take-Two Interactive",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TTWO.png"
+  },
+  {
+    "symbol":"TPR",
+    "companyName":"Tapestry, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TPR.png"
+  },
+  {
+    "symbol":"TRGP",
+    "companyName":"Targa Resources",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Energy",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TRGP.png"
+  },
+  {
+    "symbol":"TGT",
+    "companyName":"Target Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TGT.png"
+  },
+  {
+    "symbol":"TEL",
+    "companyName":"TE Connectivity",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TEL.png"
+  },
+  {
+    "symbol":"TDY",
+    "companyName":"Teledyne Technologies",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TDY.png"
+  },
+  {
+    "symbol":"TER",
+    "companyName":"Teradyne",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TER.png"
+  },
+  {
+    "symbol":"TSLA",
+    "companyName":"Tesla, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TSLA.png"
+  },
+  {
+    "symbol":"TXN",
+    "companyName":"Texas Instruments",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TXN.png"
+  },
+  {
+    "symbol":"TPL",
+    "companyName":"Texas Pacific Land Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Energy",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TPL.png"
+  },
+  {
+    "symbol":"TXT",
+    "companyName":"Textron",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TXT.png"
+  },
+  {
+    "symbol":"TMO",
+    "companyName":"Thermo Fisher Scientific",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TMO.png"
+  },
+  {
+    "symbol":"TJX",
+    "companyName":"TJX Companies",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TJX.png"
+  },
+  {
+    "symbol":"TKO",
+    "companyName":"TKO Group Holdings",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TKO.png"
+  },
+  {
+    "symbol":"TTD",
+    "companyName":"Trade Desk (The)",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TTD.png"
+  },
+  {
+    "symbol":"TSCO",
+    "companyName":"Tractor Supply",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TSCO.png"
+  },
+  {
+    "symbol":"TT",
+    "companyName":"Trane Technologies",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TT.png"
+  },
+  {
+    "symbol":"TDG",
+    "companyName":"TransDigm Group",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TDG.png"
+  },
+  {
+    "symbol":"TRV",
+    "companyName":"Travelers Companies (The)",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TRV.png"
+  },
+  {
+    "symbol":"TRMB",
+    "companyName":"Trimble Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TRMB.png"
+  },
+  {
+    "symbol":"TFC",
+    "companyName":"Truist Financial",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TFC.png"
+  },
+  {
+    "symbol":"TYL",
+    "companyName":"Tyler Technologies",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TYL.png"
+  },
+  {
+    "symbol":"TSN",
+    "companyName":"Tyson Foods",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/TSN.png"
+  },
+  {
+    "symbol":"USB",
+    "companyName":"U.S. Bancorp",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/USB.png"
+  },
+  {
+    "symbol":"UBER",
+    "companyName":"Uber",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/UBER.png"
+  },
+  {
+    "symbol":"UDR",
+    "companyName":"UDR, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/UDR.png"
+  },
+  {
+    "symbol":"ULTA",
+    "companyName":"Ulta Beauty",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ULTA.png"
+  },
+  {
+    "symbol":"UNP",
+    "companyName":"Union Pacific Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/UNP.png"
+  },
+  {
+    "symbol":"UAL",
+    "companyName":"United Airlines Holdings",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/UAL.png"
+  },
+  {
+    "symbol":"UPS",
+    "companyName":"United Parcel Service",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/UPS.png"
+  },
+  {
+    "symbol":"URI",
+    "companyName":"United Rentals",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/URI.png"
+  },
+  {
+    "symbol":"UNH",
+    "companyName":"UnitedHealth Group",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/UNH.png"
+  },
+  {
+    "symbol":"UHS",
+    "companyName":"Universal Health Services",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/UHS.png"
+  },
+  {
+    "symbol":"VLO",
+    "companyName":"Valero Energy",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Energy",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/VLO.png"
+  },
+  {
+    "symbol":"VTR",
+    "companyName":"Ventas",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/VTR.png"
+  },
+  {
+    "symbol":"VLTO",
+    "companyName":"Veralto",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/VLTO.png"
+  },
+  {
+    "symbol":"VRSN",
+    "companyName":"Verisign",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/VRSN.png"
+  },
+  {
+    "symbol":"VRSK",
+    "companyName":"Verisk Analytics",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/VRSK.png"
+  },
+  {
+    "symbol":"VZ",
+    "companyName":"Verizon",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/VZ.png"
+  },
+  {
+    "symbol":"VRTX",
+    "companyName":"Vertex Pharmaceuticals",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/VRTX.png"
+  },
+  {
+    "symbol":"VRT",
+    "companyName":"Vertiv",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/VRT.png"
+  },
+  {
+    "symbol":"VTRS",
+    "companyName":"Viatris",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/VTRS.png"
+  },
+  {
+    "symbol":"VICI",
+    "companyName":"Vici Properties",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/VICI.png"
+  },
+  {
+    "symbol":"V",
+    "companyName":"Visa Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/V.png"
+  },
+  {
+    "symbol":"VST",
+    "companyName":"Vistra Corp.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Utilities",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/VST.png"
+  },
+  {
+    "symbol":"VMC",
+    "companyName":"Vulcan Materials Company",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Materials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/VMC.png"
+  },
+  {
+    "symbol":"WRB",
+    "companyName":"W. R. Berkley Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WRB.png"
+  },
+  {
+    "symbol":"GWW",
+    "companyName":"W. W. Grainger",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/GWW.png"
+  },
+  {
+    "symbol":"WAB",
+    "companyName":"Wabtec",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WAB.png"
+  },
+  {
+    "symbol":"WMT",
+    "companyName":"Walmart",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Staples",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WMT.png"
+  },
+  {
+    "symbol":"DIS",
+    "companyName":"Walt Disney Company (The)",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/DIS.png"
+  },
+  {
+    "symbol":"WBD",
+    "companyName":"Warner Bros. Discovery",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Communication Services",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WBD.png"
+  },
+  {
+    "symbol":"WM",
+    "companyName":"Waste Management",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WM.png"
+  },
+  {
+    "symbol":"WAT",
+    "companyName":"Waters Corporation",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WAT.png"
+  },
+  {
+    "symbol":"WEC",
+    "companyName":"WEC Energy Group",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Utilities",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WEC.png"
+  },
+  {
+    "symbol":"WFC",
+    "companyName":"Wells Fargo",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WFC.png"
+  },
+  {
+    "symbol":"WELL",
+    "companyName":"Welltower",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WELL.png"
+  },
+  {
+    "symbol":"WST",
+    "companyName":"West Pharmaceutical Services",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WST.png"
+  },
+  {
+    "symbol":"WDC",
+    "companyName":"Western Digital",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WDC.png"
+  },
+  {
+    "symbol":"WY",
+    "companyName":"Weyerhaeuser",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Real Estate",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WY.png"
+  },
+  {
+    "symbol":"WSM",
+    "companyName":"Williams-Sonoma, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WSM.png"
+  },
+  {
+    "symbol":"WMB",
+    "companyName":"Williams Companies",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Energy",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WMB.png"
+  },
+  {
+    "symbol":"WTW",
+    "companyName":"Willis Towers Watson",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Financials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WTW.png"
+  },
+  {
+    "symbol":"WDAY",
+    "companyName":"Workday, Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WDAY.png"
+  },
+  {
+    "symbol":"WYNN",
+    "companyName":"Wynn Resorts",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/WYNN.png"
+  },
+  {
+    "symbol":"XEL",
+    "companyName":"Xcel Energy",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Utilities",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/XEL.png"
+  },
+  {
+    "symbol":"XYL",
+    "companyName":"Xylem Inc.",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Industrials",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/XYL.png"
+  },
+  {
+    "symbol":"YUM",
+    "companyName":"Yum! Brands",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Consumer Discretionary",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/YUM.png"
+  },
+  {
+    "symbol":"ZBRA",
+    "companyName":"Zebra Technologies",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Information Technology",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ZBRA.png"
+  },
+  {
+    "symbol":"ZBH",
+    "companyName":"Zimmer Biomet",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ZBH.png"
+  },
+  {
+    "symbol":"ZTS",
+    "companyName":"Zoetis",
+    "shares":0,
+    "purchasePrice":0,
+    "sector":"Health Care",
+    "imageUrl":"https:\/\/financialmodelingprep.com\/image-stock\/ZTS.png"
   }
 ]
