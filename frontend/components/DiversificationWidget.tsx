@@ -163,13 +163,13 @@ export default function DiversificationWidget() {
           )}
         </View>
       )}
-      // explanation of why the stocks were selected based on risk preference
+      {/* explanation of why the stocks were selected based on risk preference */}
       <View style={styles.suggestionSummaryBox}>
         <Text style={styles.suggestionSummaryTitle}>Why these stocks were selected</Text>
         <Text style={styles.suggestionSummaryText}>{getSuggestionSummary(risk)}</Text>
       </View>
 
-      // list of suggested stocks with reason for recommendation
+      {/* list of suggested stocks with reason for recommendation */}
       <FlatList
         data={suggestions}
         keyExtractor={(item, index) => index.toString()}

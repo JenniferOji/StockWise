@@ -19,3 +19,4 @@ services/models/finbert/*.onnx
 # services/models/*.csv
 services/models/finbert/*
 .venv
+.env

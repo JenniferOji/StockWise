@@ -8,13 +8,12 @@ Screencast: [SharePoint video](https://atlantictu-my.sharepoint.com/:v:/g/person
 
 ## Project Overview
 
-This project is built as a multi-service system made up of three main components:
+This project is built as a multi-service system consisting of four main components:
 
-- **Frontend (React Native + Expo)** – user interface for interacting with the app  
-- **Backend API (Go + Iris)** – handles requests, business logic, and database interaction  
-- **ML Service (Python + FastAPI)** – performs financial analytics and machine learning tasks  
-
-The backend acts as the main controller, receiving requests from the frontend and calling the ML service when advanced analytics (such as risk calculations or clustering) are required.
+- **Frontend (React Native + Expo Web)** - user interface to interact with the application  
+- **Backend API (Go + Iris)** -  handles requests, business logic, and database interaction  
+- **ML Service (Python + FastAPI)** - performs financial analytics and machine learning tasks  
+- **Database (PostgreSQL)** - stores portfolio and user data  
 
 ---
 
@@ -38,17 +37,23 @@ The application includes the following features:
 
 ## System Architecture
 
-- Frontend communicates with the Go backend via REST API  
-- Backend validates requests and interacts with PostgreSQL  
-- Backend forwards analytics-related requests to FastAPI  
-- FastAPI processes data using trained ML models and returns results  
+- The frontend communicates with the Go backend via a REST API  
+- The backend validates requests and interacts with PostgreSQL  
+- The backend forwards analytics-related requests to the FastAPI service  
+- The FastAPI service processes data using trained ML models and returns results  
 - Results are sent back to the frontend for display  
+
+## System Architecture Diagram
+
+<p align="center">
+  <img src="frontend/assets/images/architecture.png" width="700"/>
+</p>
 
 ---
 
 ## Tech Stack
 
-- **Frontend:** React Native (Expo), TypeScript  
+- **Frontend:** React Native (Expo Web), TypeScript  
 - **Backend:** Go (Iris framework)  
 - **ML Service:** Python (FastAPI, scikit-learn, pandas, numpy)  
 - **Database:** PostgreSQL  
@@ -58,10 +63,10 @@ The application includes the following features:
 
 ## Repository Structure
 
-- `frontend/` – mobile/web UI and API calls  
-- `backend/` – REST API, business logic, database models  
+- `frontend/` – user interface  
+- `backend/` – REST API and business logic  
 - `services/` – ML models and FastAPI endpoints  
-- `docker-compose.yml` – multi-service setup  
+- `docker-compose.yml` – multi-service configuration  
 
 ---
 
@@ -71,20 +76,52 @@ Before running the project, ensure you have:
 
 - Docker Desktop (or Docker Engine + Compose)
 - Docker Compose (v2 or higher)
-- Node.js (v18+) and npm (only if running frontend locally)
 
 ---
 
-## Running the Project (Docker)
+## Environment Variables
 
-The easiest way to run the project is using Docker Compose.
+This project uses environment variables for configuration.
 
-This will start:
-- PostgreSQL database on **port 5432**
-- Go backend API on **port 8080**
-- FastAPI ML service on **port 8000**
+1. Create a `.env` file in the project root:
 
-### Build and run:
+```bash
+cp .env.example .env
+```
+
+2. Update values as needed.
+
+Docker Compose will automatically load these variables.
+
+---
+
+## Running the Project
+
+1. Create a `.env` file in the project root based on the `.env.example`.
+
+2. Run the application:
 
 ```bash
 docker-compose up --build
+```
+
+3. Open in your browser:
+
+- Frontend $\rightarrow$ http://localhost:3000  
+- Backend  $\rightarrow$ http://localhost:8080  
+- FastAPI  $\rightarrow$ http://localhost:8000  
+
+To stop the application:
+
+```bash
+docker-compose down
+```
+---
+
+## Deployment
+
+The application is deployed across multiple platforms:
+
+- **Frontend:** Vercel  
+- **Backend API:** Render  
+- **ML Service (FastAPI):** Render  
