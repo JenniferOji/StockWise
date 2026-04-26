@@ -36,7 +36,7 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 	const value = parseFloat(rawValue)
 	const band = getActiveBand(label, rawValue, riskPref)
 
-	// handles volatility explanations and tips
+	// handles volatility explanations 
 	if (label === 'Volatility') {
 		const what = 'Portfolio volatility measures how much your portfolio value fluctuates over time. The higher the number, the more your balance swings up and down.'
 
@@ -67,7 +67,7 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 		return { what, score }
 	}
 
-	// handles sharpe ratio explanations and tips
+	// handles sharpe ratio explanations 
 	if (label === 'Sharpe Ratio') {
 		const what = 'The Sharpe Ratio measures how much return you are getting for the amount of risk you are taking. A higher number means you are being better rewarded for the risk in your portfolio.'
 
@@ -98,7 +98,7 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 		return { what, score }
 	}
 
-	// handles max drawdown explanations and tips
+	// handles max drawdown explanations 
 	if (label === 'Max Drawdown') {
 		const what = 'Max Drawdown shows the largest drop your portfolio has experienced from its highest point to its lowest. Think of it as the worst-case loss you have seen during a bad stretch in the market.'
 
@@ -129,7 +129,7 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 		return { what, score }
 	}
 
-	// handles var explanations and tips
+	// handles var explanations 
 	if (label === 'VaR (95%)') {
 		const what = 'Value at Risk (VaR) estimates the maximum amount you could expect to lose on a bad day. In simple terms: on 95% of days your losses should stay below this number.'
 
@@ -159,6 +159,6 @@ export function getMetricInsight(label: string, rawValue: string, riskPref: stri
 		return { what, score }
 	}
 
-	// default empty response for unsupported labels
+	// defaulting to empty response
 	return { what: '', score: '' }
 }
