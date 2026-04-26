@@ -20,7 +20,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # loading features and cluster mappings from shared db helpers
 df_features = load_features()
-df_features.columns = df_features.columns.str.lower()
 cluster_risk = load_cluster_risk()
 
 # loading stock metadata from json file

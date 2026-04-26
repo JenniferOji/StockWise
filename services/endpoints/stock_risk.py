@@ -32,7 +32,6 @@ STOCK_META_PATH = os.path.join(BASE_DIR, "data", "stocks.json")
 
 df_features = load_features()
 df_features["symbol"] = df_features["symbol"].astype(str).str.strip().str.upper().str.replace(".", "-", regex=False)
-df_features.columns = df_features.columns.str.lower()
 feature_map = df_features.set_index("symbol").to_dict(orient="index")
 
 df_prices = load_prices()

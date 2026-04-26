@@ -16,7 +16,6 @@ router = APIRouter()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 df_features = load_features()
-df_features.columns = df_features.columns.str.lower()
 df_prices = load_prices()
 cluster_risk_mapping = load_cluster_risk()
 
