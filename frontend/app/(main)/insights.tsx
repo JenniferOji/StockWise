@@ -12,7 +12,6 @@ import RandomSuggestionsWidget from '@/components/RandomSuggestions';
 import StockRiskWidget from '@/components/StockRiskWidget';
 
 // list of sections shown on the insights page
-
 type MenuSection = {
         title: string;
         subtitle: string;
@@ -118,6 +117,7 @@ export default function InsightsScreen() {
     };
 
     return (
+        // the the insights page with accordions for each section
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
                 <View style={[styles.pageShell, isLargeScreen && styles.pageShellLarge]}>

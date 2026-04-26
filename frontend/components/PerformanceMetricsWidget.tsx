@@ -9,7 +9,7 @@ export default function PerformanceMetricsWidget() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
 
-  // fetches performance metrics from backend for current user
+  // fetches the performance metrics from backend for the current user
   const fetchMetrics = async () => {
     setError('');
     setLoading(true);
@@ -69,7 +69,7 @@ export default function PerformanceMetricsWidget() {
   const best = metrics.best_performer;
   const worst = metrics.worst_performer;
 
-  // renders performance overview with portfolio value, returns, and stock breakdown
+  // renders the performance overview with portfolio value, returns, and stock breakdown
   return (
     <View style={styles.container}>
       <View style={styles.topCard}>

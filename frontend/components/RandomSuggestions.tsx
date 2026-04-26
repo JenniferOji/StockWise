@@ -35,6 +35,7 @@ export default function RandomSuggestionsWidget() {
   const [currentPortfolio, setCurrentPortfolio] = useState<SectorAllocation[]>([]);
   const [withSuggestions, setWithSuggestions] = useState<SectorAllocation[]>([]);
 
+  // fetches the diversification suggestions on mount
   const fetchRandomSuggestions = async () => {
     setError('');
     setLoading(true);
@@ -90,6 +91,7 @@ export default function RandomSuggestionsWidget() {
         <Text style={styles.noDataText}>No suggestions available.</Text>
       ) : (
         <>
+          {/* list of suggested stocks with reason for recommendation */}
           <FlatList
             data={suggestions}
             keyExtractor={(item, index) => index.toString()}
@@ -107,6 +109,8 @@ export default function RandomSuggestionsWidget() {
             )}
           />
 
+          {/* sector diversification comparison if the data is available */}
+          {/*  The users current portfolio */}
           {(currentPortfolio.length > 0 && withSuggestions.length > 0) && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Sector Diversification</Text>
@@ -125,6 +129,7 @@ export default function RandomSuggestionsWidget() {
               </>
 
               <>
+              {/* The users portfolio with the suggested stocks */}
                 <Text style={styles.sectorSubtitle}>With Suggestions</Text>
                 {withSuggestions.map((item) => (
                   <View key={`suggested-${item.sector}`} style={styles.sectorItem}>

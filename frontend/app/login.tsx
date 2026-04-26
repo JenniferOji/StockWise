@@ -5,7 +5,6 @@ import { storage } from '../utils/storage';
 import { loginUser } from '../services/user';
 import { MaterialIcons } from '@expo/vector-icons';
 
-// login form and credential validation
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -13,7 +12,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // authenticates user with email and password
+  // authenticates the user with their email and password
   const handleLogin = async () => {
     setLoading(true);
     try {
@@ -41,7 +40,7 @@ export default function LoginPage() {
     router.push('/');
   };
 
-  // renders login form with email and password fields
+  // renders the login form with email and password fields
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>

@@ -42,6 +42,7 @@ export default function News() {
     }
   };
 
+  // loads the stock news for the user's holdings
   const loadStockNews = async (force = false) => {
     try {
       const now = Date.now();
@@ -56,6 +57,7 @@ export default function News() {
 
       const userJson = await storage.getItem('user');
 
+      // if user exists, fetch its news and holdings
       if (userJson) {
         const user = JSON.parse(userJson);
         const res = await getStockNews(user.ID);
@@ -88,16 +90,19 @@ export default function News() {
     }
   };
 
+  // load news on mount and when screen is focused
   useEffect(() => {
     loadStockNews(true);
   }, []);
 
+  // also reload news when screen is focused to get the newest updates
   useFocusEffect(
     useCallback(() => {
       loadStockNews(false);
     }, [lastFetched])
   );
 
+  // updating the selected stock if the route param changes from the stock sentiment page 
   useEffect(() => {
     const routeSymbol = route.params?.selectedStock;
 
@@ -120,6 +125,7 @@ export default function News() {
     : news.filter((item) => item.symbol === selectedStock);
     
 
+  // rendering the news page 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -155,6 +161,7 @@ export default function News() {
           </View>
         </View>
 
+        {/* show loading, error or the news articles depending on the current state */}
         {loading && news.length === 0 ? (
           <View style={{ alignItems: 'center', marginTop: 32 }}>
             <Text style={{ color: '#0b3d91', fontSize: 16, fontWeight: '600' }}>
@@ -168,6 +175,7 @@ export default function News() {
             </Text>
           </View>
         ) : (
+          // list of news articles with the sentiment label and link to the full article
           <FlatList
             data={filteredNews}
             keyExtractor={(item) => item.name + item.headline}

@@ -44,7 +44,6 @@ export default function StockHoldings() {
   const loadUserStocks = async () => {
     try {
       const userJson = await storage.getItem('user');
-      // if user exists load their stocks
       if (userJson) {
         const user = JSON.parse(userJson);
         const stocks = await getUserStocks(user.ID);
@@ -62,6 +61,7 @@ export default function StockHoldings() {
             0
           );
 
+          // calculate the average purchase price across multiple entries for the same stock
           const avgPrice =
             totalShares > 0
               ? entries.reduce(
@@ -141,6 +141,7 @@ export default function StockHoldings() {
     }
   };
 
+  // rendering the stock holdings page 
   return (
     <SafeAreaView style={styles.container}>
       <View style={[styles.pageShell, styles.pageHeader]}>
@@ -149,7 +150,7 @@ export default function StockHoldings() {
         </Text>
       </View>
 
-      {/* search and add controls */}
+      {/* search field and add button at the top of the page */}
       <View style={[styles.pageShell, styles.searchContainer]}>
         <View style={styles.searchRow}>
           <View style={styles.searchInputContainer}>
@@ -161,7 +162,6 @@ export default function StockHoldings() {
               onChangeText={setQuery}
               style={[styles.searchInput, styles.searchInputWithIcon]}
             />
-            {/* keep search icon inside the input */}
             <View style={styles.searchIcon} pointerEvents="none">
               <IconSymbol name="magnifyingglass" size={18} color={iconColor} />
             </View>
@@ -181,6 +181,7 @@ export default function StockHoldings() {
         </View>
       </View>
 
+      {/* showing the list of stocks in the user's portfolio  */}
       <FlatList
         data={filteredDisplayed}
         keyExtractor={(item) => (item as any).dbId?.toString() || item.symbol}
@@ -198,6 +199,7 @@ export default function StockHoldings() {
             </Text>
           </View>
         }
+        // render each stock row with the symbol, company name, number of shares and an edit button to update the entries for that stock
         renderItem={({ item }) => {
           return (
             <View style={styles.card}>
@@ -240,6 +242,7 @@ export default function StockHoldings() {
         }}
       />
 
+      {/* the pop up modal for adding a new stock and editing an existing stock */}
       <Modal
         visible={addModalVisible}
         transparent
@@ -311,6 +314,7 @@ export default function StockHoldings() {
               </Pressable>
             </View>
             
+            {/* rendering the list of entries for the selected stock */}
             <View style={styles.modalInputContainer}>
               <Text style={styles.entryHelperText}>
                 If you bought this stock in multiple installments, add each purchase using the + button.
@@ -405,7 +409,8 @@ export default function StockHoldings() {
             >
               <Text style={styles.modalSaveText}>{formMode === 'add' ? 'Add Stock' : 'Save Changes'}</Text>
             </Pressable>
-
+            
+            {/* deletes the stock from the user's portfolio and refreshes the list */}
             {formMode === 'edit' && (
               <Pressable
                 style={styles.modalDelete}

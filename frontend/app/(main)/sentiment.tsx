@@ -30,6 +30,7 @@ export default function SentimentPage() {
     return "#ff9100";
   };
 
+  // loading the user's stocks and their sentiment data from the backend
   const loadData = async (force = false) => {
     try {
       const now = Date.now();
@@ -89,6 +90,7 @@ export default function SentimentPage() {
     loadData(true);
   }, []);
 
+  // reload the data when thescreen is focused to get the newest sentiment updates
   useFocusEffect(
     useCallback(() => {
       loadData(false);
@@ -112,6 +114,7 @@ export default function SentimentPage() {
     return groups;
   }, [holdings, sentiment]);
 
+  // meaning of each sentiment category for the user to understand the implications of the data
   const sections = [
     {
       key: "positive",
@@ -144,6 +147,7 @@ export default function SentimentPage() {
 
   const totalStocks = holdings.length;
 
+  // rendering the sentiment page with the summary of entiment breakdown 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -201,6 +205,7 @@ export default function SentimentPage() {
             <Text style={styles.emptyText}>No stocks found yet. Add stocks in Stock Holdings.</Text>
           </View>
         ) : (
+          // rendering each stock grouped by sentiment category with a link to the news page for that stock when pressed
           sections.map((section) => {
             if (section.data.length === 0) return null;
             return (
@@ -214,6 +219,7 @@ export default function SentimentPage() {
                   <Text style={styles.sectionCount}>{section.data.length}</Text>
                 </View>
                 <Text style={styles.sectionDetail}>{section.detail}</Text>
+                
                 {section.data.map((item: any) => {
                   const sentimentData = sentiment[item.symbol];
                   return (

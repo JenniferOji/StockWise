@@ -29,7 +29,7 @@ export default function DiversificationWidget() {
   const [currentVolatility, setCurrentVolatility] = useState<number | null>(null);
   const [withSuggestionsVolatility, setWithSuggestionsVolatility] = useState<number | null>(null);
 
-  // returns explanation text based on user's risk preference
+  // returns the explanation text based on the user's risk preference
   const getSuggestionSummary = (riskPreference: string) => {
     const riskLevel = riskPreference.trim().toLowerCase();
 
@@ -44,11 +44,9 @@ export default function DiversificationWidget() {
     if (riskLevel.includes('high')) {
       return 'These stocks are selected for higher return potential, accepting higher volatility in line with your high risk preference.';
     }
-
-    return 'These stocks are selected to best align with your risk preference using the portfolio optimization model.';
   };
 
-  // fetches diversification suggestions on mount
+  // fetches the diversification suggestions on mount
   useEffect(() => {
     async function fetchDiversificationSuggestions() {
       setError('');
@@ -133,7 +131,7 @@ export default function DiversificationWidget() {
     };
   })();
 
-  // renders diversification suggestions with volatility comparison
+  // renders the diversification suggestions with volatility comparison
   return (
     <View style={styles.card}>
       <Text style={styles.subtitle}>{risk} Preference</Text>
@@ -165,11 +163,13 @@ export default function DiversificationWidget() {
           )}
         </View>
       )}
+      // explanation of why the stocks were selected based on risk preference
       <View style={styles.suggestionSummaryBox}>
         <Text style={styles.suggestionSummaryTitle}>Why these stocks were selected</Text>
         <Text style={styles.suggestionSummaryText}>{getSuggestionSummary(risk)}</Text>
       </View>
 
+      // list of suggested stocks with reason for recommendation
       <FlatList
         data={suggestions}
         keyExtractor={(item, index) => index.toString()}

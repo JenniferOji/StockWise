@@ -3,26 +3,13 @@ import { endpoints } from "../constants/endpoints";
 import { handleError } from "../utils/handleError";
 import { totalEntries, getRiskPreference, getUserStocks } from "./user";
 
-const normalizeRiskPreference = (risk?: string | null) => {
-    // map user text to the labels used by the model api
-    const normalized = (risk || "").trim().toLowerCase();
-
-    if (normalized === "very low risk" || normalized === "very low") return "Very Low Risk";
-    if (normalized === "low risk" || normalized === "low") return "Low Risk";
-    if (normalized === "moderate risk" || normalized === "moderate" || normalized === "medium") return "Moderate Risk";
-    if (normalized === "high risk" || normalized === "high") return "High Risk";
-    if (normalized === "very high risk" || normalized === "very high") return "Very High Risk";
-
-    return "Moderate Risk";
-};
-
 export const getDiversificationSuggestions = async (userID: number) => {
     try {        
         const stocks = await getUserStocks(userID);
         if (!stocks) throw new Error("No stocks found");
 
         const rawRisk = await getRiskPreference(userID);
-        const risk = normalizeRiskPreference(rawRisk);
+        const risk = rawRisk || "Moderate Risk";
         
         // build current holdings in the format expected by api
         const currentStocks = stocks.map((s: any) => {
@@ -47,7 +34,7 @@ export const getRandomSuggestions = async (userID: number) => {
         if (!stocks) throw new Error("No stocks found");
 
         const rawRisk = await getRiskPreference(userID);
-        const risk = normalizeRiskPreference(rawRisk);
+        const risk = rawRisk || "Moderate Risk";
         
         // build current holdings in the format expected by api
         const currentStocks = stocks.map((s: any) => {

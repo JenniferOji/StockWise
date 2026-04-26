@@ -36,12 +36,13 @@ export default function SettingsPage() {
     loadUserData();
   }, []);
 
+  // loading the user's current risk preference and email from local storage
   const loadUserData = async () => {
     try {
       const userStr = await storage.getItem('user');
       if (userStr) {
         const user: User = JSON.parse(userStr);
-        setCurrentRisk(user.Risk || 'Moderate');
+        setCurrentRisk(user.Risk || 'Moderate Risk');
         setUserId(user.ID);
         setEmail(user.Email || '');
       }
@@ -50,6 +51,7 @@ export default function SettingsPage() {
     }
   };
 
+  // handling the risk preference update by sending the new risk to the backend and updating local storage
   const handleUpdateRisk = async (newRisk: string) => {
     setLoading(true);
     try {
@@ -114,18 +116,7 @@ export default function SettingsPage() {
         </Pressable>
       </View>
 
-      {/* account details */}
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Account</Text>
-
-        <View style={styles.simpleRow}>
-          <Text style={styles.rowText}>Email</Text>
-          <Text style={styles.readonlyValue}>{email || 'Not available'}</Text>
-        </View>
-        <Text style={styles.readonlyHint}>Email cannot be changed.</Text>
-      </View>
-
-      {/* modal for risk selection */}
+      {/* the pop up modal for risk selection */}
       <Modal visible={showRiskModal} transparent animationType="fade">
         <TouchableOpacity
           style={styles.modalOverlay}

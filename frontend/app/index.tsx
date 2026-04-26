@@ -37,7 +37,7 @@ export default function IntroPage() {
     return null;
   }
 
-  // renders welcome screen with app branding and auth buttons
+  // renders thw welcome screen 
   return (
     <AuthContext.Provider value={{ user, setUser }}>
       <SafeAreaView style={styles.container}>

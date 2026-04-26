@@ -34,13 +34,13 @@ export default function RiskInsightsWidget() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  // returns color for metric based on its risk band
+  // returns the color for metric based on its risk band
   function getMetricColor(label: string, rawValue: string) {
     const band = getActiveBand(label, rawValue, riskPreference)
     return band.color
   }
 
-  // renders threshold scale showing metric bands and highlights active one
+  // renders the threshold scale showing metric bands and highlights the active one
   function ThresholdScale({ label, riskPreference, rawValue }: { label: string; riskPreference: string; rawValue: string }) {
     const profile = METRIC_THRESHOLDS[label]?.[riskPreference]
     const activeBand = getActiveBand(label, rawValue, riskPreference)
@@ -64,7 +64,7 @@ export default function RiskInsightsWidget() {
     )
   }
 
-  // renders single metric card with color, value, and description
+  // renders the single metric card with its color, value, and its description
   function MetricBox({ label, value, desc, onPress }: any) {
     const color = getMetricColor(label, value)
     return (
@@ -82,7 +82,7 @@ export default function RiskInsightsWidget() {
     )
   }
 
-  // fetches risk metrics and stock categories on mount
+  // fetches the risk metrics and stock categories on mount
   useEffect(() => {
     async function fetchRiskMetricsForUser() {
       setLoading(true)
@@ -133,7 +133,7 @@ export default function RiskInsightsWidget() {
     return sortedStocks
   }
 
-  // renders complete risk insights widget with metrics and categorized stocks
+  // renders the complete risk insights widget with metrics and categorised stocks
   return (
     <View style={styles.card}>
       <View style={styles.valueRow}><Text style={styles.valueLabel}>Calculated over a one year period using historical data</Text></View>
@@ -164,6 +164,7 @@ export default function RiskInsightsWidget() {
         </View>
       )}
 
+      {/* metric cards with insights modal on press */}
       <View style={styles.metricsGrid}>
         <MetricBox label="Volatility" value={riskData.metrics.volatility} desc="How much your portfolio value changes over time." onPress={() => setSelectedMetric({ label: 'Volatility', value: riskData.metrics.volatility })} />
         <MetricBox label="Sharpe Ratio" value={riskData.metrics.sharpe} desc="Return vs risk. Higher is better." onPress={() => setSelectedMetric({ label: 'Sharpe Ratio', value: riskData.metrics.sharpe })} />
@@ -171,6 +172,7 @@ export default function RiskInsightsWidget() {
         <MetricBox label="VaR (95%)" value={riskData.metrics.var_95} desc="Maximum loss with 95% confidence." onPress={() => setSelectedMetric({ label: 'VaR (95%)', value: riskData.metrics.var_95 })} />
       </View>
 
+      {/* modal showing the insights for the selected metric */}
       <Modal visible={!!selectedMetric} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -195,6 +197,7 @@ export default function RiskInsightsWidget() {
         </View>
       </Modal>
 
+      {/* stock categories with sorting options */}
       <View style={styles.riskCategorySection}>
         <Text style={styles.sectionTitle}>Stock Risk Categories</Text>
         <Text style={styles.sectionSubtitle}>Grouped by machine-learned risk profile</Text>
@@ -302,6 +305,7 @@ export default function RiskInsightsWidget() {
         <Text style={styles.sortMicrocopy}>{sortSummary}</Text>
         <Text style={styles.metricLegend}>Vol = Volatility • DD = Max Drawdown • Ret = Annual Return</Text>
         
+        {/* renders each stock category with its stocks sorted by the selected metric and colored by risk band */}
         {CATEGORY_ORDER.map((category) => {
           const categoryStocks = stockRiskData?.categories?.[category] || []
           const stocks = getSortedStocks(categoryStocks)

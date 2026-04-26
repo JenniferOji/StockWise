@@ -36,6 +36,7 @@ export default function StockRiskWidget() {
   const [impact, setImpact] = useState<any>(null);
   const canSimulate = shares.trim().length > 0;
 
+  // creating list of matchign stocks based on what user types 
   const filteredSuggestions = useMemo(() => {
     const q = symbol.trim().toLowerCase();
     if (!q) return [];
@@ -70,6 +71,7 @@ export default function StockRiskWidget() {
     setLoading(false);
   };
 
+  // handling the simulation of adding the stock to user's portfolio
   const handleSimulate = async () => {
     if (!shares) return;
 
@@ -110,6 +112,7 @@ export default function StockRiskWidget() {
     setSimLoading(false);
   };
 
+  // helper function to render the before and after metrics with change indicators
   const renderMetric = (label: string, data: any) => {
     const increaseIsGood =
       label === "Annual Return" ||
@@ -135,6 +138,7 @@ export default function StockRiskWidget() {
 
   const riskColor = result ? getRiskColor(result.risk_level) : '#0b3d91';
 
+  // rendering the before and after metrics 
   return (
     <View style={styles.card}>
       <Text style={styles.subtitle}>Analyse the risk level of any stock ticker</Text>
@@ -154,6 +158,7 @@ export default function StockRiskWidget() {
             onSubmitEditing={handleCheckRisk}
           />
 
+          {/* closing dropdown if user clicks outside or submits the input */}
           {showDropdown && filteredSuggestions.length > 0 && (
             <ScrollView style={styles.dropdown} nestedScrollEnabled keyboardShouldPersistTaps="handled">
               {filteredSuggestions.map((item, index) => (
@@ -190,6 +195,7 @@ export default function StockRiskWidget() {
 
       {!!error && <Text style={styles.error}>{error}</Text>}
       {result && (
+        // main result card showing the stock risk level and metrics
         <View style={[styles.resultCard, { borderLeftColor: riskColor }]}>
           <Text style={styles.stockTitle}>
             {result.symbol} - {result.company_name}
