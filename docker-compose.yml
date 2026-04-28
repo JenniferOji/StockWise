@@ -28,26 +28,30 @@ services:
     environment:
       DB_CONNECTION_STRING: ${DB_CONNECTION_STRING}
       ML_API_URL: ${ML_API_URL}
+      SUPABASE_KEY: ${SUPABASE_KEY}
+      SUPABASE_URL: ${SUPABASE_URL}
     ports:
       - "8080:8080"
-    volumes:
-      - ./backend/.env:/app/.env
 
   fastapi:
     build: ./services
     container_name: stockwise-fastapi
+    environment:
+      SUPABASE_KEY: ${SUPABASE_KEY}
+      SUPABASE_URL: ${SUPABASE_URL}
     ports:
       - "8000:8000"
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL}
     container_name: stockwise-frontend
     depends_on:
       - backend
     ports:
       - "3000:3000"
-    environment:
-      EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL}
 
 volumes:
   stockwise_pgdata:

@@ -53,7 +53,7 @@ The application includes the following features:
 
 ## Tech Stack
 
-- **Frontend:** React Native (Expo Web), TypeScript  
+- **Frontend:** React (Expo Web), TypeScript  
 - **Backend:** Go (Iris framework)  
 - **ML Service:** Python (FastAPI, scikit-learn, pandas, numpy)  
 - **Database:** PostgreSQL  
@@ -66,62 +66,61 @@ The application includes the following features:
 - `frontend/` – user interface  
 - `backend/` – REST API and business logic  
 - `services/` – ML models and FastAPI endpoints  
-- `docker-compose.yml` – multi-service configuration  
 
 ---
 
-## Prerequisites
+## Running the Project Locally
 
-Before running the project, ensure you have:
+### Prerequisites
 
-- Docker Desktop (or Docker Engine + Compose)
-- Docker Compose (v2 or higher)
+- Docker Desktop (or Docker Engine + Docker Compose v2+)
 
----
+### Setup
 
-## Environment Variables
+1. Clone the repository:
 
-This project uses environment variables for configuration.
+```bash
+git clone https://github.com/JenniferOji/StockWise
+cd StockWise
+```
 
-1. Create a `.env` file in the project root:
+2. Create your environment file from the example:
 
 ```bash
 cp .env.example .env
 ```
 
-2. Update values as needed.
+3. Fill in the required values in `.env`.
 
-Docker Compose will automatically load these variables.
+### Running the Application
 
----
-
-## Running the Project
-
-1. Create a `.env` file in the project root based on the `.env.example`.
-
-2. Run the application:
+Start all services using Docker Compose:
 
 ```bash
 docker-compose up --build
 ```
 
-3. Open in your browser:
+### Accessing the Application
 
-- Frontend $\rightarrow$ http://localhost:3000  
-- Backend  $\rightarrow$ http://localhost:8080  
-- FastAPI  $\rightarrow$ http://localhost:8000  
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8080 |
+| FastAPI (ML) | http://localhost:8000 |
 
 To stop the application:
 
 ```bash
 docker-compose down
 ```
+
 ---
 
 ## Deployment
 
 The application is deployed across multiple platforms:
 
-- **Frontend:** Vercel  
+- **Frontend:** Vercel - https://stockwise-frontend-lovat.vercel.app/
 - **Backend API:** Render  
 - **ML Service (FastAPI):** Render  
+

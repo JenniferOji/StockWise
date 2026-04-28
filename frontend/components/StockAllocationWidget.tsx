@@ -224,21 +224,19 @@ export default function StockAllocationWidget() {
 					</View>
 				)}
 
-				{/* showing the stock list */}
+				{/* showing the sector list */}
 				<View style={styles.detailsCard}>
-					{stocks.map(stock => (
+					{chartData.map((item, i) => (
 						<Pressable
-							key={stock.ID}
-							onPress={() => setSelectedSector(stock.sector)}
+							key={i}
+							onPress={() => setSelectedSector(selectedSector === item.sector ? null : item.sector)}
 							style={styles.stockRow}
 						>
-							<View>
-								<Text style={styles.stockSymbol}>{stock.symbol}</Text>
-								<Text style={styles.stockCompany}>{stock.company_name}</Text>
+							<View style={{ flexDirection: 'row', alignItems: 'center' }}>
+								<View style={[styles.dot, { backgroundColor: item.color }]} />
+								<Text style={styles.stockSymbol}>{item.sector}</Text>
 							</View>
-							<Text style={styles.stockShares}>
-								{stock.entries?.reduce((s, e) => s + (e.quantity || 0), 0)} shares
-							</Text>
+							<Text style={styles.stockShares}>{item.value.toFixed(1)}%</Text>
 						</Pressable>
 					))}
 				</View>
@@ -253,7 +251,13 @@ export default function StockAllocationWidget() {
 
 						{selectedSectorData.stocks.map(stock => (
 							<View key={stock.ID} style={styles.stockRow}>
-								<Text>{stock.symbol}</Text>
+								<View>
+									<Text style={styles.stockSymbol}>{stock.symbol}</Text>
+									<Text style={styles.stockCompany}>{stock.company_name}</Text>
+								</View>
+								<Text style={styles.stockShares}>
+									{stock.entries?.reduce((s, e) => s + (e.quantity || 0), 0)} shares
+								</Text>
 							</View>
 						))}
 					</View>
@@ -346,6 +350,12 @@ const styles = StyleSheet.create({
 		fontSize: 12, 
 		color: '#64748b', 
 		marginBottom: 10 
+	},
+	dot: {
+		width: 10,
+		height: 10,
+		borderRadius: 5,
+		marginRight: 8,
 	},
 
 	stockRow: { 
